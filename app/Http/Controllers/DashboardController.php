@@ -12,11 +12,13 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $clusters  = $this->clusterDataService->getAllOrderedByLatest();
-        $stats     = $this->clusterDataService->getDashboardStats();
+        $stats = $this->clusterDataService->getDashboardStats();
 
+        // The DataTable is populated entirely via AJAX (/dashboard/json),
+        // so we pass an empty collection — rendering all rows in Blade first
+        // would be redundant and slow.
         return view('dashboard', [
-            'clusters'  => $clusters,
+            'clusters'  => collect(),
             'count'     => $stats['count'],
             'papaducks' => $stats['papaducks'],
             'mamaducks' => $stats['mamaducks'],

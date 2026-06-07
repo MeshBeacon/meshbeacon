@@ -27,11 +27,19 @@
 
                   <a href="/dashboard" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Dashboard</a>
                   <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
+                  <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
                   @endif
                   @if(request()->is('status'))
 
-                  <a href="/dashboard" aria-current="page" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
-                  <a href="/status" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Status</a>
+                  <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+                  <a href="/status" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Status</a>
+                  <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
+                  @endif
+                  @if(request()->is('gps'))
+
+                  <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+                  <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
+                  <a href="/gps" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Tracking</a>
                   @endif
                   <a href="#" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Settings</a>
                 </div>
@@ -122,6 +130,12 @@
         @if(request()->is('status'))
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold tracking-tight text-white">Status</h1>
+          @yield('page-actions')
+        </div>
+        @endif
+        @if(request()->is('gps'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-white">Tracking</h1>
           @yield('page-actions')
         </div>
         @endif

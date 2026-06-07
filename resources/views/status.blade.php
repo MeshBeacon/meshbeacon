@@ -1,12 +1,21 @@
 <x-layouts::app :title="__('status')">
 @section('page-actions')
-  <button type="button" id="open-broadcast-btn"
-    class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-      <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892L5.18 9.817a.75.75 0 0 0 .985.985l2.15-.975a2.75 2.75 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.475ZM3.5 6.75A3.25 3.25 0 0 1 6.75 3.5h.75a.75.75 0 0 1 0 1.5h-.75A1.75 1.75 0 0 0 5 6.75v5.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 14 12.25v-.75a.75.75 0 0 1 1.5 0v.75A3.25 3.25 0 0 1 12.25 15.5h-5.5A3.25 3.25 0 0 1 3.5 12.25v-5.5Z" />
-    </svg>
-    Emergency Broadcast
-  </button>
+  <div class="flex items-center gap-2">
+    <button command="show-modal" commandfor="send-duck-dialog"
+      class="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+        <path fill-rule="evenodd" d="M1 8.74C1 9.99 2.01 11 3.26 11h1.04l.56 2.8a.75.75 0 0 0 1.46-.2L6.998 11H9.5C10.881 11 12 9.881 12 8.5v-5C12 2.119 10.881 1 9.5 1h-6C2.119 1 1 2.119 1 3.5v5.24ZM13 5.36c.44.17.75.6.75 1.11V8.5a3 3 0 0 1-3 3H9.499l-.044.222A2.75 2.75 0 0 0 12 9.5V4.25c.57.22 1 .77 1 1.11Z" clip-rule="evenodd" />
+      </svg>
+      Send Message to Duck
+    </button>
+    <button type="button" id="open-broadcast-btn"
+      class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+        <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892L5.18 9.817a.75.75 0 0 0 .985.985l2.15-.975a2.75 2.75 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.475ZM3.5 6.75A3.25 3.25 0 0 1 6.75 3.5h.75a.75.75 0 0 1 0 1.5h-.75A1.75 1.75 0 0 0 5 6.75v5.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 14 12.25v-.75a.75.75 0 0 1 1.5 0v.75A3.25 3.25 0 0 1 12.25 15.5h-5.5A3.25 3.25 0 0 1 3.5 12.25v-5.5Z" />
+      </svg>
+      Emergency Broadcast
+    </button>
+  </div>
 @endsection
 @section('content')
 <style>
@@ -57,6 +66,15 @@
   <div class="mb-4 flex items-center justify-between">
     <h1 class="text-base font-semibold text-white">Duck Status</h1>
     <div class="flex items-center gap-2">
+      <label class="inline-flex cursor-pointer items-center gap-2 select-none" title="Show online ducks only">
+        <span class="text-xs text-gray-400 whitespace-nowrap">Online only</span>
+        <div class="relative">
+          <input type="checkbox" id="online-only-toggle" class="sr-only peer">
+          <div class="w-9 h-5 rounded-full bg-gray-600 peer-checked:bg-green-500 transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-green-500"></div>
+          <div class="absolute top-0.5 left-0.5 size-4 rounded-full bg-white transition-transform duration-200 peer-checked:translate-x-4"></div>
+        </div>
+      </label>
+
       <el-select id="urgency-filter" name="urgency-filter" value="" class="block w-36">
         <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white/5 py-1.5 pl-3 pr-2 text-left text-white outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">All Urgency</el-selectedcontent>
@@ -113,7 +131,7 @@
   </div>
   <div id="duck-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 @foreach ($mamaducks as $mamaduck)
-<div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-500/30 overflow-hidden rounded-lg bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}">
+<div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-500/30 overflow-hidden rounded-lg bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}" data-online="{{ $mamaduck->created_at->gt(now()->subHour()) ? '1' : '0' }}">
   <!-- Header -->
   <div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'px-4 py-4 sm:px-6 flex flex-col gap-2 bg-red-900/50' : 'px-4 py-4 sm:px-6 flex flex-col gap-2' }}">
     <div class="flex items-center justify-between">
@@ -128,7 +146,7 @@
     {{-- Hidden anchor keeps the JS data-payload-duck hook alive for live updates --}}
     <span class="sr-only" data-payload-duck="{{ $mamaduck->duck_id }}"></span>
     <div data-card-body-duck="{{ $mamaduck->duck_id }}">
-    @if (!$mamaduck->sos_from_device && !$mamaduck->sos_from_mobile)
+    @if (!$mamaduck->sos_from_device && !$mamaduck->sos_from_mobile && !$mamaduck->roger_from_device)
       <p class="text-sm text-gray-400 text-wrap break-words">{{ $mamaduck->display_text }}</p>
     @endif
     @if ($mamaduck->sos_from_device)
@@ -139,6 +157,46 @@
         <div>
           <p class="text-xs font-semibold text-red-400">SOS &mdash; Hardware Button Triggered</p>
           <p class="text-xs text-red-300/80">This SOS was sent because the physical SOS button on the device was pressed.</p>
+          @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
+            <div class="mt-1.5 flex flex-col gap-1.5">
+              @if ($mamaduck->gps_batt !== null)
+                <div class="flex items-start gap-1.5">
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">Device</span>
+                  <div class="flex flex-wrap gap-1.5 flex-1">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
+                    {{ $mamaduck->gps_batt }}%
+                  </span>
+                  </div>
+                </div>
+              @endif
+              @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
+                <div class="flex items-start gap-1.5">
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">GPS</span>
+                  <div class="flex flex-wrap gap-1.5 flex-1">
+                  @if ($mamaduck->gps_alt !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .674.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 13.347l-3.767 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 7.874a.75.75 0 0 1 .416-1.28l4.21-.611L7.327 2.17A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_alt, 1) }} m
+                    </span>
+                  @endif
+                  @if ($mamaduck->gps_spd !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-800/60 text-purple-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388a.75.75 0 1 0 1.474.28l.455-2.388Zm4.095.99a.75.75 0 1 0-1.06-1.06L9.22 4.122a.75.75 0 1 0 1.06 1.06l1.302-1.302ZM2.28 8a.75.75 0 1 0-.28-1.474l-2.388.455a.75.75 0 1 0 .28 1.474L2.28 8ZM8 2a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 2ZM5.122 9.22a.75.75 0 0 0 0-1.06L3.818 6.857a.75.75 0 0 0-1.06 1.06l1.304 1.303a.75.75 0 0 0 1.06 0ZM8 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3.25.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm-.44 3.22a.75.75 0 1 0 1.06-1.06l-1.3-1.302a.75.75 0 0 0-1.06 1.06l1.3 1.302Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_spd, 1) }} km/h
+                    </span>
+                  @endif
+                  @if ($mamaduck->gps_hdg !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-800/60 text-sky-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 14a6 6 0 1 0 0-12A6 6 0 0 0 8 14ZM9.25 5.75A.75.75 0 0 0 8 5.134a.75.75 0 0 0-1.25.616v4.5a.75.75 0 0 0 1.25.616.75.75 0 0 0 1.25-.616v-4.5Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_hdg, 1) }}&deg;
+                    </span>
+                  @endif
+                  </div>
+                </div>
+              @endif
+            </div>
+          @endif
         </div>
       </div>
     @elseif ($mamaduck->sos_from_mobile)
@@ -149,6 +207,56 @@
         <div>
           <p class="text-xs font-semibold text-orange-400">SOS &mdash; Mobile Phone Triggered</p>
           <p class="text-xs text-orange-300/80">This SOS was sent from the user&rsquo;s mobile phone application and should include GPS coordinates.</p>
+          @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
+            <div class="mt-1.5 flex flex-col gap-1.5">
+              @if ($mamaduck->gps_batt !== null)
+                <div class="flex items-start gap-1.5">
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">Device</span>
+                  <div class="flex flex-wrap gap-1.5 flex-1">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
+                    {{ $mamaduck->gps_batt }}%
+                  </span>
+                  </div>
+                </div>
+              @endif
+              @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
+                <div class="flex items-start gap-1.5">
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">GPS</span>
+                  <div class="flex flex-wrap gap-1.5 flex-1">
+                  @if ($mamaduck->gps_alt !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .674.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 13.347l-3.767 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 7.874a.75.75 0 0 1 .416-1.28l4.21-.611L7.327 2.17A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_alt, 1) }} m
+                    </span>
+                  @endif
+                  @if ($mamaduck->gps_spd !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-800/60 text-purple-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388a.75.75 0 1 0 1.474.28l.455-2.388Zm4.095.99a.75.75 0 1 0-1.06-1.06L9.22 4.122a.75.75 0 1 0 1.06 1.06l1.302-1.302ZM2.28 8a.75.75 0 1 0-.28-1.474l-2.388.455a.75.75 0 1 0 .28 1.474L2.28 8ZM8 2a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 2ZM5.122 9.22a.75.75 0 0 0 0-1.06L3.818 6.857a.75.75 0 0 0-1.06 1.06l1.304 1.303a.75.75 0 0 0 1.06 0ZM8 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3.25.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm-.44 3.22a.75.75 0 1 0 1.06-1.06l-1.3-1.302a.75.75 0 0 0-1.06 1.06l1.3 1.302Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_spd, 1) }} km/h
+                    </span>
+                  @endif
+                  @if ($mamaduck->gps_hdg !== null)
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-800/60 text-sky-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 14a6 6 0 1 0 0-12A6 6 0 0 0 8 14ZM9.25 5.75A.75.75 0 0 0 8 5.134a.75.75 0 0 0-1.25.616v4.5a.75.75 0 0 0 1.25.616.75.75 0 0 0 1.25-.616v-4.5Z" clip-rule="evenodd"/></svg>
+                      {{ number_format($mamaduck->gps_hdg, 1) }}&deg;
+                    </span>
+                  @endif
+                  </div>
+                </div>
+              @endif
+            </div>
+          @endif
+        </div>
+      </div>
+    @elseif ($mamaduck->roger_from_device)
+      <div class="flex items-start gap-2 rounded-md bg-green-900/50 px-3 py-2 ring-2 ring-inset ring-green-500/60">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-green-400">
+          <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />
+        </svg>
+        <div>
+          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">Roger &mdash; Device Confirmed</p>
+          <p class="text-xs text-green-400/80">The person holding the device triple-clicked the button to confirm they have received your message.</p>
         </div>
       </div>
     @endif
@@ -166,16 +274,25 @@
         </div>
       @endif
     </div>
+    <div data-gps-warning-duck="{{ $mamaduck->duck_id }}">
     @if ($mamaduck->gps_unavailable)
       <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-yellow-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
-        GPS location unavailable
+        GPS location unavailable &mdash; no satellite fix
+      </p>
+    @elseif ($mamaduck->gps_hardware_absent)
+      <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
+          <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
+        </svg>
+        No GPS hardware &mdash; this device cannot report location
       </p>
     @endif
-    @if ($mamaduck->id === $latestCoordsId && $mamaduck->map_url)
-      @php $mapDialogId = 'map-dialog-' . $mamaduck->id; @endphp
+    </div>
+    @php $mapDialogId = 'map-dialog-' . $mamaduck->id; @endphp
+    <div data-map-btn-duck="{{ $mamaduck->duck_id }}" class="{{ $mamaduck->map_url ? '' : 'hidden' }}">
       <button command="show-modal" commandfor="{{ $mapDialogId }}"
          class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
@@ -183,17 +300,30 @@
         </svg>
         View on Map
       </button>
-      <el-dialog>
-        <dialog id="{{ $mapDialogId }}" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
+    </div>
+    <el-dialog>
+        <dialog id="{{ $mapDialogId }}" data-map-duck="{{ $mamaduck->duck_id }}" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
           <el-dialog-backdrop class="fixed inset-0 bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
           <div tabindex="0" class="flex min-h-full items-center justify-center p-4 focus:outline focus:outline-0">
             <el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">
               <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                <h3 class="text-sm font-semibold text-white">{{ $mamaduck->duck_id }} — Location</h3>
+                <div>
+                  <h3 class="text-sm font-semibold text-white">{{ $mamaduck->duck_id }} &mdash; GPS Location</h3>
+                  <p class="text-xs text-gray-400 mt-0.5" data-map-subtitle>
+                    Source: <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
+                    @if ($mamaduck->gps_sats !== null)
+                      &bull; {{ $mamaduck->gps_sats }} satellites
+                    @endif
+                    @if ($mamaduck->gps_alt !== null)
+                      &bull; {{ number_format($mamaduck->gps_alt, 1) }} m &bull; {{ number_format($mamaduck->gps_spd ?? 0, 1) }} km/h &bull; {{ number_format($mamaduck->gps_hdg ?? 0, 1) }}&deg;
+                    @endif
+                  </p>
+                </div>
                 <button command="close" commandfor="{{ $mapDialogId }}" class="text-gray-400 hover:text-white text-lg leading-none">&times;</button>
               </div>
               <div class="w-full h-96">
                 <iframe
+                  data-map-iframe
                   src="{{ $mamaduck->map_embed_url }}"
                   class="w-full h-full border-0"
                   allowfullscreen
@@ -202,14 +332,13 @@
                 </iframe>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-white/10">
-                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" class="text-xs text-yellow-400 hover:text-yellow-300">Open in Google Maps &rarr;</a>
+                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-yellow-400 hover:text-yellow-300">Open in Google Maps &rarr;</a>
                 <button command="close" commandfor="{{ $mapDialogId }}" class="rounded-md bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20">Close</button>
               </div>
             </el-dialog-panel>
           </div>
         </dialog>
       </el-dialog>
-    @endif
   </div>
   <!-- Footer -->
   <div class="px-4 py-4 sm:px-6 flex items-center justify-between">
@@ -230,7 +359,7 @@
   <input type="hidden" name="duck_id" value="{{ $mamaduck->duck_id }}">
   <div class="space-y-12">
     <div class="border-b border-white/10 pb-3">
-      <h2 class="text-base/7 font-semibold text-white">Messaging</h2>
+      <h2 class="text-base/7 font-semibold text-white">Message <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
       <p class="mt-1 text-sm/6 text-gray-400">This messaging is on a best-effort basis</p>
 
         <!-- Last known GPS location — updated by pollHistory() -->
@@ -315,6 +444,47 @@
       </dialog>
     </el-dialog>
 
+    <!-- Send Message to Duck Modal -->
+    <el-dialog>
+      <dialog id="send-duck-dialog" aria-labelledby="send-duck-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
+        <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+        <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
+          <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+            <form id="send-duck-form" class="duck-message-form" action="/status/send">
+              @csrf
+              <div class="space-y-12">
+                <div class="border-b border-white/10 pb-3">
+                  <h2 id="send-duck-title" class="text-base/7 font-semibold text-white">Messaging</h2>
+                  <p class="mt-1 text-sm/6 text-gray-400">This messaging is on a best-effort basis</p>
+                  <div class="col-span-full mt-4">
+                    <label class="block text-sm/6 font-medium text-white">Duck ID</label>
+                    <div class="mt-2">
+                      <input type="text" name="duck_id" maxlength="50" placeholder="e.g. MAMAMUHAMMAD"
+                        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-sm text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+                    </div>
+                  </div>
+                  <div class="col-span-full mt-4">
+                    <label class="block text-sm/6 font-medium text-white">New message</label>
+                    <div class="mt-2">
+                      <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500 sm:text-sm/6"></textarea>
+                    </div>
+                    <p class="mt-1 flex justify-end text-xs text-gray-500"><span class="char-count">0</span>&nbsp;/ 200</p>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 flex items-center gap-3">
+                <button type="submit" command="close" commandfor="send-duck-dialog"
+                  class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+                  Send Message
+                </button>
+                <span class="send-status text-xs"></span>
+              </div>
+            </form>
+          </el-dialog-panel>
+        </div>
+      </dialog>
+    </el-dialog>
+
     <!-- Empty state -->
     <div id="duck-empty-state" class="col-span-full hidden py-16 text-center">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto mb-3 size-10 text-gray-600">
@@ -330,15 +500,20 @@
   var urgencyLabels = { '0': 'Low', '1': 'Medium', '2': 'Critical' };
 
   function applyFilters() {
-    var q = document.getElementById('duck-search').value.trim().toLowerCase();
-    var u = document.getElementById('urgency-filter').value;
+    var q          = document.getElementById('duck-search').value.trim().toLowerCase();
+    var u          = document.getElementById('urgency-filter').value;
+    var onlineOnly = document.getElementById('online-only-toggle').checked;
     var visible = 0;
 
     document.querySelectorAll('#duck-cards-container [data-duck-id]').forEach(function (card) {
       var id      = card.getAttribute('data-duck-id').toLowerCase();
       var urgency = card.getAttribute('data-urgency');
+      var online  = card.getAttribute('data-online') === '1';
 
-      // Neither filter active — show all
+      // Online-only gate (AND — always applied when active)
+      if (onlineOnly && !online) { card.style.display = 'none'; return; }
+
+      // Neither search nor urgency active — show all (that passed online gate)
       if (q === '' && u === '') { card.style.display = ''; visible++; return; }
 
       // Only urgency active
@@ -357,7 +532,10 @@
 
     if (visible === 0) {
       empty.classList.remove('hidden');
-      if (q !== '' && u === '') {
+      if (onlineOnly && q === '' && u === '') {
+        title.textContent = 'No online ducks';
+        sub.textContent   = 'All ducks are currently offline.';
+      } else if (q !== '' && u === '') {
         title.textContent = 'No ducks matching "' + q + '"';
         sub.textContent   = 'Try a different duck ID.';
       } else if (q === '' && u !== '') {
@@ -374,6 +552,8 @@
 
   document.getElementById('duck-search').addEventListener('input', applyFilters);
   document.getElementById('urgency-filter').addEventListener('change', applyFilters);
+  document.getElementById('online-only-toggle').addEventListener('change', applyFilters);
+  window.applyFilters = applyFilters;
 
   // ── Emergency Broadcast ──────────────────────────────────────────────────
   (function () {
