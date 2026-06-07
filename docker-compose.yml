@@ -1,6 +1,6 @@
 services:
   migrate:
-    image: docker.service.consul:5000/opendms:1.0.0
+    image: docker.io/muhammadn/opendms:1.0.0
     env_file: .env
     volumes:
       - .env:/var/www/.env
@@ -9,7 +9,7 @@ services:
 
   # Main HTTP Web App Service
   app:
-    image: docker.service.consul:5000/opendms:1.0.0
+    image: docker.io/muhammadn/opendms:1.0.0
     restart: always
     env_file: .env
     volumes:
@@ -29,7 +29,7 @@ services:
 
   # Dedicated Background Queue Worker
   mqtt-worker:
-    image: docker.service.consul:5000/opendms:1.0.0
+    image: docker.io/muhammadn/opendms:1.0.0
     depends_on:
       - app
     restart: always
@@ -42,7 +42,7 @@ services:
 
   # Dedicated Queue Worker
   queue-worker:
-    image: docker.service.consul:5000/opendms:1.0.0
+    image: docker.io/muhammadn/opendms:1.0.0
     depends_on:
       - app
     restart: always
@@ -54,7 +54,7 @@ services:
 
   # Dedicated Task Scheduler
   scheduler:
-    image: docker.service.consul:5000/opendms:1.0.0
+    image: docker.io/muhammadn/opendms:1.0.0
     depends_on:
       - app
     restart: always
