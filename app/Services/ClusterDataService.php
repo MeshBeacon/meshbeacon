@@ -156,6 +156,41 @@ class ClusterDataService
     }
 
     /**
+     * Active incidents feed: latest alert per duck from the past 24 hours.
+     * Extracts the nearest relay (first hop after the victim) from the path.
+     */
+    public function getIncidentsFeed(): array
+    {
+        $incidents = $this->repository->getActiveIncidents()
+            ->map(function (ClusterData $cluster) {
+                $pathHops     = $cluster->path ? array_map('trim', explode(',', $cluster->path)) : [];
+                $nearestRelay = count($pathHops) >= 2 ? $pathHops[1] : null;
+                $urgency      = $cluster->urgency;
+
+                return [
+                    'id'              => $cluster->id,
+                    'duck_id'         => $cluster->duck_id,
+                    'message_id'      => $cluster->message_id,
+                    'path'            => $cluster->path,
+                    'hops'            => $cluster->hops,
+                    'origin'          => $cluster->origin,
+                    'destination'     => $cluster->destination,
+                    'nearest_relay'   => $nearestRelay,
+                    'display_text'    => $cluster->display_text,
+                    'payload'         => $cluster->payload,
+                    'urgency_value'   => $urgency?->value,
+                    'urgency_label'   => $urgency?->label(),
+                    'sos_from_device' => $cluster->sos_from_device,
+                    'sos_from_mobile' => $cluster->sos_from_mobile,
+                    'map_url'         => $cluster->map_url,
+                    'created_at'      => $cluster->created_at,
+                ];
+            });
+
+        return ['data' => $incidents, 'total' => $incidents->count()];
+    }
+
+    /**
      * Message counts for each of the past 12 hours (may overlap yesterday),
      * plus a trend comparing the current slot to the previous one.
      *

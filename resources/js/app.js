@@ -88,9 +88,14 @@ $(document).ready(function () {
                 className:
                     "hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell dt-type-date sorting_1",
                 render: function (data) {
-                    return data
-                        ? escapeHtml(data)
-                        : '<span class="italic text-gray-600">No path recorded</span>';
+                    if (!data) return '<span class="italic text-gray-600">&mdash;</span>';
+                    var hops = data.split(',');
+                    var parts = hops.map(function (hop, i) {
+                        return (i > 0 ? '<span class="text-gray-500 mx-0.5">&#8594;</span>' : '') +
+                            '<span class="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-gray-200">' +
+                            escapeHtml(hop.trim()) + '</span>';
+                    });
+                    return '<div class="flex flex-wrap items-center gap-1">' + parts.join('') + '</div>';
                 },
             },
             {
@@ -99,6 +104,23 @@ $(document).ready(function () {
                 className:
                     "hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell",
                 render: function (data, type, row) {
+                    // RREP rows have no message payload — show origin → destination instead
+                    if (row.topic === "rrep") {
+                        var origin = row.origin || "?";
+                        var dest   = row.destination || "?";
+                        return (
+                            '<div style="display:flex;align-items:center;gap:0.375rem;">' +
+                            '<span style="flex-shrink:0;" class="inline-flex items-center justify-center rounded bg-purple-700 px-1.5 py-0.5 text-xs font-bold text-white">RREP</span>' +
+                            '<span class="font-mono text-xs text-gray-300">' +
+                            escapeHtml(origin) +
+                            '</span>' +
+                            '<span class="text-gray-500">&#8594;</span>' +
+                            '<span class="font-mono text-xs text-gray-300">' +
+                            escapeHtml(dest) +
+                            '</span>' +
+                            '</div>'
+                        );
+                    }
                     var payload = row.payload || "";
                     var rawText = data || payload || "";
                     var isSosDev =
@@ -507,6 +529,208 @@ $(document).ready(function () {
 
     setInterval(pollStats, 10000);
     pollStats();
+
+    // Active Incidents panel — polls /dashboard/incidents every 30 s.
+    // Shows the latest alert per duck from the past 24 h with the nearest
+    // relay duck highlighted and a one-click GPS request button.
+    var knownIncidentIds = null; // null = first load (don't alert on initial paint)
+
+    function playIncidentAlert() {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // Two-tone alert: high beep then slightly lower beep
+            [880, 660].forEach(function (freq, i) {
+                var osc  = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+                gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime + i * 0.18 + 0.02);
+                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.18);
+                osc.start(ctx.currentTime + i * 0.18);
+                osc.stop(ctx.currentTime + i * 0.18 + 0.2);
+            });
+        } catch (e) { /* AudioContext unavailable — fail silently */ }
+    }
+
+    function pollIncidents() {
+        $.ajax({
+            url: "/dashboard/incidents",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+                var incidents = data.data || [];
+                var $list  = $("#incidents-list");
+                var $count = $("#incidents-count");
+
+                // Detect new incidents (skip on first load)
+                var currentIds = incidents.map(function (inc) { return inc.id; });
+                if (knownIncidentIds !== null) {
+                    var hasNew = currentIds.some(function (id) {
+                        return knownIncidentIds.indexOf(id) === -1;
+                    });
+                    if (hasNew) {
+                        playIncidentAlert();
+                    }
+                }
+                knownIncidentIds = currentIds;
+
+                if (incidents.length === 0) {
+                    $list.html('<p class="text-xs text-gray-500 italic">No active incidents in the past 24 hours.</p>');
+                    $count.addClass("hidden").text("");
+                    return;
+                }
+
+                $count.text(incidents.length).removeClass("hidden");
+
+                var html = '<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">';
+                $.each(incidents, function (i, inc) {
+                    var isSosDev  = inc.sos_from_device;
+                    var isSosMob  = inc.sos_from_mobile && !inc.sos_from_device;
+                    var urgVal    = inc.urgency_value;
+
+                    // Card accent colour
+                    var cardCls, headerCls, badgeCls, icon;
+                    if (isSosDev) {
+                        cardCls   = "rounded-lg overflow-hidden outline outline-2 -outline-offset-2 outline-red-500 bg-red-950/40";
+                        headerCls = "px-4 py-3 bg-red-900/60 flex items-center gap-2";
+                        badgeCls  = "bg-red-600 text-white";
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-red-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                    } else if (isSosMob) {
+                        cardCls   = "rounded-lg overflow-hidden outline outline-2 -outline-offset-2 outline-orange-500 bg-orange-950/40";
+                        headerCls = "px-4 py-3 bg-orange-900/60 flex items-center gap-2";
+                        badgeCls  = "bg-orange-500 text-white";
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-orange-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                    } else {
+                        var urgColors = { 2: ["red", "bg-red-950/40", "bg-red-900/60", "outline-red-500", "bg-red-600 text-white"],
+                                          1: ["yellow", "bg-yellow-950/40", "bg-yellow-900/60", "outline-yellow-500", "bg-yellow-600 text-black"],
+                                          0: ["gray",  "bg-gray-800/50",   "bg-gray-700/60",  "outline-white/10",  "bg-gray-600 text-white"] };
+                        var c = urgColors[urgVal] || urgColors[0];
+                        cardCls   = "rounded-lg overflow-hidden outline outline-1 -outline-offset-1 " + c[3] + " " + c[1];
+                        headerCls = "px-4 py-3 " + c[2] + " flex items-center gap-2";
+                        badgeCls  = c[4];
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-gray-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                    }
+
+                    var timeStr = new Date(inc.created_at).toLocaleString(navigator.language, {
+                        day: "2-digit", month: "short",
+                        hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+                    });
+
+                    var sosBadge = isSosDev
+                        ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold ' + badgeCls + '">SOS HW</span>'
+                        : isSosMob
+                            ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold ' + badgeCls + '">SOS</span>'
+                            : (inc.urgency_label
+                                ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ' + badgeCls + '">' + escapeHtml(inc.urgency_label) + '</span>'
+                                : '');
+
+                    // Relay row
+                    var relayRow = "";
+                    if (inc.nearest_relay) {
+                        var gpsBtn =
+                            '<button class="inc-gps-btn inline-flex items-center gap-1 rounded bg-white/10 px-2 py-1 text-xs font-medium text-white hover:bg-white/20 transition-colors shrink-0" ' +
+                            'data-duck="' + escapeHtml(inc.nearest_relay) + '">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 pointer-events-none"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
+                            'Request GPS</button>';
+                        relayRow =
+                            '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
+                            '<span style="font-size:0.7rem;color:#6b7280;white-space:nowrap;">Nearest relay</span>' +
+                            '<span style="font-family:monospace;font-size:0.7rem;color:#e5e7eb;background:rgba(255,255,255,0.1);border-radius:4px;padding:1px 6px;word-break:break-all;">' + escapeHtml(inc.nearest_relay) + '</span>' +
+                            '<span style="flex:1;"></span>' +
+                            gpsBtn +
+                            '</div>';
+                    } else if (inc.hops === 0 || inc.hops === "0") {
+                        relayRow =
+                            '<div style="display:flex;align-items:center;gap:0.375rem;padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;color:#4ade80;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
+                            '<span style="font-size:0.7rem;color:#4ade80;">Direct to concentrator</span>' +
+                            '</div>';
+                    } else {
+                        relayRow =
+                            '<div style="padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
+                            '<span style="font-size:0.7rem;color:#4b5563;font-style:italic;">No relay path recorded</span>' +
+                            '</div>';
+                    }
+
+                    var msgText = inc.display_text
+                        ? '<span style="word-break:break-word;overflow-wrap:break-word;">' + escapeHtml(inc.display_text) + '</span>'
+                        : '<span style="font-style:italic;color:#6b7280;">No message</span>';
+                    var mapBtn = "";
+                    if (inc.map_url) {
+                        mapBtn =
+                            '<a href="' + escapeHtml(inc.map_url) + '" target="_blank" rel="noopener noreferrer" ' +
+                            'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;background:rgba(255,255,255,0.08);font-size:0.75rem;font-weight:500;color:#a5b4fc;text-decoration:none;" ' +
+                            'onmouseover="this.style.background=\'rgba(255,255,255,0.15)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.08)\'">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
+                            'View on Map</a>';
+                    }
+
+                    html +=
+                        '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';display:flex;flex-direction:column;height:100%;">' +
+                        // Header
+                        '<div style="padding:0.75rem 1rem;background:' + (isSosDev ? 'rgba(127,29,29,0.6)' : isSosMob ? 'rgba(124,45,18,0.6)' : 'rgba(55,65,81,0.6)') + ';display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
+                        icon +
+                        '<span style="font-size:0.875rem;font-weight:600;color:white;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
+                        sosBadge +
+                        '</div>' +
+                        // Body: message, map button, timestamp
+                        '<div style="padding:0.75rem 1rem 1rem;display:flex;flex-direction:column;flex:1;justify-content:space-between;">' +
+                        '<div>' +
+                        '<div style="font-size:0.875rem;color:#d1d5db;word-break:break-word;overflow-wrap:break-word;">' + msgText + '</div>' +
+                        mapBtn +
+                        '</div>' +
+                        '<div style="font-size:0.7rem;color:#6b7280;margin-top:0.75rem;">' + timeStr + '</div>' +
+                        '</div>' +
+                        // Relay footer
+                        relayRow +
+                        '</div>';
+                });
+
+                html += '</div>';
+
+                // Only repaint when content changed to avoid flicker
+                if ($list.data("last-html") !== html) {
+                    $list.html(html);
+                    $list.data("last-html", html);
+                }
+            },
+            error: function () {
+                // Silently fail — panel stays as-is until next poll
+            }
+        });
+    }
+
+    // One-click GPS request from the incidents panel
+    $(document).on("click", ".inc-gps-btn", function () {
+        var $btn    = $(this);
+        var duckId  = $btn.data("duck");
+        $btn.prop("disabled", true).text("Requesting…");
+        $.ajax({
+            type: "POST",
+            url: "/gps/request",
+            data: { duck_id: duckId },
+            success: function () {
+                $btn.text("Sent ✓").addClass("text-green-400");
+                setTimeout(function () {
+                    $btn.prop("disabled", false).text("Request GPS").removeClass("text-green-400");
+                }, 4000);
+            },
+            error: function () {
+                $btn.prop("disabled", false).text("Failed").addClass("text-red-400");
+                setTimeout(function () {
+                    $btn.text("Request GPS").removeClass("text-red-400");
+                }, 3000);
+            }
+        });
+    });
+
+    if ($("#incidents-list").length) {
+        pollIncidents();
+        setInterval(pollIncidents, 30000);
+    }
 
     // Status page: poll /status/history and refresh each duck's message box (newest first)
     function formatHistoryMessage(msg, isRead) {

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClusterData extends Model
 {
-    protected $fillable = ['duck_id', 'topic', 'message_id', 'payload', 'path', 'hops', 'duck_type'];
+    protected $fillable = ['duck_id', 'topic', 'message_id', 'payload', 'path', 'origin', 'destination', 'hops', 'duck_type'];
 
     /**
      * Parse LAT/LNG from the payload and return a Google Maps URL, or null

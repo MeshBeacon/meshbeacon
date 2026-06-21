@@ -14,6 +14,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
     Route::get('/status', [StatusController::class, 'index']);
     Route::post('/status/send', [StatusController::class, 'message']);
     Route::post('/status/broadcast', [StatusController::class, 'broadcast']);

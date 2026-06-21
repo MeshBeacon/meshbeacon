@@ -44,4 +44,9 @@ class DashboardController extends Controller
     {
         return response()->json($this->clusterDataService->getHourlyMessageCounts(), 200);
     }
+
+    public function incidents(): JsonResponse
+    {
+        return response()->json($this->clusterDataService->getIncidentsFeed(), 200);
+    }
 }

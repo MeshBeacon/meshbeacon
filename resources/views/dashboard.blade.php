@@ -80,6 +80,16 @@
           </dl>
         </div>
 
+        {{-- Active Incidents panel --}}
+        <div class="mt-6 mb-2">
+          <div class="flex items-center gap-3 mb-3">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Active Incidents</h2>
+            <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/30"></span>
+          </div>
+          <div id="incidents-list">
+            <p class="text-xs text-gray-500 italic">Loading…</p>
+          </div>
+        </div>
 
  <div class="flex justify-end items-center gap-2">
 <!-- Include this script tag or install `@tailwindplus/elements` via npm: -->
@@ -188,8 +198,18 @@
           <td class="hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell">{{ $cluster->topic }}</td>
           <td class="hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell">{{ $cluster->message_id }}</td>
           <td class="border-t border-white/10 px-3 py-3.5 text-sm text-gray-400">
-            <div class="sm:hidden">{{ $cluster-> path }}</div>
-            <div class="hidden sm:block">{{ $cluster->path }}</div>
+            @if($cluster->path)
+              <div class="flex flex-wrap items-center gap-1">
+                @foreach(explode(',', $cluster->path) as $index => $hop)
+                  @if($index > 0)
+                    <span class="text-gray-500">&#8594;</span>
+                  @endif
+                  <span class="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs text-gray-200">{{ trim($hop) }}</span>
+                @endforeach
+              </div>
+            @else
+              <span class="text-gray-600 italic">—</span>
+            @endif
           </td>
           <td class="hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell"><div class="break-words whitespace-normal">{{ $cluster->payload }}</div></td>
           <td class="hidden border-t border-white/10 px-3 py-3.5 text-sm text-gray-400 lg:table-cell">{{ $cluster->hops }}</td>

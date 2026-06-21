@@ -32,11 +32,17 @@ class ClusterDataRepository
     }
 
     /**
-     * All alert/status records, newest first (capped at 500 rows for performance).
+     * All alert/status/rrep records, newest first (capped at 500 rows for performance).
+     * RREP rows are only included when hops > 0 — zero-hop RREPs mean a direct
+     * connection (no relay), so they carry no relay-path information.
      */
     public function getAlertStatusOrderedDesc(int $limit = 500): Collection
     {
-        return ClusterData::whereIn('topic', ['alert', 'status'])
+        return ClusterData::whereIn('topic', ['alert', 'status', 'rrep'])
+            ->where(function ($q) {
+                $q->where('topic', '!=', 'rrep')
+                  ->orWhere('hops', '>', 0);
+            })
             ->orderBy('id', 'desc')
             ->limit($limit)
             ->get();
@@ -150,6 +156,31 @@ class ClusterDataRepository
                 ->where('payload', 'LIKE', '%LAT:%,LNG:%')
                 ->groupBy('duck_id');
         })->get();
+    }
+
+    /**
+     * Latest SOS record per duck_id within the last $hours hours.
+     * Covers both hardware SOS (topic='alert', SRC:DEVICE) and mobile-app SOS
+     * (topic='status', payload starts with 'SOS' but no SRC:DEVICE).
+     * Used to populate the Active Incidents panel on the dashboard.
+     */
+    public function getActiveIncidents(int $hours = 24): Collection
+    {
+        return ClusterData::whereIn('id', function ($query) use ($hours) {
+            $query->selectRaw('max(id)')
+                ->from('cluster_data')
+                ->where(function ($q) {
+                    // Hardware SOS (physical button)
+                    $q->where('topic', 'alert')
+                      // Mobile-app SOS (phone sends CDK:SOS → firmware relays as status topic)
+                      ->orWhere(function ($q2) {
+                          $q2->where('topic', 'status')
+                             ->where('payload', 'like', 'SOS,%');
+                      });
+                })
+                ->where('created_at', '>=', now()->subHours($hours))
+                ->groupBy('duck_id');
+        })->orderByDesc('id')->get();
     }
 
     public function getAllInWindow(
