@@ -2,19 +2,34 @@ services:
   migrate:
     image: docker.io/muhammadn/opendms:1.0.2
     env_file: .env
+    user: "0:0"
     volumes:
       - .env:/var/www/.env
-      - ./database/database.sqlite:/var/www/database/database.sqlite
-    command: php artisan migrate
+      - ./database:/var/www/database
+    command: php artisan migrate --no-interaction --force
+
+  permissions:
+    image: docker.io/muhammadn/opendms:1.0.2
+    user: "0:0"
+    depends_on:
+      - migrate
+    volumes:
+      - .env:/var/www/.env
+      - ./database:/var/www/database
+    entrypoint: >
+      sh -c "chmod 666 /var/www/database/database.sqlite && 
+      chown www-data:www-data /var/www/database/database.sqlite"
 
   # Main HTTP Web App Service
   app:
     image: docker.io/muhammadn/opendms:1.0.2
     restart: always
     env_file: .env
+    depends_on: 
+      - permissions
     volumes:
       - .env:/var/www/.env
-      - ./database/database.sqlite:/var/www/database/database.sqlite
+      - ./database:/var/www/database
 
   webserver:
     image: nginx:alpine
@@ -36,7 +51,7 @@ services:
     env_file: .env
     volumes:
       - .env:/var/www/.env
-      - ./database/database.sqlite:/var/www/database/database.sqlite
+      - ./database:/var/www/database
     # Executes background jobs explicitly
     command: php artisan app:mqtt-subscribe
 
@@ -47,9 +62,10 @@ services:
       - app
     restart: always
     env_file: .env
+    user: "0:0"
     volumes:
       - .env:/var/www/.env
-      - ./database/database.sqlite:/var/www/database/database.sqlite
+      - ./database:/var/www/database
     command: php artisan queue:work --tries=5 --timeout=0
 
   # Dedicated Task Scheduler
@@ -61,7 +77,7 @@ services:
     env_file: .env
     volumes:
       - .env:/var/www/.env
-      - ./database/database.sqlite:/var/www/database/database.sqlite
+      - ./database:/var/www/database
     # Shell loop mimics cron to evaluate schedules every 60 seconds safely
     command: /bin/sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
 
