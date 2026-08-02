@@ -1,6 +1,6 @@
 services:
   migrate:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     env_file: .env
     user: "0:0"
     volumes:
@@ -9,7 +9,7 @@ services:
     command: php artisan migrate --no-interaction --force
 
   permissions:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     user: "0:0"
     depends_on:
       - migrate
@@ -17,18 +17,20 @@ services:
       - .env:/var/www/.env
       - ./database:/var/www/database
     entrypoint: >
-      sh -c "chmod 666 /var/www/database/database.sqlite && 
+      sh -c "chmod 777 /var/www/database &&
+      chmod 777 /var/www/database/database.sqlite && 
       chown www-data:www-data /var/www/database/database.sqlite"
 
   # Main HTTP Web App Service
   app:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     restart: always
     env_file: .env
     depends_on: 
       - permissions
     volumes:
       - .env:/var/www/.env
+      - .:/var/www
       - ./database:/var/www/database
 
   webserver:
@@ -37,6 +39,7 @@ services:
     ports:
       - "8080:80"
     volumes:
+      - .env:/var/www/.env
       - .:/var/www
       - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
@@ -44,12 +47,13 @@ services:
 
   # Dedicated Background Queue Worker
   mqtt-worker:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     depends_on:
       - app
     restart: always
     env_file: .env
     volumes:
+      - .:/var/www
       - .env:/var/www/.env
       - ./database:/var/www/database
     # Executes background jobs explicitly
@@ -57,25 +61,27 @@ services:
 
   # Dedicated Queue Worker
   queue-worker:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     depends_on:
       - app
     restart: always
     env_file: .env
     user: "0:0"
     volumes:
+      - .:/var/www
       - .env:/var/www/.env
       - ./database:/var/www/database
     command: php artisan queue:work --tries=5 --timeout=0
 
   # Dedicated Task Scheduler
   scheduler:
-    image: docker.io/muhammadn/opendms:1.0.2
+    image: docker.io/muhammadn/opendms:1.0.3
     depends_on:
       - app
     restart: always
     env_file: .env
     volumes:
+      - .:/var/www
       - .env:/var/www/.env
       - ./database:/var/www/database
     # Shell loop mimics cron to evaluate schedules every 60 seconds safely
