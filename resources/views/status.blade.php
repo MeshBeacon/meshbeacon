@@ -161,21 +161,22 @@
       </span>
       @php
         $activeInc = $activeIncidents[$mamaduck->duck_id] ?? null;
-        $incLabel = match($activeInc?->status) {
+        $incStatus = $activeInc?->status;
+        $incLabel = match($incStatus) {
           'acknowledged' => "ACK'D",
           'responding'   => 'RESP',
           default        => 'OPEN',
         };
+        $incClass = match($incStatus) {
+          'acknowledged' => 'bg-amber-500/20 text-amber-300 ring-amber-500/40',
+          'responding'   => 'bg-blue-500/20 text-blue-300 ring-blue-500/40',
+          default        => 'bg-red-500/20 text-red-300 ring-red-500/40',
+        };
       @endphp
       <div class="flex items-center gap-1.5">
         <a href="/dashboard#incidents" data-incident-badge-duck="{{ $mamaduck->duck_id }}"
-          class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset
-            {{ match($activeInc?->status) {
-              'acknowledged' => 'bg-amber-500/20 text-amber-300 ring-amber-500/40',
-              'responding'   => 'bg-blue-500/20 text-blue-300 ring-blue-500/40',
-              default        => 'bg-red-500/20 text-red-300 ring-red-500/40',
-            } }}">
-          {{ $incLabel }}
+          class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">
+          {!! $incLabel !!}
         </a>
         <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">Online</button>
       </div>
