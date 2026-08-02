@@ -514,6 +514,7 @@ $(document).ready(function () {
             method: "GET",
             dataType: "json",
             success: function (data) {
+                $("#stat-messages-today").text(data.count);
                 $("#stat-total").text(data.count);
                 $("#stat-papaducks").text(data.papaducks);
                 $("#stat-mamaducks").text(data.mamaducks);

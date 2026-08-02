@@ -4,7 +4,7 @@
 <div class="max-w w-full bg-transparent border border-white/10 rounded-base shadow-xs p-4 md:p-6">
   <div class="flex justify-between items-start">
     <div>
-      <h5 class="text-2xl font-semibold text-heading text-white">{{ Number::forHumans($count) }}</h5>
+      <h5 id="stat-messages-today" class="text-2xl font-semibold text-heading text-white">{{ Number::forHumans($count) }}</h5>
       <p class="text-body text-gray-400">Messages today</p>
     </div>
     <div id="chart-trend" class="flex items-center px-2.5 py-0.5 font-medium text-gray-400 text-center">
