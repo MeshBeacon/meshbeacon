@@ -14,6 +14,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/map-pins', [DashboardController::class, 'mapPins']);
+    Route::get('/dashboard/duck-health', [DashboardController::class, 'duckHealth']);
+    Route::get('/dashboard/topology', [DashboardController::class, 'topology']);
+    Route::post('/dashboard/sos-ack', [DashboardController::class, 'sosAck']);
+    Route::patch('/dashboard/incidents/{messageId}/status', [DashboardController::class, 'updateIncidentStatus']);
     Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
     Route::get('/status', [StatusController::class, 'index']);
     Route::post('/status/send', [StatusController::class, 'message']);

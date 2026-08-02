@@ -159,6 +159,45 @@ class ClusterDataRepository
     }
 
     /**
+     * Latest record per duck_id that contains coordinates (any topic).
+     * Used to populate the dashboard map with last-known positions.
+     */
+    public function getLatestPositionPerDuck(): Collection
+    {
+        return ClusterData::whereIn('id', function ($query) {
+            $query->selectRaw('max(id)')
+                ->from('cluster_data')
+                ->where('payload', 'LIKE', '%LAT:%')
+                ->where('payload', 'LIKE', '%LNG:%')
+                ->groupBy('duck_id');
+        })->get();
+    }
+
+    /**
+     * Most-recent record per duck (any topic) — for duck online/offline health.
+     */
+    public function getLatestRecordPerDuck(): Collection
+    {
+        return ClusterData::whereIn('id', function ($query) {
+            $query->selectRaw('max(id)')
+                ->from('cluster_data')
+                ->groupBy('duck_id');
+        })->get(['id', 'duck_id', 'topic', 'duck_type', 'payload', 'created_at']);
+    }
+
+    /**
+     * Most-recent relayed messages (hops > 0, path set) for the topology panel.
+     */
+    public function getRecentRelays(int $limit = 15): Collection
+    {
+        return ClusterData::where('hops', '>', 0)
+            ->whereNotNull('path')
+            ->orderBy('id', 'desc')
+            ->limit($limit)
+            ->get(['id', 'duck_id', 'topic', 'path', 'hops', 'created_at']);
+    }
+
+    /**
      * Latest SOS record per duck_id within the last $hours hours.
      * Covers both hardware SOS (topic='alert', SRC:DEVICE) and mobile-app SOS
      * (topic='status', payload starts with 'SOS' but no SRC:DEVICE).

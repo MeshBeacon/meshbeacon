@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClusterData;
 use App\Models\GpsPoll;
+use App\Models\IncidentLog;
 use App\Services\ClusterDataService;
 use App\Services\MqttService;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,13 @@ class StatusController extends Controller
         $mamaducks      = $this->clusterDataService->getLatestPerDuck();
         $latestCoordsId = $this->clusterDataService->latestWithCoordsId($mamaducks);
 
-        return view('status', compact('mamaducks', 'latestCoordsId'));
+        $activeIncidents = IncidentLog::whereIn('duck_id', $mamaducks->pluck('duck_id'))
+            ->where('status', '!=', 'resolved')
+            ->orderByDesc('created_at')
+            ->get()
+            ->keyBy('duck_id');
+
+        return view('status', compact('mamaducks', 'latestCoordsId', 'activeIncidents'));
     }
 
     public function gps()

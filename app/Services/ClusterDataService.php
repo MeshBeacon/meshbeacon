@@ -216,6 +216,71 @@ class ClusterDataService
         return $this->repository->getLastKnownCoordsPerDuck($duckIds)->keyBy('duck_id');
     }
 
+    /**
+     * Latest position per duck from ANY topic that has LAT/LNG in the payload.
+     * Used to populate the dashboard map pins.
+     *
+     * @return array<string, array{duck_id: string, lat: float, lng: float, topic: string, created_at: string}>
+     */
+    public function getMapPins(): array
+    {
+        return $this->repository->getLatestPositionPerDuck()
+            ->filter(fn (ClusterData $r) => $r->gps_lat !== null && $r->gps_lng !== null)
+            ->map(fn (ClusterData $r) => [
+                'duck_id'    => $r->duck_id,
+                'lat'        => (float) $r->gps_lat,
+                'lng'        => (float) $r->gps_lng,
+                'topic'      => $r->topic,
+                'source'     => $r->gps_from_phone ? 'Phone' : 'Satellite',
+                'created_at' => $r->created_at->diffForHumans(),
+                'map_url'    => 'https://www.google.com/maps?q=' . $r->gps_lat . ',' . $r->gps_lng,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Online/idle/offline status + battery per duck for the health widget.
+     * online  = last message < 10 minutes ago
+     * idle    = 10–60 minutes ago
+     * offline = > 60 minutes ago
+     */
+    public function getDuckHealth(): array
+    {
+        $onlineThreshold = now()->subMinutes(10);
+        $idleThreshold   = now()->subMinutes(60);
+
+        return $this->repository->getLatestRecordPerDuck()
+            ->map(fn (ClusterData $r) => [
+                'duck_id'   => $r->duck_id,
+                'duck_type' => (int) $r->duck_type,
+                'status'    => $r->created_at->greaterThan($onlineThreshold) ? 'online'
+                             : ($r->created_at->greaterThan($idleThreshold)  ? 'idle' : 'offline'),
+                'last_seen' => $r->created_at->diffForHumans(),
+                'battery'   => $r->gps_batt,
+            ])
+            ->sortBy('duck_id')
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Recent relay paths for the topology panel.
+     */
+    public function getTopology(): array
+    {
+        return $this->repository->getRecentRelays(15)
+            ->map(fn (ClusterData $r) => [
+                'duck_id'    => $r->duck_id,
+                'topic'      => $r->topic,
+                'path'       => $r->path,
+                'hops'       => $r->hops,
+                'created_at' => $r->created_at->diffForHumans(),
+            ])
+            ->values()
+            ->toArray();
+    }
+
     public function getHourlyMessageCounts(): array
     {
         $windowStart = now()->subHours(11)->startOfHour();

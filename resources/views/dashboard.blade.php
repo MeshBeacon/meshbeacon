@@ -80,11 +80,129 @@
           </dl>
         </div>
 
-        {{-- Active Incidents panel --}}
-        <div class="mt-6 mb-2">
+        {{-- Duck Health --}}
+        <div class="mt-6">
           <div class="flex items-center gap-3 mb-3">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Active Incidents</h2>
-            <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/30"></span>
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Duck Health</h2>
+            <span class="relative flex size-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
+            </span>
+          </div>
+          <div id="duck-health-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+            <p class="text-xs text-gray-500 italic col-span-full">Loading&hellip;</p>
+          </div>
+        </div>
+        <div class="mt-6">
+          <div class="flex items-center gap-3 mb-3">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Duck Positions</h2>
+            <span class="relative flex size-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
+            </span>
+          </div>
+          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+          <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+          <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+          <div id="duck-map" class="rounded-lg overflow-hidden ring-1 ring-inset ring-white/10" style="height:420px;"></div>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+          <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+          <script>
+          (function () {
+            var map = L.map('duck-map', { zoomControl: true }).setView([3.139, 101.6869], 6);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            var clusterGroup = L.markerClusterGroup();
+            map.addLayer(clusterGroup);
+
+            function makeIcon(badge) {
+              var color = badge === 'Satellite' ? '#22c55e'
+                        : badge === 'Phone'     ? '#3b82f6'
+                        : '#eab308';
+              return L.divIcon({
+                className: '',
+                html: '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.5);"></div>',
+                iconSize:    [12, 12],
+                iconAnchor:  [6, 6],
+                popupAnchor: [0, -10],
+              });
+            }
+
+            function refreshMap() {
+              fetch('/dashboard/map-pins', {
+                headers: {
+                  'Accept': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+              })
+              .then(function (r) { return r.json(); })
+              .then(function (pins) {
+                clusterGroup.clearLayers();
+                var bounds = [];
+
+                pins.forEach(function (duck) {
+                  var lat = duck.lat;
+                  var lng = duck.lng;
+                  if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+
+                  var mapsLink = duck.map_url;
+                  var popup = '<div style="min-width:160px;line-height:1.5">'
+                    + '<p style="font-weight:600;margin:0 0 2px">' + duck.duck_id + '</p>'
+                    + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + lat.toFixed(5) + ', ' + lng.toFixed(5) + '</p>'
+                    + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + duck.source + ' &nbsp;·&nbsp; ' + duck.topic + '</p>'
+                    + '<p style="font-size:.75rem;color:#6b7280;margin:0">' + duck.created_at + '</p>'
+                    + '<a href="' + mapsLink + '" target="_blank" rel="noopener" style="font-size:.75rem;color:#eab308">Open in Maps ↗</a>'
+                    + '</div>';
+
+                  L.marker([lat, lng], { icon: makeIcon(duck.source) })
+                   .bindPopup(popup)
+                   .addTo(clusterGroup);
+
+                  bounds.push([lat, lng]);
+                });
+
+                if (bounds.length) {
+                  map.fitBounds(bounds, { maxZoom: 14, padding: [40, 40] });
+                }
+              })
+              .catch(function (e) { console.error('Map refresh error', e); });
+            }
+
+            refreshMap();
+            setInterval(refreshMap, 30000);
+          })();
+          </script>
+        </div>
+
+        {{-- Mesh Topology --}}
+        <div class="mt-6">
+          <div class="flex items-center gap-3 mb-3">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Recent Relay Paths</h2>
+          </div>
+          <div id="topology-list">
+            <p class="text-xs text-gray-500 italic">Loading&hellip;</p>
+          </div>
+        </div>
+
+        {{-- Active Incidents panel --}}
+        <div id="incidents" class="mt-6 mb-2">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Active Incidents</h2>
+              <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/30"></span>
+            </div>
+            <button id="notif-btn"
+              onclick="requestNotificationPermission()"
+              class="inline-flex items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
+                <path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Enable Notifications
+            </button>
           </div>
           <div id="incidents-list">
             <p class="text-xs text-gray-500 italic">Loading…</p>
