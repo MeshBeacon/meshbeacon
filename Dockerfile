@@ -6,7 +6,7 @@ RUN npm ci
 COPY resources/ ./resources/
 COPY vite.config.js tailwind.config.js* ./
 # Compiles assets into public/build
-RUN npm run build 
+RUN npm run build
 
 # --- Build Stage ---
 FROM php:8.5-fpm-alpine AS builder
@@ -54,8 +54,7 @@ WORKDIR /var/www
 # Copy codebase from builder stage
 COPY --from=builder /app /var/www
 # Copy compiled assets from Step 1
-#COPY --from=asset-builder /app/public/build/ ./public/build/
-COPY --from=asset-builder /app/public/build/ /var/www/html/public/build/
+COPY --from=asset-builder /app/public/build /var/www/public/build
 
 # Set appropriate directory ownership permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database \
