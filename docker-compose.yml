@@ -12,7 +12,7 @@ services:
     image: docker.io/muhammadn/opendms:1.0.3
     user: "0:0"
     depends_on:
-      - migrate
+      - app
     volumes:
       - .env:/var/www/.env
       - ./database:/var/www/database
@@ -27,7 +27,7 @@ services:
     restart: always
     env_file: .env
     depends_on: 
-      - permissions
+      - migrate
     volumes:
       - .env:/var/www/.env
       - .:/var/www
