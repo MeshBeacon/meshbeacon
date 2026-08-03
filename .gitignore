@@ -23,3 +23,4 @@ yarn-error.log
 /.zed
 /services/mosquitto/log/*
 /services/mosquitto/data/*
+/package-lock.json
