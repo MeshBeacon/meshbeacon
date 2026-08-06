@@ -26,6 +26,17 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function kiosk()
+    {
+        $stats = $this->clusterDataService->getDashboardStats();
+
+        return view('kiosk', [
+            'count'     => $stats['count'],
+            'papaducks' => $stats['papaducks'],
+            'mamaducks' => $stats['mamaducks'],
+        ]);
+    }
+
     public function stats(): JsonResponse
     {
         return response()->json($this->clusterDataService->getDashboardStats(), 200);
@@ -85,15 +96,49 @@ class DashboardController extends Controller
                         'retransmission_count'   => $openLog->retransmission_count + 1,
                     ]);
                 }
+                continue;
+            }
+
+            // No open incident for this duck. This is normally a brand-new
+            // SOS event, but it can also be a previously-RESOLVED log whose
+            // message_id got reused — e.g. a duck's onboard message counter
+            // wrapping around after a reboot. Scope the lookup to this exact
+            // duck (message_id alone is no longer guaranteed unique across
+            // ducks) and, if found, reopen it as a fresh incident rather than
+            // silently leaving a live SOS marked "resolved".
+            $existing = IncidentLog::where('message_id', $inc['message_id'])
+                ->where('duck_id', $inc['duck_id'])
+                ->first();
+
+            if ($existing) {
+                // Only actually reopen if this is a genuinely NEW
+                // transmission (a different ClusterData row) than what the
+                // resolved log already recorded. The active-incidents feed
+                // keeps returning a duck's latest message for up to 24
+                // hours regardless of resolution status, so without this
+                // check, the very same stale alert a responder just
+                // resolved would flip back to 'open' again on the next
+                // poll — even though nothing new was received from the
+                // device.
+                if ($existing->cluster_data_id !== $inc['id']) {
+                    $existing->update([
+                        'cluster_data_id'      => $inc['id'],
+                        'status'               => 'open',
+                        'notes'                => null,
+                        'assigned_to'          => null,
+                        'assigned_at'          => null,
+                        'acknowledged_at'      => null,
+                        'resolved_at'          => null,
+                        'retransmission_count' => 1,
+                    ]);
+                }
             } else {
-                IncidentLog::firstOrCreate(
-                    ['message_id' => $inc['message_id']],
-                    [
-                        'duck_id'         => $inc['duck_id'],
-                        'cluster_data_id' => $inc['id'],
-                        'status'          => 'open',
-                    ]
-                );
+                IncidentLog::create([
+                    'message_id'      => $inc['message_id'],
+                    'duck_id'         => $inc['duck_id'],
+                    'cluster_data_id' => $inc['id'],
+                    'status'          => 'open',
+                ]);
             }
         }
 

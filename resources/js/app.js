@@ -589,7 +589,16 @@ $(document).ready(function () {
             url: "/dashboard/incidents/responders",
             method: "GET",
             dataType: "json",
-            success: function (data) { incidentResponders = data || []; }
+            success: function (data) {
+                incidentResponders = data || [];
+                // loadResponders() and pollIncidents() both fire on page
+                // load; if this responders request resolves after the
+                // first incidents render, the assign dropdown would be
+                // stuck showing only "Unassigned" until the next 30s poll.
+                // Re-render immediately (from cached data, no extra
+                // request) once responders are actually available.
+                renderIncidentsList();
+            }
         });
     }
 
@@ -678,6 +687,25 @@ $(document).ready(function () {
         });
     }
 
+    // Ranks incidents so the most urgent/newest are always shown first —
+    // matters most on the kiosk screen, where the list may be capped and
+    // whatever sorts to the top must be the stuff that actually needs eyes.
+    function incidentSortRank(inc) {
+        if (inc.sos_from_device) return 4;
+        if (inc.sos_from_mobile) return 3;
+        if (inc.urgency_value === 2) return 2;
+        if (inc.urgency_value === 1) return 1;
+        return 0;
+    }
+
+    function sortIncidents(list) {
+        return list.slice().sort(function (a, b) {
+            var rankDiff = incidentSortRank(b) - incidentSortRank(a);
+            if (rankDiff !== 0) return rankDiff;
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+    }
+
     // Renders the incidents panel from the last-fetched data, applying the
     // current search filter. Called after every poll and whenever the
     // search box changes — filtering is done client-side against the
@@ -686,7 +714,8 @@ $(document).ready(function () {
         var $list  = $("#incidents-list");
         var $count = $("#incidents-count");
         var query  = ($("#incidents-search").val() || "").trim().toLowerCase();
-        var incidents = filterIncidents(lastIncidentsRaw, query);
+        var isCompact = $list.is('[data-compact]');
+        var incidents = sortIncidents(filterIncidents(lastIncidentsRaw, query));
 
         if (lastIncidentsRaw.length === 0) {
             $list.html('<p class="text-xs text-gray-500 italic">No active incidents in the past 24 hours.</p>');
@@ -704,8 +733,22 @@ $(document).ready(function () {
 
         $count.text(query ? incidents.length + ' of ' + lastIncidentsRaw.length : incidents.length).removeClass("hidden");
 
-        var html = '<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">';
-        $.each(incidents, function (i, inc) {
+        // Kiosk mode is view-only and has limited screen space — cap the
+        // rendered cards to a sane number (already sorted urgent-first) and
+        // say how many more there are, rather than silently overflowing
+        // off-screen with no indication anything is missing.
+        var displayIncidents = incidents;
+        var hiddenCount = 0;
+        if (isCompact) {
+            var KIOSK_CAP = 9;
+            if (incidents.length > KIOSK_CAP) {
+                hiddenCount = incidents.length - KIOSK_CAP;
+                displayIncidents = incidents.slice(0, KIOSK_CAP);
+            }
+        }
+
+        var html = '<div class="grid grid-cols-1 gap-3 @xl:grid-cols-2 @5xl:grid-cols-3">';
+        $.each(displayIncidents, function (i, inc) {
                     var isSosDev  = inc.sos_from_device;
                     var isSosMob  = inc.sos_from_mobile && !inc.sos_from_device;
                     var urgVal    = inc.urgency_value;
@@ -840,6 +883,24 @@ $(document).ready(function () {
                         '</div>' +
                         '</div>';
 
+                    if (isCompact) {
+                        // Condensed card for the kiosk screen — no operator
+                        // controls (ack/status/assign/notes), just enough to
+                        // tell what/who/how urgent/when at a glance.
+                        html +=
+                            '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';padding:0.625rem 0.875rem;display:flex;flex-direction:column;gap:4px;">' +
+                            '<div style="display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
+                            icon +
+                            '<span style="font-size:0.85rem;font-weight:600;color:white;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
+                            sosBadge +
+                            statusBadge +
+                            '</div>' +
+                            '<div style="font-size:0.78rem;color:#d1d5db;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + msgText + '</div>' +
+                            '<div style="font-size:0.68rem;color:#6b7280;">' + timeStr + '</div>' +
+                            '</div>';
+                        return;
+                    }
+
                     html +=
                         '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';display:flex;flex-direction:column;height:100%;">' +
                         // Header
@@ -866,6 +927,10 @@ $(document).ready(function () {
                 });
 
                 html += '</div>';
+
+                if (hiddenCount > 0) {
+                    html += '<p style="margin-top:0.75rem;font-size:0.75rem;color:#9ca3af;text-align:center;">+' + hiddenCount + ' more \u2014 see full dashboard for all active incidents</p>';
+                }
 
                 // Only repaint when content changed to avoid flicker
                 if ($list.data("last-html") !== html) {

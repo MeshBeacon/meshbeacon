@@ -1,0 +1,29 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+node_modules
+npm-debug.log
+
+# Locally-generated bootstrap caches must never ship in an image build —
+# they bake in the absolute base_path() of whatever machine ran
+# `artisan config:cache`/`route:cache`, which breaks storage/view paths
+# on any other machine/container (see tempnam() production incident).
+bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
+
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/framework/views/*
+storage/logs/*
+storage/debugbar/*
+!storage/framework/cache/.gitignore
+!storage/framework/sessions/.gitignore
+!storage/framework/testing/.gitignore
+!storage/framework/views/.gitignore
+!storage/logs/.gitignore
+
+tests
+.phpunit.result.cache

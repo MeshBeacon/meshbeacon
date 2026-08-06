@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MessageLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StatusController;
@@ -15,8 +16,12 @@ Route::get('/', function () {
 // segment + the X-Telegram-Bot-Api-Secret-Token header (see TelegramWebhookController).
 Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'handle']);
 
+// Available to guests too, so the login page can be switched before authenticating.
+Route::post('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/kiosk', [DashboardController::class, 'kiosk']);
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);

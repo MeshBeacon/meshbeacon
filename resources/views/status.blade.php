@@ -6,14 +6,14 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M1 8.74C1 9.99 2.01 11 3.26 11h1.04l.56 2.8a.75.75 0 0 0 1.46-.2L6.998 11H9.5C10.881 11 12 9.881 12 8.5v-5C12 2.119 10.881 1 9.5 1h-6C2.119 1 1 2.119 1 3.5v5.24ZM13 5.36c.44.17.75.6.75 1.11V8.5a3 3 0 0 1-3 3H9.499l-.044.222A2.75 2.75 0 0 0 12 9.5V4.25c.57.22 1 .77 1 1.11Z" clip-rule="evenodd" />
       </svg>
-      Send Message to Duck
+      {{ __('Send Message to Duck') }}
     </button>
     <button type="button" id="open-broadcast-btn"
       class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892L5.18 9.817a.75.75 0 0 0 .985.985l2.15-.975a2.75 2.75 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.475ZM3.5 6.75A3.25 3.25 0 0 1 6.75 3.5h.75a.75.75 0 0 1 0 1.5h-.75A1.75 1.75 0 0 0 5 6.75v5.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 14 12.25v-.75a.75.75 0 0 1 1.5 0v.75A3.25 3.25 0 0 1 12.25 15.5h-5.5A3.25 3.25 0 0 1 3.5 12.25v-5.5Z" />
       </svg>
-      Emergency Broadcast
+      {{ __('Emergency Broadcast') }}
     </button>
   </div>
 @endsection
@@ -64,10 +64,10 @@
   </div>
 
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-base font-semibold text-white">Duck Status</h1>
+    <h1 class="text-base font-semibold text-white">{{ __('Duck Status') }}</h1>
     <div class="flex items-center gap-2">
-      <label class="inline-flex cursor-pointer items-center gap-2 select-none" title="Show online ducks only">
-        <span class="text-xs text-gray-400 whitespace-nowrap">Online only</span>
+      <label class="inline-flex cursor-pointer items-center gap-2 select-none" title="{{ __('Show online ducks only') }}">
+        <span class="text-xs text-gray-400 whitespace-nowrap">{{ __('Online only') }}</span>
         <div class="relative">
           <input type="checkbox" id="online-only-toggle" class="sr-only peer">
           <div class="w-9 h-5 rounded-full bg-gray-600 peer-checked:bg-green-500 transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-green-500"></div>
@@ -77,13 +77,13 @@
 
       <el-select id="incident-filter" name="incident-filter" value="" class="block w-36">
         <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white/5 py-1.5 pl-3 pr-2 text-left text-white outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
-          <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">All Incidents</el-selectedcontent>
+          <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Incidents') }}</el-selectedcontent>
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-400 sm:size-4">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
           </svg>
         </button>
         <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
-          @foreach (['' => 'All Incidents', 'any' => 'Has Incident', 'open' => 'Open', 'acknowledged' => 'Acknowledged', 'responding' => 'Responding'] as $val => $label)
+          @foreach ([['', __('All Incidents')], ['any', __('Has Incident')], ['open', __('Open')], ['acknowledged', __('Acknowledged')], ['responding', __('Responding')]] as [$val, $label])
           <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ $label }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
@@ -98,14 +98,14 @@
 
       <el-select id="urgency-filter" name="urgency-filter" value="" class="block w-36">
         <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white/5 py-1.5 pl-3 pr-2 text-left text-white outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
-          <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">All Urgency</el-selectedcontent>
+          <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Urgency') }}</el-selectedcontent>
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-400 sm:size-4">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
           </svg>
         </button>
         <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
           <el-option value="" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
-            <span class="block truncate font-normal group-aria-selected/option:font-semibold">All Urgency</span>
+            <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('All Urgency') }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -113,7 +113,7 @@
             </span>
           </el-option>
           <el-option value="0" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
-            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Low</span>
+            <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Low') }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -121,7 +121,7 @@
             </span>
           </el-option>
           <el-option value="1" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
-            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Medium</span>
+            <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Medium') }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -129,7 +129,7 @@
             </span>
           </el-option>
           <el-option value="2" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
-            <span class="block truncate font-normal group-aria-selected/option:font-semibold">Critical</span>
+            <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Critical') }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -145,7 +145,7 @@
             <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
           </svg>
         </div>
-        <input id="duck-search" type="text" placeholder="Search duck ID…"
+        <input id="duck-search" type="text" placeholder="{{ __('Search duck ID…') }}"
           class="w-56 rounded-md bg-gray-800 py-1.5 pl-9 pr-3 text-sm text-white placeholder-gray-500 outline outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
       </div>
     </div>
@@ -163,9 +163,9 @@
         $activeInc = $activeIncidents[$mamaduck->duck_id] ?? null;
         $incStatus = $activeInc?->status;
         $incLabel = match($incStatus) {
-          'acknowledged' => "ACK'D",
-          'responding'   => 'RESP',
-          default        => 'OPEN',
+          'acknowledged' => __("ACK'D"),
+          'responding'   => __('RESP'),
+          default        => __('OPEN'),
         };
         $incClass = match($incStatus) {
           'acknowledged' => 'bg-amber-500/20 text-amber-300 ring-amber-500/40',
@@ -178,7 +178,7 @@
           class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">
           {!! $incLabel !!}
         </a>
-        <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">Online</button>
+        <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Online') }}</button>
       </div>
     </div>
   </div>
@@ -196,13 +196,13 @@
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-red-400">SOS &mdash; Hardware Button Triggered</p>
-          <p class="text-xs text-red-300/80">This SOS was sent because the physical SOS button on the device was pressed.</p>
+          <p class="text-xs font-semibold text-red-400">{{ __('SOS — Hardware Button Triggered') }}</p>
+          <p class="text-xs text-red-300/80">{{ __('This SOS was sent because the physical SOS button on the device was pressed.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
               @if ($mamaduck->gps_batt !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">Device</span>
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
@@ -213,7 +213,7 @@
               @endif
               @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">GPS</span>
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   @if ($mamaduck->gps_alt !== null)
                     <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
@@ -246,13 +246,13 @@
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-orange-400">SOS &mdash; Mobile Phone Triggered</p>
-          <p class="text-xs text-orange-300/80">This SOS was sent from the user&rsquo;s mobile phone application and should include GPS coordinates.</p>
+          <p class="text-xs font-semibold text-orange-400">{{ __('SOS — Mobile Phone Triggered') }}</p>
+          <p class="text-xs text-orange-300/80">{{ __('This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
               @if ($mamaduck->gps_batt !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">Device</span>
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
@@ -263,7 +263,7 @@
               @endif
               @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">GPS</span>
+                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   @if ($mamaduck->gps_alt !== null)
                     <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
@@ -296,8 +296,8 @@
           <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">Roger &mdash; Device Confirmed</p>
-          <p class="text-xs text-green-400/80">The person holding the device triple-clicked the button to confirm they have received your message.</p>
+          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">{{ __('Roger — Device Confirmed') }}</p>
+          <p class="text-xs text-green-400/80">{{ __('The person holding the device triple-clicked the button to confirm they have received your message.') }}</p>
         </div>
       </div>
     @endif
@@ -309,8 +309,8 @@
             <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
           </svg>
           <div>
-            <p class="text-xs font-bold text-red-400 uppercase tracking-wide">Critical &mdash; Immediate Attention Required</p>
-            <p class="text-xs text-red-300/80">This message has been marked as critical urgency and must be attended to immediately.</p>
+            <p class="text-xs font-bold text-red-400 uppercase tracking-wide">{{ __('Critical — Immediate Attention Required') }}</p>
+            <p class="text-xs text-red-300/80">{{ __('This message has been marked as critical urgency and must be attended to immediately.') }}</p>
           </div>
         </div>
       @endif
@@ -321,14 +321,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
-        GPS location unavailable &mdash; no satellite fix
+        {{ __('GPS location unavailable — no satellite fix') }}
       </p>
     @elseif ($mamaduck->gps_hardware_absent)
       <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
         </svg>
-        No GPS hardware &mdash; this device cannot report location
+        {{ __('No GPS hardware — this device cannot report location') }}
       </p>
     @endif
     </div>
@@ -349,11 +349,11 @@
             <el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">
               <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
                 <div>
-                  <h3 class="text-sm font-semibold text-white">{{ $mamaduck->duck_id }} &mdash; GPS Location</h3>
+                  <h3 class="text-sm font-semibold text-white">{{ $mamaduck->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
                   <p class="text-xs text-gray-400 mt-0.5" data-map-subtitle>
-                    Source: <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
+                    {{ __('Source:') }} <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
                     @if ($mamaduck->gps_sats !== null)
-                      &bull; {{ $mamaduck->gps_sats }} satellites
+                      &bull; {{ $mamaduck->gps_sats }} {{ __('satellites') }}
                     @endif
                     @if ($mamaduck->gps_alt !== null)
                       &bull; {{ number_format($mamaduck->gps_alt, 1) }} m &bull; {{ number_format($mamaduck->gps_spd ?? 0, 1) }} km/h &bull; {{ number_format($mamaduck->gps_hdg ?? 0, 1) }}&deg;
@@ -373,8 +373,8 @@
                 </iframe>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-white/10">
-                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-yellow-400 hover:text-yellow-300">Open in Google Maps &rarr;</a>
-                <button command="close" commandfor="{{ $mapDialogId }}" class="rounded-md bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20">Close</button>
+                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-yellow-400 hover:text-yellow-300">{{ __('Open in Google Maps') }} &rarr;</a>
+                <button command="close" commandfor="{{ $mapDialogId }}" class="rounded-md bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20">{{ __('Close') }}</button>
               </div>
             </el-dialog-panel>
           </div>
@@ -387,7 +387,7 @@
     <div>
       <!-- Include this script tag or install `@tailwindplus/elements` via npm: -->
       <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> -->
-      <button command="show-modal" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="rounded-md bg-white/10 px-2.5 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20">Message</button>
+      <button command="show-modal" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="rounded-md bg-white/10 px-2.5 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20">{{ __('Message') }}</button>
       <el-dialog>
         <dialog id="msg-dialog-{{ $mamaduck->duck_id }}" aria-labelledby="dialog-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
         <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
@@ -400,8 +400,8 @@
   <input type="hidden" name="duck_id" value="{{ $mamaduck->duck_id }}">
   <div class="space-y-12">
     <div class="border-b border-white/10 pb-3">
-      <h2 class="text-base/7 font-semibold text-white">Message <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
-      <p class="mt-1 text-sm/6 text-gray-400">This messaging is on a best-effort basis</p>
+      <h2 class="text-base/7 font-semibold text-white">{{ __('Message') }} <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
+      <p class="mt-1 text-sm/6 text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
 
         <!-- Last known GPS location — updated by pollHistory() -->
         <div data-gps-duck="{{ $mamaduck->duck_id }}" class="mt-3"></div>
@@ -409,11 +409,11 @@
         <!-- Conversation history — populated by pollHistory() in app.js -->
         <div class="mt-3 h-48 overflow-y-auto rounded-md bg-white/5 p-3 space-y-2 outline outline-1 -outline-offset-1 outline-white/10"
              data-history-duck="{{ $mamaduck->duck_id }}">
-          <p class="text-center text-xs text-gray-500">Loading…</p>
+          <p class="text-center text-xs text-gray-500">{{ __('Loading…') }}</p>
         </div>
 
         <div class="col-span-full mt-4">
-          <label for="about" class="block text-sm/6 font-medium text-white">New message</label>
+          <label for="about" class="block text-sm/6 font-medium text-white">{{ __('New message') }}</label>
           <div class="mt-2">
             <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500 sm:text-sm/6"></textarea>
           </div>
@@ -423,7 +423,7 @@
   </div>
 
   <div class="mt-2 flex items-center gap-3">
-            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">Send Message</button>
+            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Send Message') }}</button>
             <span class="send-status text-xs"></span>
   </div>
 </form>
@@ -448,18 +448,18 @@
                 </svg>
               </div>
               <div>
-                <h2 id="broadcast-dialog-title" class="text-base font-semibold text-white">Emergency Broadcast</h2>
-                <p class="text-xs text-gray-400">Message will be sent to <span class="font-semibold text-red-400">all</span> connected devices (topic 24).</p>
+                <h2 id="broadcast-dialog-title" class="text-base font-semibold text-white">{{ __('Emergency Broadcast') }}</h2>
+                <p class="text-xs text-gray-400">{{ __('Message will be sent to') }} <span class="font-semibold text-red-400">{{ __('all') }}</span> {{ __('connected devices (topic 24).') }}</p>
               </div>
             </div>
             <form id="broadcast-form">
               @csrf
               <div class="space-y-4">
                 <div>
-                  <label for="broadcast-message" class="block text-sm font-medium text-white">Broadcast message</label>
+                  <label for="broadcast-message" class="block text-sm font-medium text-white">{{ __('Broadcast message') }}</label>
                   <div class="mt-2">
                     <textarea id="broadcast-message" name="message" rows="4" maxlength="200"
-                      placeholder="Enter your emergency message…"
+                      placeholder="{{ __('Enter your emergency message…') }}"
                       class="bc-textarea block w-full rounded-md bg-white/5 px-3 py-1.5 text-sm text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-red-500"></textarea>
                   </div>
                   <p class="mt-1 flex justify-end text-xs text-gray-500"><span id="bc-char-count">0</span>&nbsp;/ 200</p>
@@ -471,11 +471,11 @@
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
                     <path d="M2.87 2.298a.75.75 0 0 0-.812.495l-2 6.5a.75.75 0 0 0 .926.926L4 9.32V10a.75.75 0 0 0 .28.585l4.5 3.5A.75.75 0 0 0 10 13.5V10.82l2.985-.897a.75.75 0 0 0 .516-.923L11.578 3.3a.75.75 0 0 0-.812-.495L8 3.6 5.234 3.3 2.87 2.298Z" />
                   </svg>
-                  Send Broadcast
+                  {{ __('Send Broadcast') }}
                 </button>
                 <button type="button" id="broadcast-cancel-btn"
                   class="rounded-md bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20">
-                  Cancel
+                  {{ __('Cancel') }}
                 </button>
                 <span id="broadcast-send-status" class="ml-auto text-xs"></span>
               </div>
@@ -495,17 +495,17 @@
               @csrf
               <div class="space-y-12">
                 <div class="border-b border-white/10 pb-3">
-                  <h2 id="send-duck-title" class="text-base/7 font-semibold text-white">Messaging</h2>
-                  <p class="mt-1 text-sm/6 text-gray-400">This messaging is on a best-effort basis</p>
+                  <h2 id="send-duck-title" class="text-base/7 font-semibold text-white">{{ __('Messaging') }}</h2>
+                  <p class="mt-1 text-sm/6 text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
                   <div class="col-span-full mt-4">
-                    <label class="block text-sm/6 font-medium text-white">Duck ID</label>
+                    <label class="block text-sm/6 font-medium text-white">{{ __('Duck ID') }}</label>
                     <div class="mt-2">
                       <input type="text" name="duck_id" maxlength="50" placeholder="e.g. MAMAMUHAMMAD"
                         class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-sm text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
                     </div>
                   </div>
                   <div class="col-span-full mt-4">
-                    <label class="block text-sm/6 font-medium text-white">New message</label>
+                    <label class="block text-sm/6 font-medium text-white">{{ __('New message') }}</label>
                     <div class="mt-2">
                       <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500 sm:text-sm/6"></textarea>
                     </div>
@@ -516,7 +516,7 @@
               <div class="mt-2 flex items-center gap-3">
                 <button type="submit" command="close" commandfor="send-duck-dialog"
                   class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
-                  Send Message
+                  {{ __('Send Message') }}
                 </button>
                 <span class="send-status text-xs"></span>
               </div>
@@ -531,8 +531,8 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto mb-3 size-10 text-gray-600">
         <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
       </svg>
-      <p id="duck-empty-title" class="text-sm font-semibold text-gray-400">No ducks found</p>
-      <p id="duck-empty-sub" class="mt-1 text-xs text-gray-600">Try adjusting the search or urgency filter.</p>
+      <p id="duck-empty-title" class="text-sm font-semibold text-gray-400">{{ __('No ducks found') }}</p>
+      <p id="duck-empty-sub" class="mt-1 text-xs text-gray-600">{{ __('Try adjusting the search or urgency filter.') }}</p>
     </div>
 </div>
 </div>

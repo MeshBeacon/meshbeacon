@@ -20,10 +20,23 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Guard every step against already having been applied: MySQL/MariaDB
+        // DDL auto-commits statement-by-statement (no transactional rollback),
+        // so a migration that fails partway through (as this one originally
+        // did on MariaDB, see below) can leave the schema in a partial state.
+        // Re-running `migrate` must be able to safely resume from any point.
         Schema::table('incident_logs', function (Blueprint $table) {
-            $table->dropUnique(['message_id']);
-            $table->index('message_id');
-            $table->unsignedInteger('retransmission_count')->default(1)->after('message_id');
+            if (Schema::hasIndex('incident_logs', 'incident_logs_message_id_unique', 'unique')) {
+                $table->dropUnique(['message_id']);
+            }
+
+            if (! Schema::hasIndex('incident_logs', 'incident_logs_message_id_index')) {
+                $table->index('message_id');
+            }
+
+            if (! Schema::hasColumn('incident_logs', 'retransmission_count')) {
+                $table->unsignedInteger('retransmission_count')->default(1)->after('message_id');
+            }
         });
 
         // Historical data may already contain multiple non-resolved incidents
@@ -32,11 +45,40 @@ return new class extends Migration
         // uniqueness constraint is added, otherwise the index creation fails.
         $this->mergeDuplicateOpenIncidents();
 
-        // Partial unique index: only one open (non-resolved) incident per duck.
-        // Supported by SQLite (this project's only DB driver, see database.php).
-        DB::statement(
-            'CREATE UNIQUE INDEX incident_logs_open_duck_unique ON incident_logs (duck_id) WHERE status != \'resolved\''
-        );
+        // Only one open (non-resolved) incident per duck.
+        if ($this->supportsPartialIndexes()) {
+            // SQLite/Postgres support a true partial unique index.
+            if (! Schema::hasIndex('incident_logs', 'incident_logs_open_duck_unique')) {
+                DB::statement(
+                    'CREATE UNIQUE INDEX incident_logs_open_duck_unique ON incident_logs (duck_id) WHERE status != \'resolved\''
+                );
+            }
+        } else {
+            // MySQL/MariaDB have no partial/filtered unique index syntax, so
+            // emulate one via a virtual generated column that collapses to
+            // NULL once an incident is resolved. Both engines allow multiple
+            // NULLs in a unique index, so resolved incidents never collide -
+            // only non-resolved rows sharing the same duck_id are rejected.
+            if (! Schema::hasColumn('incident_logs', 'open_duck_id')) {
+                Schema::table('incident_logs', function (Blueprint $table) {
+                    $table->string('open_duck_id', 64)
+                        ->nullable()
+                        ->virtualAs("case when status != 'resolved' then duck_id else null end")
+                        ->after('duck_id');
+                });
+            }
+
+            if (! Schema::hasIndex('incident_logs', 'incident_logs_open_duck_unique', 'unique')) {
+                Schema::table('incident_logs', function (Blueprint $table) {
+                    $table->unique('open_duck_id', 'incident_logs_open_duck_unique');
+                });
+            }
+        }
+    }
+
+    private function supportsPartialIndexes(): bool
+    {
+        return in_array(Schema::getConnection()->getDriverName(), ['sqlite', 'pgsql'], true);
     }
 
     private function mergeDuplicateOpenIncidents(): void
@@ -83,12 +125,32 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement('DROP INDEX IF EXISTS incident_logs_open_duck_unique');
+        if ($this->supportsPartialIndexes()) {
+            DB::statement('DROP INDEX IF EXISTS incident_logs_open_duck_unique');
+        } else {
+            Schema::table('incident_logs', function (Blueprint $table) {
+                if (Schema::hasIndex('incident_logs', 'incident_logs_open_duck_unique', 'unique')) {
+                    $table->dropUnique('incident_logs_open_duck_unique');
+                }
+
+                if (Schema::hasColumn('incident_logs', 'open_duck_id')) {
+                    $table->dropColumn('open_duck_id');
+                }
+            });
+        }
 
         Schema::table('incident_logs', function (Blueprint $table) {
-            $table->dropColumn('retransmission_count');
-            $table->dropIndex(['message_id']);
-            $table->unique('message_id');
+            if (Schema::hasColumn('incident_logs', 'retransmission_count')) {
+                $table->dropColumn('retransmission_count');
+            }
+
+            if (Schema::hasIndex('incident_logs', 'incident_logs_message_id_index')) {
+                $table->dropIndex(['message_id']);
+            }
+
+            if (! Schema::hasIndex('incident_logs', 'incident_logs_message_id_unique', 'unique')) {
+                $table->unique('message_id');
+            }
         });
     }
 };

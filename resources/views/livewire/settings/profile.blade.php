@@ -3,75 +3,115 @@
 
     <flux:heading class="sr-only">{{ __('Profile Settings') }}</flux:heading>
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+    <x-settings.layout>
+        <div class="divide-y divide-white/10">
+            <div class="grid grid-cols-1 gap-x-8 gap-y-8 py-10 first:pt-0 lg:grid-cols-3">
+                <div class="px-4 sm:px-0">
+                    <h2 class="text-base/7 font-semibold text-white">{{ __('Profile') }}</h2>
+                    <p class="mt-1 text-sm/6 text-gray-400">{{ __('Your name and email are visible to other responders using this system.') }}</p>
+                </div>
 
-            <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <form wire:submit="updateProfileInformation" class="bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10 sm:rounded-xl lg:col-span-2">
+                    <div class="px-4 py-6 sm:p-8">
+                        <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                            <div class="sm:col-span-4">
+                                <label for="name" class="block text-sm/6 font-medium text-white">{{ __('Name') }}</label>
+                                <div class="mt-2">
+                                    <input wire:model="name" id="name" type="text" required autofocus autocomplete="name"
+                                        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                                </div>
+                                @error('name')
+                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                @if ($this->hasUnverifiedEmail)
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
+                            <div class="sm:col-span-4">
+                                <label for="email" class="block text-sm/6 font-medium text-white">{{ __('Email') }}</label>
+                                <div class="mt-2">
+                                    <input wire:model="email" id="email" type="email" required autocomplete="email"
+                                        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+                                </div>
+                                @error('email')
+                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                @enderror
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
+                                @if ($this->hasUnverifiedEmail)
+                                    <p class="mt-3 text-sm/6 text-gray-400">
+                                        {{ __('Your email address is unverified.') }}
 
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
+                                        <button type="button" wire:click.prevent="resendVerificationNotification" class="font-semibold text-indigo-400 hover:text-indigo-300">
+                                            {{ __('Click here to re-send the verification email.') }}
+                                        </button>
+                                    </p>
+
+                                    @if (session('status') === 'verification-link-sent')
+                                        <p class="mt-2 text-sm/6 font-medium text-green-400">
+                                            {{ __('A new verification link has been sent to your email address.') }}
+                                        </p>
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                @endif
+
+                    <div class="flex items-center justify-end gap-x-6 border-t border-white/10 px-4 py-4 sm:px-8">
+                        <x-action-message class="me-3 text-sm/6 text-gray-400" on="profile-updated">
+                            {{ __('Saved.') }}
+                        </x-action-message>
+
+                        <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                            {{ __('Save') }}
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
-                </div>
+            @if ($this->telegramConfigured)
+                <div class="grid grid-cols-1 gap-x-8 gap-y-8 py-10 lg:grid-cols-3">
+                    <div class="px-4 sm:px-0">
+                        <h2 class="text-base/7 font-semibold text-white">{{ __('SOS Alerts via Telegram') }}</h2>
+                        <p class="mt-1 text-sm/6 text-gray-400">{{ __('Link your Telegram account to receive instant SOS alert notifications — free, with no per-message cost.') }}</p>
+                    </div>
 
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
-                </x-action-message>
-            </div>
-        </form>
+                    <div class="bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10 sm:rounded-xl lg:col-span-2">
+                        <div class="px-4 py-6 sm:p-8">
+                            @if ($telegramLinked)
+                                <div class="flex items-center gap-3">
+                                    <flux:badge color="green">{{ __('Linked') }}</flux:badge>
+                                    <button type="button" wire:click="unlinkTelegram" class="text-sm/6 font-semibold text-white hover:text-gray-300">
+                                        {{ __('Unlink') }}
+                                    </button>
+                                </div>
+                            @else
+                                <div class="space-y-3">
+                                    <button type="button" wire:click="generateTelegramLinkToken"
+                                        class="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white ring-1 ring-inset ring-white/5 hover:bg-white/20">
+                                        {{ __('Generate linking code') }}
+                                    </button>
 
-        <div class="mt-6 border-t border-zinc-800/10 pt-6 dark:border-white/10">
-            <flux:heading>{{ __('SOS Alerts via Telegram') }}</flux:heading>
-            <flux:text class="mt-1">{{ __('Link your Telegram account to receive instant SOS alert notifications — free, with no per-message cost.') }}</flux:text>
-
-            @if ($telegramLinked)
-                <div class="mt-4 flex items-center gap-3">
-                    <flux:badge color="green">{{ __('Linked') }}</flux:badge>
-                    <flux:button wire:click="unlinkTelegram" variant="ghost" size="sm">{{ __('Unlink') }}</flux:button>
-                </div>
-            @else
-                <div class="mt-4 space-y-3">
-                    <flux:button wire:click="generateTelegramLinkToken" size="sm">
-                        {{ __('Generate linking code') }}
-                    </flux:button>
-
-                    @if ($telegramLinkToken)
-                        <flux:text>
-                            {{ __('Open Telegram and message') }}
-                            @if ($this->telegramBotUsername)
-                                <flux:link href="https://t.me/{{ $this->telegramBotUsername }}?start={{ $telegramLinkToken }}" target="_blank">
-                                    &commat;{{ $this->telegramBotUsername }}
-                                </flux:link>
+                                    @if ($telegramLinkToken)
+                                        <p class="text-sm/6 text-gray-400">
+                                            {{ __('Open Telegram and message') }}
+                                            @if ($this->telegramBotUsername)
+                                                <flux:link href="https://t.me/{{ $this->telegramBotUsername }}?start={{ $telegramLinkToken }}" target="_blank">
+                                                    &commat;{{ $this->telegramBotUsername }}
+                                                </flux:link>
+                                            @endif
+                                            {{ __('with this code:') }} <span class="font-mono font-semibold text-white">{{ $telegramLinkToken }}</span>
+                                        </p>
+                                    @endif
+                                </div>
                             @endif
-                            {{ __('with this code:') }} <span class="font-mono font-semibold">{{ $telegramLinkToken }}</span>
-                        </flux:text>
-                    @endif
+                        </div>
+                    </div>
                 </div>
             @endif
-        </div>
 
-        @if ($this->showDeleteUser)
-            <livewire:settings.delete-user-form />
-        @endif
+
+            @if ($this->showDeleteUser)
+                <livewire:settings.delete-user-form />
+            @endif
+        </div>
     </x-settings.layout>
 </section>
+

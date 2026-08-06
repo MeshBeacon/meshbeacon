@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Concerns\ProfileValidationRules;
+use App\Services\TelegramService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -103,6 +104,12 @@ class Profile extends Component
     public function telegramBotUsername(): string
     {
         return config('services.telegram.bot_username', '');
+    }
+
+    #[Computed]
+    public function telegramConfigured(): bool
+    {
+        return app(TelegramService::class)->isConfigured();
     }
 
     #[Computed]

@@ -5,6 +5,13 @@ COPY . /var/www/html
 VOLUME /var/www/html/storage
 WORKDIR /var/www/html
 
-RUN ln -s ../vendor/livewire/livewire/dist public/livewire
+# Nginx's generated config serves *.js/*.css as static files with no
+# fallback to PHP. Symlink Livewire's and Flux's dynamically-routed
+# scripts to real static paths so they're served directly instead of
+# 404ing (mirrors the same workaround in Dockerfile.fpm).
+RUN ln -s ../vendor/livewire/livewire/dist public/livewire && \
+    mkdir -p public/flux && \
+    ln -s ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js && \
+    ln -s ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js
 
 EXPOSE 80

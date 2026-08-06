@@ -144,7 +144,10 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Public self-registration is intentionally disabled: this is an
+        // internal emergency-dispatch tool, not a public sign-up product.
+        // New accounts are provisioned by an admin via Settings > Manage Users.
+        // Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>OpenDMS After-Action Report &mdash; {{ $from->toDateString() }} to {{ $to->toDateString() }}</title>
+  <title>{{ __('OpenDMS After-Action Report') }} &mdash; {{ $from->toDateString() }} to {{ $to->toDateString() }}</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 2rem; }
     h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
@@ -24,32 +24,32 @@
 </head>
 <body>
   <div class="no-print">
-    <button onclick="window.print()">Print / Save as PDF</button>
+    <button onclick="window.print()">{{ __('Print / Save as PDF') }}</button>
   </div>
 
-  <h1>OpenDMS After-Action Report</h1>
-  <p class="subtitle">Operational period: {{ $from->toFormattedDateString() }} &mdash; {{ $to->toFormattedDateString() }}</p>
+  <h1>{{ __('OpenDMS After-Action Report') }}</h1>
+  <p class="subtitle">{{ __('Operational period:') }} {{ $from->toFormattedDateString() }} &mdash; {{ $to->toFormattedDateString() }}</p>
 
-  <h2>Message &amp; Relay Summary</h2>
+  <h2>{{ __('Message & Relay Summary') }}</h2>
   <dl class="stats">
-    <div class="stat"><dt>Total Messages</dt><dd>{{ $summary['message_volume']['total'] }}</dd></div>
-    <div class="stat"><dt>Relay Reliability</dt><dd>{{ $summary['hop_distribution']['relay_reliability_pct'] }}%</dd></div>
-    <div class="stat"><dt>Avg. Hops per Message</dt><dd>{{ $summary['hop_distribution']['avg_hops'] }}</dd></div>
-    <div class="stat"><dt>Relayed Messages</dt><dd>{{ $summary['hop_distribution']['relayed_messages'] }}</dd></div>
+    <div class="stat"><dt>{{ __('Total Messages') }}</dt><dd>{{ $summary['message_volume']['total'] }}</dd></div>
+    <div class="stat"><dt>{{ __('Relay Reliability') }}</dt><dd>{{ $summary['hop_distribution']['relay_reliability_pct'] }}%</dd></div>
+    <div class="stat"><dt>{{ __('Avg. Hops per Message') }}</dt><dd>{{ $summary['hop_distribution']['avg_hops'] }}</dd></div>
+    <div class="stat"><dt>{{ __('Relayed Messages') }}</dt><dd>{{ $summary['hop_distribution']['relayed_messages'] }}</dd></div>
   </dl>
 
-  <h2>SOS Response-Time Analytics</h2>
+  <h2>{{ __('SOS Response-Time Analytics') }}</h2>
   <dl class="stats">
-    <div class="stat"><dt>Total Incidents</dt><dd>{{ $summary['sos_analytics']['total_incidents'] }}</dd></div>
-    <div class="stat"><dt>Open / Resolved</dt><dd>{{ $summary['sos_analytics']['open_incidents'] }} / {{ $summary['sos_analytics']['resolved_incidents'] }}</dd></div>
-    <div class="stat"><dt>Avg. Time to Acknowledge</dt><dd>{{ $summary['sos_analytics']['avg_ack_seconds'] !== null ? gmdate('H:i:s', $summary['sos_analytics']['avg_ack_seconds']) : '&mdash;' }}</dd></div>
-    <div class="stat"><dt>Avg. Time to Resolve</dt><dd>{{ $summary['sos_analytics']['avg_resolve_seconds'] !== null ? gmdate('H:i:s', $summary['sos_analytics']['avg_resolve_seconds']) : '&mdash;' }}</dd></div>
+    <div class="stat"><dt>{{ __('Total Incidents') }}</dt><dd>{{ $summary['sos_analytics']['total_incidents'] }}</dd></div>
+    <div class="stat"><dt>{{ __('Open / Resolved') }}</dt><dd>{{ $summary['sos_analytics']['open_incidents'] }} / {{ $summary['sos_analytics']['resolved_incidents'] }}</dd></div>
+    <div class="stat"><dt>{{ __('Avg. Time to Acknowledge') }}</dt><dd>{{ $summary['sos_analytics']['avg_ack_seconds'] !== null ? gmdate('H:i:s', $summary['sos_analytics']['avg_ack_seconds']) : '&mdash;' }}</dd></div>
+    <div class="stat"><dt>{{ __('Avg. Time to Resolve') }}</dt><dd>{{ $summary['sos_analytics']['avg_resolve_seconds'] !== null ? gmdate('H:i:s', $summary['sos_analytics']['avg_resolve_seconds']) : '&mdash;' }}</dd></div>
   </dl>
 
-  <h2>Message Volume by Device</h2>
+  <h2>{{ __('Message Volume by Device') }}</h2>
   <table>
     <thead>
-      <tr><th>Duck ID</th><th>Type</th><th>Messages</th></tr>
+      <tr><th>{{ __('Duck ID') }}</th><th>{{ __('Type') }}</th><th>{{ __('Messages') }}</th></tr>
     </thead>
     <tbody>
       @forelse ($summary['message_volume']['by_duck'] as $duck)
@@ -59,15 +59,15 @@
         <td>{{ $duck['total'] }}</td>
       </tr>
       @empty
-      <tr><td colspan="3">No messages in this period.</td></tr>
+      <tr><td colspan="3">{{ __('No messages in this period.') }}</td></tr>
       @endforelse
     </tbody>
   </table>
 
-  <h2>Relay Hop Distribution</h2>
+  <h2>{{ __('Relay Hop Distribution') }}</h2>
   <table>
     <thead>
-      <tr><th>Hops</th><th>Messages</th></tr>
+      <tr><th>{{ __('Hops') }}</th><th>{{ __('Messages') }}</th></tr>
     </thead>
     <tbody>
       @forelse ($summary['hop_distribution']['labels'] as $i => $label)
@@ -76,16 +76,16 @@
         <td>{{ $summary['hop_distribution']['data'][$i] }}</td>
       </tr>
       @empty
-      <tr><td colspan="2">No relay data in this period.</td></tr>
+      <tr><td colspan="2">{{ __('No relay data in this period.') }}</td></tr>
       @endforelse
     </tbody>
   </table>
 
-  <h2>Incidents ({{ $incidents->count() }})</h2>
+  <h2>{{ __('Incidents') }} ({{ $incidents->count() }})</h2>
   <table>
     <thead>
       <tr>
-        <th>Duck</th><th>Status</th><th>Assigned</th><th>Created</th><th>Acknowledged</th><th>Resolved</th>
+        <th>{{ __('Duck') }}</th><th>{{ __('Status') }}</th><th>{{ __('Assigned') }}</th><th>{{ __('Created') }}</th><th>{{ __('Acknowledged') }}</th><th>{{ __('Resolved') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -99,7 +99,7 @@
         <td>{{ $log->resolved_at?->toDateTimeString() ?? '&mdash;' }}</td>
       </tr>
       @empty
-      <tr><td colspan="6">No incidents in this period.</td></tr>
+      <tr><td colspan="6">{{ __('No incidents in this period.') }}</td></tr>
       @endforelse
     </tbody>
   </table>

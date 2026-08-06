@@ -6,7 +6,12 @@ services:
     volumes:
       - .env:/var/www/.env
       - ./database:/var/www/database
-    command: php artisan migrate --no-interaction --force
+    # Seeds a default admin account on first run (idempotent - safe to
+    # re-run on every container start) so Settings > Manage Users is
+    # reachable even though public self-registration is disabled.
+    command: >
+      sh -c "php artisan migrate --no-interaction --force &&
+      php artisan db:seed --no-interaction --force"
 
   permissions:
     image: docker.io/muhammadn/opendms:1.0.3

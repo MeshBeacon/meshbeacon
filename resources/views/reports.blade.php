@@ -8,21 +8,21 @@
       class="rounded-md bg-white/5 px-3 py-1.5 text-sm text-white outline outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
     <button id="report-apply-btn" type="button"
       class="rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
-      Apply
+      {{ __('Apply') }}
     </button>
     <a id="report-export-csv" href="{{ route('reports.export', ['from' => $from, 'to' => $to]) }}"
       class="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M8 1a.75.75 0 0 1 .75.75v6.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V1.75A.75.75 0 0 1 8 1ZM3.5 12.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
       </svg>
-      CSV
+      {{ __('CSV') }}
     </a>
     <a id="report-export-print" href="{{ route('reports.print', ['from' => $from, 'to' => $to]) }}" target="_blank"
       class="inline-flex items-center gap-1.5 rounded-md bg-yellow-500 px-3 py-1.5 text-sm font-semibold text-gray-900 hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M5 2.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2.5H5V2.5ZM4 6a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h1v1.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V12h1a1 1 0 0 0 1-1V8a2 2 0 0 0-2-2H4Zm2 6v-1h4v1H6Z" />
       </svg>
-      Print / PDF
+      {{ __('Print / PDF') }}
     </a>
   </div>
 @endsection
@@ -31,44 +31,44 @@
 
   {{-- Summary stat cards --}}
   <div>
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-white mb-3">Message &amp; Relay Summary</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-white mb-3">{{ __('Message & Relay Summary') }}</h2>
     <dl class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" id="report-message-stats">
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Total Messages</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Total Messages') }}</dt>
         <dd id="stat-total-messages" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Relay Reliability</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Relay Reliability') }}</dt>
         <dd id="stat-relay-reliability" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Avg. Hops per Message</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Avg. Hops per Message') }}</dt>
         <dd id="stat-avg-hops" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Relayed Messages</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Relayed Messages') }}</dt>
         <dd id="stat-relayed-messages" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
     </dl>
   </div>
 
   <div>
-    <h2 class="text-sm font-semibold uppercase tracking-wide text-white mb-3">SOS Response-Time Analytics</h2>
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-white mb-3">{{ __('SOS Response-Time Analytics') }}</h2>
     <dl class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" id="report-sos-stats">
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Total Incidents</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Total Incidents') }}</dt>
         <dd id="stat-total-incidents" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Open / Resolved</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Open / Resolved') }}</dt>
         <dd id="stat-open-resolved" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Avg. Time to Acknowledge</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Avg. Time to Acknowledge') }}</dt>
         <dd id="stat-avg-ack" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
       <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-        <dt class="truncate text-sm font-medium text-gray-400">Avg. Time to Resolve</dt>
+        <dt class="truncate text-sm font-medium text-gray-400">{{ __('Avg. Time to Resolve') }}</dt>
         <dd id="stat-avg-resolve" class="mt-1 text-3xl font-semibold tracking-tight text-white">&mdash;</dd>
       </div>
     </dl>
@@ -77,21 +77,21 @@
   {{-- Charts --}}
   <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
     <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Message Volume by Device</h3>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">{{ __('Message Volume by Device') }}</h3>
       <div id="chart-message-volume" class="h-64"></div>
     </div>
     <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Relay Hop Distribution</h3>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">{{ __('Relay Hop Distribution') }}</h3>
       <div id="chart-hop-distribution" class="h-64"></div>
     </div>
   </div>
 
   {{-- Message volume by device type --}}
   <div class="overflow-hidden rounded-lg bg-gray-800/75 px-4 py-5 shadow ring-1 ring-inset ring-white/10 sm:p-6">
-    <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">Message Volume by Device Type</h3>
+    <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-3">{{ __('Message Volume by Device Type') }}</h3>
     <dl id="report-device-type-stats" class="grid grid-cols-1 gap-4 sm:grid-cols-3 text-sm text-gray-300">
       <div class="flex items-center justify-between rounded-md bg-white/5 px-4 py-3">
-        <dt>No data</dt>
+        <dt>{{ __('No data') }}</dt>
       </div>
     </dl>
   </div>
@@ -99,7 +99,7 @@
   {{-- Incidents table --}}
   <div>
     <div class="flex items-center justify-between mb-3">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">Incidents in Period</h2>
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('Incidents in Period') }}</h2>
       <span id="report-incidents-count" class="text-sm text-gray-400"></span>
     </div>
     <div class="relative mb-3 max-w-sm">
@@ -108,25 +108,25 @@
           <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
         </svg>
       </div>
-      <input id="report-incidents-search" type="text" placeholder="Search duck, notes, assignee…"
+      <input id="report-incidents-search" type="text" placeholder="{{ __('Search duck, notes, assignee…') }}"
         class="w-full rounded-md min-w-0 bg-white/5 pl-9 pr-3 py-1.5 text-sm text-white placeholder:text-gray-500 outline outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
     </div>
     <div class="overflow-x-auto rounded-lg ring-1 ring-white/10">
       <table class="min-w-full divide-y divide-white/10">
         <thead class="bg-gray-800/75">
           <tr>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Duck</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Status</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Assigned</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Notes</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Created</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Ack Time</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">Resolve Time</th>
-            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-400">Export</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Duck') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Status') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Assigned') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Notes') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Created') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Ack Time') }}</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-400">{{ __('Resolve Time') }}</th>
+            <th class="px-3 py-2 text-right text-xs font-semibold text-gray-400">{{ __('Export') }}</th>
           </tr>
         </thead>
         <tbody id="report-incidents-body" class="divide-y divide-white/5 bg-gray-800/40">
-          <tr><td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">Loading…</td></tr>
+          <tr><td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">{{ __('Loading…') }}</td></tr>
         </tbody>
       </table>
     </div>

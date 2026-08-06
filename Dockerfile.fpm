@@ -8,7 +8,14 @@ VOLUME /var/www/html/storage
 # Now we set root / at /var/www/html
 WORKDIR /var/www/html
 # Run command at WORKDIR
-RUN ln -s ../vendor/livewire/livewire/dist public/livewire
+# Nginx's generated config serves *.js/*.css as static files with no
+# fallback to PHP, so Flux's dynamically-routed script (normally served
+# via the /flux/flux.js Laravel route) 404s in production. Symlink it to
+# a real static path (nginx's own image has the equivalent symlinks for
+# both Livewire and Flux, see Dockerfile.nginx).
+RUN mkdir -p public/flux && \
+    ln -s ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js && \
+    ln -s ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js
 # Build assets
 #RUN apt-get update
 #RUN apt-get install -y nodejs
