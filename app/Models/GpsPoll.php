@@ -7,7 +7,7 @@ use Illuminate\Support\Carbon;
 
 class GpsPoll extends Model
 {
-    protected $fillable = ['duck_id', 'enabled', 'next_run_at'];
+    protected $fillable = ['duck_id', 'enabled', 'interval_minutes', 'next_run_at'];
 
     protected $casts = [
         'enabled'    => 'boolean',

@@ -28,18 +28,40 @@
                   <a href="/dashboard" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Dashboard</a>
                   <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
                   <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
+                  <a href="/reports" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+                  <a href="/messages" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Messages</a>
                   @endif
                   @if(request()->is('status'))
 
                   <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
                   <a href="/status" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Status</a>
                   <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
+                  <a href="/reports" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+                  <a href="/messages" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Messages</a>
                   @endif
                   @if(request()->is('gps'))
 
                   <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
                   <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
                   <a href="/gps" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Tracking</a>
+                  <a href="/reports" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+                  <a href="/messages" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Messages</a>
+                  @endif
+                  @if(request()->is('reports'))
+
+                  <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+                  <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
+                  <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
+                  <a href="/reports" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Reports</a>
+                  <a href="/messages" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Messages</a>
+                  @endif
+                  @if(request()->is('messages'))
+
+                  <a href="/dashboard" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Dashboard</a>
+                  <a href="/status" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Status</a>
+                  <a href="/gps" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Tracking</a>
+                  <a href="/reports" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+                  <a href="/messages" aria-current="page" class="rounded-md bg-gray-950/50 px-3 py-2 text-sm font-medium text-white">Messages</a>
                   @endif
                 </div>
               </div>
@@ -99,7 +121,7 @@
           <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Team</a>
           <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Projects</a>
           <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Calendar</a>
-          <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
+          <a href="/reports" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-white/5 hover:text-white">Reports</a>
         </div>
         <div class="border-t border-white/10 pb-3 pt-4">
           <div class="flex items-center px-5">
@@ -145,6 +167,18 @@
         @if(request()->is('gps'))
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold tracking-tight text-white">Tracking</h1>
+          @yield('page-actions')
+        </div>
+        @endif
+        @if(request()->is('reports'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-white">Reports</h1>
+          @yield('page-actions')
+        </div>
+        @endif
+        @if(request()->is('messages'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-white">Messages</h1>
           @yield('page-actions')
         </div>
         @endif

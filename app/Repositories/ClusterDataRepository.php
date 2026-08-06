@@ -232,4 +232,57 @@ class ClusterDataRepository
             ->where('topic', '!=', 'gps')
             ->get($columns);
     }
+
+    /**
+     * Last $limit GPS-topic records for a single duck, oldest first —
+     * used to build the history/replay track and battery trend.
+     */
+    public function getGpsHistoryForDuck(string $duckId, int $limit = 50): Collection
+    {
+        return ClusterData::where('duck_id', $duckId)
+            ->where('topic', 'gps')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->sortBy('id')
+            ->values();
+    }
+
+    /**
+     * Message counts grouped by duck_id / duck_type / topic within a date range.
+     * Used for the reporting page's "message volume by device/type" breakdown.
+     */
+    public function getMessageVolumeByDuck(CarbonInterface $from, CarbonInterface $to): Collection
+    {
+        return ClusterData::selectRaw('duck_id, duck_type, topic, COUNT(*) as count')
+            ->whereBetween('created_at', [$from, $to])
+            ->groupBy('duck_id', 'duck_type', 'topic')
+            ->orderBy('duck_id')
+            ->get();
+    }
+
+    /**
+     * Hop-count histogram within a date range — used for relay reliability
+     * reporting (proportion of messages that required relaying vs direct).
+     */
+    public function getHopDistribution(CarbonInterface $from, CarbonInterface $to): Collection
+    {
+        return ClusterData::selectRaw('hops, COUNT(*) as count')
+            ->whereBetween('created_at', [$from, $to])
+            ->whereNotNull('hops')
+            ->groupBy('hops')
+            ->orderBy('hops')
+            ->get();
+    }
+
+    /**
+     * All cluster_data rows sharing a message_id — the full relay/timeline
+     * trail for a single incident, oldest first.
+     */
+    public function getByMessageId(string $messageId): Collection
+    {
+        return ClusterData::where('message_id', $messageId)
+            ->orderBy('id')
+            ->get();
+    }
 }

@@ -83,17 +83,39 @@
       <span class="text-sm font-semibold text-white">{{ $record->duck_id }}</span>
       <span class="{{ $badgeClass }}" data-gps-badge="{{ $record->duck_id }}">{{ $badgeLabel }}</span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <button type="button"
-        class="poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors {{ $poll?->enabled ? 'bg-cyan-500/20 text-cyan-400 ring-cyan-500/30' : 'bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10' }}"
+        class="poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors {{ $poll?->enabled ? 'bg-cyan-500/20 text-cyan-400 ring-cyan-500/30' : 'bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10' }}"
         data-duck-id="{{ $record->duck_id }}"
-        data-poll-enabled="{{ $poll?->enabled ? '1' : '0' }}">
+        data-poll-enabled="{{ $poll?->enabled ? '1' : '0' }}"
+        data-poll-interval="{{ $poll?->interval_minutes ?? 1 }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">
           <path fill-rule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clip-rule="evenodd"/>
         </svg>
-        {{ $poll?->enabled ? 'Polling · 1min' : 'Auto-poll' }}
+        {{ $poll?->enabled ? 'Polling · ' . ($poll?->interval_minutes ?? 1) . 'min' : 'Auto-poll' }}
       </button>
-      <span class="text-xs text-gray-500 {{ $poll?->enabled ? '' : 'hidden' }}"
+      <el-select name="poll-interval-{{ $record->duck_id }}" value="{{ $poll?->interval_minutes ?? 1 }}"
+        class="poll-interval-select block w-16 shrink-0" data-duck-id="{{ $record->duck_id }}">
+        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-400 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">
+          <el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">{{ $poll?->interval_minutes ?? 1 }}min</el-selectedcontent>
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400">
+            <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+          </svg>
+        </button>
+        <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
+          @foreach ([1, 5, 15, 30, 60] as $mins)
+          <el-option value="{{ $mins }}" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+            <span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">{{ $mins }}min</span>
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">
+                <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
+              </svg>
+            </span>
+          </el-option>
+          @endforeach
+        </el-options>
+      </el-select>
+      <span class="basis-full text-xs text-gray-500 sm:basis-auto {{ $poll?->enabled ? '' : 'hidden' }}"
             data-poll-next="{{ $record->duck_id }}">{{ ($poll?->enabled && $poll?->next_run_at) ? 'Requesting in ' . max(0, (int) now()->diffInSeconds($poll->next_run_at)) . ' secs' : '' }}</span>
     </div>
   </div>
@@ -251,19 +273,29 @@
   </div>
 
   <!-- Card footer: timestamp + request GPS button -->
-  <div class="px-4 py-3 sm:px-6 flex items-center justify-between">
+  <div class="px-4 py-3 sm:px-6 flex flex-col gap-2">
     <div class="flex flex-col gap-0.5">
       <span class="text-sm text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
       <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->format('j M Y, H:i') }}</span>
     </div>
-    <button type="button"
-      class="gps-request-btn inline-flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"
-      data-duck-id="{{ $record->duck_id }}">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
-        <path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
-      </svg>
-      Request GPS
-    </button>
+    <div class="flex items-center gap-1.5">
+      <button type="button"
+        class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"
+        data-duck-id="{{ $record->duck_id }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
+          <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 4.95 11.95.75.75 0 0 0-1.06-1.06A5.5 5.5 0 1 1 13.5 8a.75.75 0 0 0 1.5 0A7 7 0 0 0 8 1Zm0 3a.75.75 0 0 1 .75.75v3.5l2.22 1.28a.75.75 0 0 1-.75 1.3l-2.6-1.5A.75.75 0 0 1 7.25 9V4.75A.75.75 0 0 1 8 4Z" clip-rule="evenodd" />
+        </svg>
+        History
+      </button>
+      <button type="button"
+        class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"
+        data-duck-id="{{ $record->duck_id }}">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
+          <path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
+        </svg>
+        Request
+      </button>
+    </div>
   </div>
 </div>
 @empty
@@ -319,6 +351,43 @@
   </dialog>
 </el-dialog>
 
+<!-- GPS History / Replay Modal (shared across all cards) -->
+<el-dialog>
+  <dialog id="gps-history-dialog" aria-labelledby="gps-history-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+    <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
+      <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+        <h2 id="gps-history-title" class="text-base/7 font-semibold text-white">Location History &mdash; <span id="gps-history-duck-id"></span></h2>
+        <p class="mt-1 text-sm/6 text-gray-400">Last 50 recorded fixes.</p>
+        <div id="gps-history-map" class="mt-4 h-72 w-full rounded-md bg-gray-900"></div>
+        <div class="mt-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Battery trend</h3>
+            <span id="gps-history-battery-caption" class="text-[11px] text-gray-500"></span>
+          </div>
+          <div id="gps-history-battery" class="mt-1 flex items-end gap-0.5 h-12"></div>
+          <div class="mt-1 flex items-center gap-3 text-[11px] text-gray-500">
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-green-500"></span>&ge;50%</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-yellow-500"></span>20&ndash;49%</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-red-500"></span>&lt;20%</span>
+            <span class="ml-auto italic">Oldest &rarr; newest, hover a bar for details</span>
+          </div>
+        </div>
+        <div id="gps-history-status" class="mt-2 text-xs text-gray-500"></div>
+        <div class="mt-4 flex justify-end">
+          <button type="button" command="close" commandfor="gps-history-dialog"
+            class="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20">
+            Close
+          </button>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -342,19 +411,39 @@
     return 'Requesting in ' + secs + ' secs';
   }
 
-  function pollToggleBtnHtml(duckId, enabled, nextAt) {
+  function pollToggleBtnHtml(duckId, enabled, nextAt, intervalMinutes) {
+    var interval = intervalMinutes || 1;
     var cls = enabled
-      ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-      : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
-    var label = enabled ? 'Polling \u00b7 1min' : 'Auto-poll';
+      ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
+      : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+    var label = enabled ? 'Polling \u00b7 ' + interval + 'min' : 'Auto-poll';
     var nextHtml = enabled && nextAt
-      ? '<span class="text-xs text-gray-500" data-poll-next="' + escHtml(duckId) + '">' + secsLabel(nextAt) + '</span>'
-      : '<span class="text-xs text-gray-500 hidden" data-poll-next="' + escHtml(duckId) + '"></span>';
-    return '<div class="flex items-center gap-2">' +
-      '<button type="button" class="' + cls + '" data-duck-id="' + escHtml(duckId) + '" data-poll-enabled="' + (enabled ? '1' : '0') + '">' +
+      ? '<span class="basis-full text-xs text-gray-500 sm:basis-auto" data-poll-next="' + escHtml(duckId) + '">' + secsLabel(nextAt) + '</span>'
+      : '<span class="basis-full text-xs text-gray-500 sm:basis-auto hidden" data-poll-next="' + escHtml(duckId) + '"></span>';
+    var options = [1, 5, 15, 30, 60].map(function (mins) {
+      return '<el-option value="' + mins + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
+        '<span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">' + mins + 'min</span>' +
+        '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
+          '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4"><path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
+        '</span>' +
+      '</el-option>';
+    }).join('');
+    var intervalSelectHtml =
+      '<el-select name="poll-interval-' + escHtml(duckId) + '" value="' + interval + '" class="poll-interval-select block w-16 shrink-0" data-duck-id="' + escHtml(duckId) + '">' +
+        '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-400 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">' +
+          '<el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">' + interval + 'min</el-selectedcontent>' +
+          '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
+        '</button>' +
+        '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
+          options +
+        '</el-options>' +
+      '</el-select>';
+    return '<div class="flex flex-wrap items-center gap-2">' +
+      '<button type="button" class="' + cls + '" data-duck-id="' + escHtml(duckId) + '" data-poll-enabled="' + (enabled ? '1' : '0') + '" data-poll-interval="' + interval + '">' +
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
         label +
       '</button>' +
+      intervalSelectHtml +
       nextHtml +
     '</div>';
   }
@@ -575,6 +664,9 @@
     var btn = e.target.closest('.poll-toggle-btn');
     if (!btn) return;
     var duckId = btn.getAttribute('data-duck-id');
+    var card = btn.closest('[data-duck-id]');
+    var intervalSelect = card ? card.querySelector('.poll-interval-select[data-duck-id="' + CSS.escape(duckId) + '"]') : null;
+    var intervalMinutes = intervalSelect ? parseInt(intervalSelect.value, 10) : (parseInt(btn.getAttribute('data-poll-interval'), 10) || 1);
     btn.disabled = true;
 
     fetch('/gps/poll/toggle', {
@@ -584,7 +676,7 @@
         'Accept': 'application/json',
         'X-CSRF-TOKEN': csrfToken,
       },
-      body: JSON.stringify({ duck_id: duckId }),
+      body: JSON.stringify({ duck_id: duckId, interval_minutes: intervalMinutes }),
     })
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (data) {
@@ -592,15 +684,16 @@
       if (!data) return;
       var enabled = data.enabled;
       var nextAt  = data.next_run_at;
+      var interval = data.interval_minutes || intervalMinutes;
 
       btn.setAttribute('data-poll-enabled', enabled ? '1' : '0');
+      btn.setAttribute('data-poll-interval', interval);
       btn.className = enabled
-        ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-        : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+        ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
+        : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
       btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
-        (enabled ? 'Polling \u00b7 1min' : 'Auto-poll');
+        (enabled ? 'Polling \u00b7 ' + interval + 'min' : 'Auto-poll');
 
-      var card = btn.closest('[data-duck-id]');
       if (card) {
         var nextEl = card.querySelector('[data-poll-next="' + duckId + '"]');
         if (nextEl) {
@@ -617,8 +710,128 @@
     .catch(function () { btn.disabled = false; });
   });
 
+  // ── Poll interval selector (per-card) — delegated ───────────────────────
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('.poll-interval-select');
+    if (!sel) return;
+    var duckId = sel.getAttribute('data-duck-id');
+    var intervalMinutes = parseInt(sel.value, 10);
+    sel.disabled = true;
+
+    fetch('/gps/poll/interval', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      body: JSON.stringify({ duck_id: duckId, interval_minutes: intervalMinutes }),
+    })
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (data) {
+      sel.disabled = false;
+      if (!data) return;
+      var card = sel.closest('[data-duck-id]');
+      if (!card) return;
+      var btn = card.querySelector('.poll-toggle-btn');
+      if (btn) {
+        btn.setAttribute('data-poll-interval', data.interval_minutes);
+        if (data.enabled) {
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
+            'Polling \u00b7 ' + data.interval_minutes + 'min';
+        }
+      }
+      var nextEl = card.querySelector('[data-poll-next="' + duckId + '"]');
+      if (nextEl && data.enabled && data.next_run_at) {
+        nextEl.textContent = secsLabel(data.next_run_at);
+        nextEl.classList.remove('hidden');
+      }
+    })
+    .catch(function () { sel.disabled = false; });
+  });
+
+  // ── GPS History / replay modal ──────────────────────────────────────────
+  var HISTORY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M8 1a7 7 0 1 0 4.95 11.95.75.75 0 0 0-1.06-1.06A5.5 5.5 0 1 1 13.5 8a.75.75 0 0 0 1.5 0A7 7 0 0 0 8 1Zm0 3a.75.75 0 0 1 .75.75v3.5l2.22 1.28a.75.75 0 0 1-.75 1.3l-2.6-1.5A.75.75 0 0 1 7.25 9V4.75A.75.75 0 0 1 8 4Z" clip-rule="evenodd" /></svg> History';
+  var historyMap = null;
+  var historyLayer = null;
+
+  function renderBatteryTrend(points) {
+    var container = document.getElementById('gps-history-battery');
+    var caption   = document.getElementById('gps-history-battery-caption');
+    container.innerHTML = '';
+    var withBatt = points.filter(function (p) { return p.batt !== null && p.batt !== undefined; });
+    if (!withBatt.length) {
+      container.innerHTML = '<span class="text-xs text-gray-600 italic">No battery data recorded.</span>';
+      caption.textContent = '';
+      return;
+    }
+    var first = withBatt[0].batt;
+    var last  = withBatt[withBatt.length - 1].batt;
+    var delta = last - first;
+    caption.textContent = first + '% \u2192 ' + last + '%' + (delta !== 0 ? ' (' + (delta > 0 ? '+' : '') + delta + '%)' : '');
+    withBatt.forEach(function (p) {
+      var pct = Math.max(0, Math.min(100, p.batt));
+      var bar = document.createElement('div');
+      bar.title = pct + '% \u00b7 ' + p.label;
+      bar.className = 'flex-1 rounded-sm ' + (pct < 20 ? 'bg-red-500' : pct < 50 ? 'bg-yellow-500' : 'bg-green-500');
+      bar.style.height = Math.max(4, (pct / 100) * 48) + 'px';
+      container.appendChild(bar);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.gps-history-btn');
+    if (!btn) return;
+    var duckId = btn.getAttribute('data-duck-id');
+    var statusEl = document.getElementById('gps-history-status');
+    document.getElementById('gps-history-duck-id').textContent = duckId;
+    statusEl.textContent = 'Loading\u2026';
+
+    var dialog = document.getElementById('gps-history-dialog');
+    if (dialog.showModal) dialog.showModal();
+
+    if (!historyMap) {
+      historyMap = L.map('gps-history-map');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(historyMap);
+    }
+    setTimeout(function () { historyMap.invalidateSize(); }, 50);
+
+    fetch('/gps/history/' + encodeURIComponent(duckId), { headers: { 'Accept': 'application/json' } })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (result) {
+        var points = (result && result.data) || [];
+        if (historyLayer) { historyMap.removeLayer(historyLayer); historyLayer = null; }
+        renderBatteryTrend(points);
+
+        if (!points.length) {
+          statusEl.textContent = 'No GPS history recorded for this duck yet.';
+          historyMap.setView([0, 0], 2);
+          return;
+        }
+
+        statusEl.textContent = points.length + ' fix' + (points.length === 1 ? '' : 'es') + ' plotted.';
+        var latlngs = points.map(function (p) { return [p.lat, p.lng]; });
+        var group = L.featureGroup();
+        L.polyline(latlngs, { color: '#facc15', weight: 3 }).addTo(group);
+        points.forEach(function (p, i) {
+          L.circleMarker([p.lat, p.lng], {
+            radius: i === points.length - 1 ? 6 : 4,
+            color: i === points.length - 1 ? '#22d3ee' : '#facc15',
+            fillOpacity: 0.8,
+          }).bindPopup(escHtml(p.label) + '<br>' + escHtml(p.source) + (p.batt !== null && p.batt !== undefined ? ' \u00b7 ' + p.batt + '%' : '')).addTo(group);
+        });
+        historyLayer = group.addTo(historyMap);
+        historyMap.fitBounds(group.getBounds().pad(0.15));
+      })
+      .catch(function () {
+        statusEl.textContent = 'Failed to load history.';
+      });
+  });
+
   // ── Request GPS (per-card buttons) — delegated so new cards work ────────
-  var GPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" /></svg> Request GPS';
+  var GPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" /></svg> Request';
 
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('.gps-request-btn');
@@ -661,21 +874,28 @@
           '<span class="text-sm font-semibold text-white">' + escHtml(duckId) + '</span>' +
           '<span class="' + badgeClass(badgeLbl) + '" data-gps-badge="' + escHtml(duckId) + '">' + escHtml(badgeLbl) + '</span>' +
         '</div>' +
-        pollToggleBtnHtml(duckId, false, null) +
+        pollToggleBtnHtml(duckId, false, null, rec.poll_interval_minutes || 1) +
       '</div>' +
       '<div class="px-4 py-3 sm:px-6 flex flex-col gap-1.5 grow" data-gps-body="' + escHtml(duckId) + '">' +
         buildGpsBody(rec) +
       '</div>' +
-      '<div class="px-4 py-3 sm:px-6 flex items-center justify-between">' +
+      '<div class="px-4 py-3 sm:px-6 flex flex-col gap-2">' +
         '<div class="flex flex-col gap-0.5">' +
           '<span class="text-sm text-white" data-gps-ts="' + escHtml(duckId) + '">' + escHtml(rec.created_at_for_humans) + '</span>' +
           '<span class="text-xs text-gray-500" data-gps-ts-abs="' + escHtml(duckId) + '">' + escHtml(rec.created_at_formatted) + '</span>' +
         '</div>' +
-        '<button type="button"' +
-          ' class="gps-request-btn inline-flex items-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
-          ' data-duck-id="' + escHtml(duckId) + '">' +
-          GPS_ICON_SVG +
-        '</button>' +
+        '<div class="flex items-center gap-1.5">' +
+          '<button type="button"' +
+            ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+            ' data-duck-id="' + escHtml(duckId) + '">' +
+            HISTORY_ICON_SVG +
+          '</button>' +
+          '<button type="button"' +
+            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+            ' data-duck-id="' + escHtml(duckId) + '">' +
+            GPS_ICON_SVG +
+          '</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }
@@ -730,13 +950,18 @@
             if (pollBtn && typeof rec.poll_enabled !== 'undefined') {
               var pollEnabled = !!rec.poll_enabled;
               var curEnabled  = pollBtn.getAttribute('data-poll-enabled') === '1';
-              if (pollEnabled !== curEnabled) {
+              var pollInterval = rec.poll_interval_minutes || 1;
+              var curInterval  = parseInt(pollBtn.getAttribute('data-poll-interval'), 10) || 1;
+              if (pollEnabled !== curEnabled || pollInterval !== curInterval) {
                 pollBtn.setAttribute('data-poll-enabled', pollEnabled ? '1' : '0');
+                pollBtn.setAttribute('data-poll-interval', pollInterval);
                 pollBtn.className = pollEnabled
-                  ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-                  : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+                  ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
+                  : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
                 pollBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
-                  (pollEnabled ? 'Polling \u00b7 1min' : 'Auto-poll');
+                  (pollEnabled ? 'Polling \u00b7 ' + pollInterval + 'min' : 'Auto-poll');
+                var intervalSelect = card.querySelector('.poll-interval-select[data-duck-id="' + CSS.escape(duckId) + '"]');
+                if (intervalSelect && document.activeElement !== intervalSelect) intervalSelect.value = pollInterval;
               }
               var nextEl = card.querySelector('[data-poll-next="' + duckId + '"]');
               if (nextEl) {

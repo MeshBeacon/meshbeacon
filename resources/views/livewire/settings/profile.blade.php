@@ -40,6 +40,36 @@
             </div>
         </form>
 
+        <div class="mt-6 border-t border-zinc-800/10 pt-6 dark:border-white/10">
+            <flux:heading>{{ __('SOS Alerts via Telegram') }}</flux:heading>
+            <flux:text class="mt-1">{{ __('Link your Telegram account to receive instant SOS alert notifications — free, with no per-message cost.') }}</flux:text>
+
+            @if ($telegramLinked)
+                <div class="mt-4 flex items-center gap-3">
+                    <flux:badge color="green">{{ __('Linked') }}</flux:badge>
+                    <flux:button wire:click="unlinkTelegram" variant="ghost" size="sm">{{ __('Unlink') }}</flux:button>
+                </div>
+            @else
+                <div class="mt-4 space-y-3">
+                    <flux:button wire:click="generateTelegramLinkToken" size="sm">
+                        {{ __('Generate linking code') }}
+                    </flux:button>
+
+                    @if ($telegramLinkToken)
+                        <flux:text>
+                            {{ __('Open Telegram and message') }}
+                            @if ($this->telegramBotUsername)
+                                <flux:link href="https://t.me/{{ $this->telegramBotUsername }}?start={{ $telegramLinkToken }}" target="_blank">
+                                    &commat;{{ $this->telegramBotUsername }}
+                                </flux:link>
+                            @endif
+                            {{ __('with this code:') }} <span class="font-mono font-semibold">{{ $telegramLinkToken }}</span>
+                        </flux:text>
+                    @endif
+                </div>
+            @endif
+        </div>
+
         @if ($this->showDeleteUser)
             <livewire:settings.delete-user-form />
         @endif

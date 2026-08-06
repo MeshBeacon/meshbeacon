@@ -29,7 +29,7 @@ $(document).ready(function () {
             processing: '<div class="dt-empty">Processing...</div>',
         },
         ajax: {
-            url: "/dashboard/json",
+            url: "/messages/json",
             dataSrc: "data",
         },
         drawCallback: function () {
@@ -252,10 +252,6 @@ $(document).ready(function () {
             ).show();
             tr.addClass("dt-map-shown");
         }
-    });
-
-    $("#custom-filter").on("keydown", function () {
-        table.ajax.reload();
     });
 
     // Link the custom input to the DataTables search functionality
@@ -564,6 +560,7 @@ $(document).ready(function () {
     // Shows the latest alert per duck from the past 24 h with the nearest
     // relay duck highlighted and a one-click GPS request button.
     var knownIncidentIds = null; // null = first load (don't alert on initial paint)
+    var lastIncidentsRaw = []; // cache of the last /dashboard/incidents payload, for client-side search filtering
 
     function playIncidentAlert() {
         try {
@@ -585,18 +582,67 @@ $(document).ready(function () {
         } catch (e) { /* AudioContext unavailable — fail silently */ }
     }
 
+    // Responders list (cached) for the incident assignment dropdown.
+    var incidentResponders = [];
+    function loadResponders() {
+        $.ajax({
+            url: "/dashboard/incidents/responders",
+            method: "GET",
+            dataType: "json",
+            success: function (data) { incidentResponders = data || []; }
+        });
+    }
+
+    function buildAssignSelect(inc) {
+        var checkIcon = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">' +
+            '<path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />' +
+            '</svg>';
+        function optionHtml(value, label) {
+            return '<el-option value="' + value + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
+                '<span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">' + escapeHtml(label) + '</span>' +
+                '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
+                checkIcon +
+                '</span>' +
+                '</el-option>';
+        }
+
+        var currentId    = inc.assigned_to ? String(inc.assigned_to) : '';
+        var currentLabel = 'Unassigned';
+        var optionsHtml  = optionHtml('', 'Unassigned');
+        incidentResponders.forEach(function (u) {
+            if (String(u.id) === currentId) currentLabel = u.name;
+            optionsHtml += optionHtml(u.id, u.name);
+        });
+
+        return '<el-select name="assign-' + escapeHtml(inc.message_id) + '" value="' + currentId + '" ' +
+            'class="inc-assign-select block w-28 shrink-0" data-msgid="' + escapeHtml(inc.message_id) + '">' +
+            '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-300 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">' +
+                '<el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">' + escapeHtml(currentLabel) + '</el-selectedcontent>' +
+                '<svg viewBox="0 0 16 16" fill="currentColor" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
+            '</button>' +
+            '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
+                optionsHtml +
+            '</el-options>' +
+        '</el-select>';
+    }
+
     function pollIncidents() {
+        // Don't repaint while the operator is actively editing a note — the
+        // regenerated HTML would otherwise clobber their in-progress text.
+        if (document.activeElement && document.activeElement.classList &&
+            document.activeElement.classList.contains('inc-notes-input')) {
+            return;
+        }
         $.ajax({
             url: "/dashboard/incidents",
             method: "GET",
             dataType: "json",
             success: function (data) {
-                var incidents = data.data || [];
-                var $list  = $("#incidents-list");
-                var $count = $("#incidents-count");
+                var incidentsAll = data.data || [];
+                lastIncidentsRaw = incidentsAll;
 
                 // Detect new incidents (skip on first load)
-                var currentIds = incidents.map(function (inc) { return inc.id; });
+                var currentIds = incidentsAll.map(function (inc) { return inc.id; });
                 if (knownIncidentIds !== null) {
                     var newIds = currentIds.filter(function (id) {
                         return knownIncidentIds.indexOf(id) === -1;
@@ -604,23 +650,62 @@ $(document).ready(function () {
                     if (newIds.length) {
                         playIncidentAlert();
                         newIds.forEach(function (id) {
-                            var ni = incidents.find(function (i) { return i.id === id; });
+                            var ni = incidentsAll.find(function (i) { return i.id === id; });
                             if (ni) firePushNotification('\uD83D\uDEA8 SOS from ' + ni.duck_id, ni.display_text || 'No message');
                         });
                     }
                 }
                 knownIncidentIds = currentIds;
 
-                if (incidents.length === 0) {
-                    $list.html('<p class="text-xs text-gray-500 italic">No active incidents in the past 24 hours.</p>');
-                    $count.addClass("hidden").text("");
-                    return;
-                }
+                renderIncidentsList();
+            },
+            error: function () {
+                // Silently fail — panel stays as-is until next poll
+            }
+        });
+    }
 
-                $count.text(incidents.length).removeClass("hidden");
+    // Combined keyword search across duck ID, message text, notes, and
+    // assigned responder name — one search box rather than separate
+    // per-field filters, since operators typically search for "everything
+    // about DUCK3" or "medevac" rather than a specific column.
+    function filterIncidents(incidents, query) {
+        if (!query) return incidents;
+        return incidents.filter(function (inc) {
+            var haystack = [inc.duck_id, inc.display_text, inc.incident_notes, inc.assigned_to_name]
+                .filter(Boolean).join(' ').toLowerCase();
+            return haystack.indexOf(query) !== -1;
+        });
+    }
 
-                var html = '<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">';
-                $.each(incidents, function (i, inc) {
+    // Renders the incidents panel from the last-fetched data, applying the
+    // current search filter. Called after every poll and whenever the
+    // search box changes — filtering is done client-side against the
+    // already-fetched data, so typing doesn't trigger extra network calls.
+    function renderIncidentsList() {
+        var $list  = $("#incidents-list");
+        var $count = $("#incidents-count");
+        var query  = ($("#incidents-search").val() || "").trim().toLowerCase();
+        var incidents = filterIncidents(lastIncidentsRaw, query);
+
+        if (lastIncidentsRaw.length === 0) {
+            $list.html('<p class="text-xs text-gray-500 italic">No active incidents in the past 24 hours.</p>');
+            $count.addClass("hidden").text("");
+            $list.data("last-html", null);
+            return;
+        }
+
+        if (incidents.length === 0) {
+            $list.html('<p class="text-xs text-gray-500 italic">No incidents match your search.</p>');
+            $count.text('0 of ' + lastIncidentsRaw.length).removeClass("hidden");
+            $list.data("last-html", null);
+            return;
+        }
+
+        $count.text(query ? incidents.length + ' of ' + lastIncidentsRaw.length : incidents.length).removeClass("hidden");
+
+        var html = '<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">';
+        $.each(incidents, function (i, inc) {
                     var isSosDev  = inc.sos_from_device;
                     var isSosMob  = inc.sos_from_mobile && !inc.sos_from_device;
                     var urgVal    = inc.urgency_value;
@@ -670,6 +755,15 @@ $(document).ready(function () {
                         'resolved':     'background:rgba(20,83,45,0.8);color:#86efac',
                     };
                     var statusBadge = '<span style="font-size:0.65rem;padding:1px 7px;border-radius:3px;font-weight:600;' + (statusStyleMap[incStatus] || statusStyleMap['open']) + '">' + incStatus.toUpperCase() + '</span>';
+
+                    // Retransmission indicator — shown when the duck has re-sent
+                    // its SOS more than once while this incident is still open
+                    // (may mean the ACK isn't reaching the device).
+                    var retransCount = inc.retransmission_count || 1;
+                    var retransBadge = retransCount > 1
+                        ? '<span title="' + retransCount + ' SOS transmissions received for this incident" ' +
+                          'style="font-size:0.65rem;padding:1px 7px;border-radius:3px;font-weight:600;background:rgba(255,255,255,0.1);color:#e5e7eb;">\u00d7' + retransCount + '</span>'
+                        : '';
 
                     // Actions row (ACK + lifecycle buttons)
                     var actionsHtml = '';
@@ -730,6 +824,22 @@ $(document).ready(function () {
                             'View on Map</a>';
                     }
 
+                    // Assignment + notes row (available regardless of status
+                    // so the incident stays auditable after resolution).
+                    var assignNotesHtml =
+                        '<div style="display:flex;flex-direction:column;gap:6px;padding:0.5rem 1rem 0.625rem;border-top:1px solid rgba(255,255,255,0.08);">' +
+                        '<div style="display:flex;align-items:center;gap:6px;">' +
+                        '<span style="font-size:0.65rem;color:#6b7280;white-space:nowrap;">Assigned to</span>' +
+                        buildAssignSelect(inc) +
+                        '</div>' +
+                        '<div style="display:flex;gap:6px;">' +
+                        '<input type="text" class="inc-notes-input" data-msgid="' + escapeHtml(inc.message_id) + '" value="' + escapeHtml(inc.incident_notes || '') + '" placeholder="Add a note\u2026" ' +
+                        'style="flex:1;min-width:0;font-size:0.7rem;background:rgba(255,255,255,0.06);color:#e5e7eb;border:none;border-radius:4px;padding:4px 8px;" />' +
+                        '<button class="inc-notes-save" data-msgid="' + escapeHtml(inc.message_id) + '" ' +
+                        'style="font-size:0.7rem;padding:4px 10px;border-radius:4px;background:rgba(255,255,255,0.1);color:#d1d5db;border:none;cursor:pointer;">Save</button>' +
+                        '</div>' +
+                        '</div>';
+
                     html +=
                         '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';display:flex;flex-direction:column;height:100%;">' +
                         // Header
@@ -738,6 +848,7 @@ $(document).ready(function () {
                         '<span style="font-size:0.875rem;font-weight:600;color:white;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
                         sosBadge +
                         statusBadge +
+                        retransBadge +
                         '</div>' +
                         // Body: message, map button, timestamp
                         '<div style="padding:0.75rem 1rem 1rem;display:flex;flex-direction:column;flex:1;justify-content:space-between;">' +
@@ -750,6 +861,7 @@ $(document).ready(function () {
                         // Relay footer
                         relayRow +
                         actionsHtml +
+                        assignNotesHtml +
                         '</div>';
                 });
 
@@ -760,11 +872,6 @@ $(document).ready(function () {
                     $list.html(html);
                     $list.data("last-html", html);
                 }
-            },
-            error: function () {
-                // Silently fail — panel stays as-is until next poll
-            }
-        });
     }
 
     // One-click ACK re-send from incidents panel
@@ -826,9 +933,96 @@ $(document).ready(function () {
         });
     });
 
+    // Assign an incident to a responder
+    $(document).on('change', '.inc-assign-select', function () {
+        var $sel   = $(this);
+        var msgId  = $sel.data('msgid');
+        var userId = $sel.val();
+        $sel.prop('disabled', true);
+        $.ajax({
+            type: 'PATCH',
+            url:  '/dashboard/incidents/' + encodeURIComponent(msgId) + '/assign',
+            data: { user_id: userId || null },
+            success: function () { pollIncidents(); },
+            error:   function () { $sel.prop('disabled', false); },
+        });
+    });
+
+    // Save a note on an incident
+    $(document).on('click', '.inc-notes-save', function () {
+        var $btn   = $(this);
+        var msgId  = $btn.data('msgid');
+        var $input = $btn.siblings('.inc-notes-input');
+        var notes  = $input.val();
+        var origText = $btn.text();
+        $btn.prop('disabled', true).text('Saving…');
+        $.ajax({
+            type: 'PATCH',
+            url:  '/dashboard/incidents/' + encodeURIComponent(msgId) + '/notes',
+            data: { notes: notes },
+            success: function () {
+                $btn.prop('disabled', false).text('Saved ✓');
+                setTimeout(function () { $btn.text(origText); }, 1500);
+            },
+            error: function () { $btn.prop('disabled', false).text('Failed'); },
+        });
+    });
+
+    // Acknowledge every open incident in one action
+    $(document).on('click', '#bulk-ack-btn', function () {
+        var $btn = $(this);
+        var origHtml = $btn.html();
+        $btn.prop('disabled', true).text('Acknowledging…');
+        $.ajax({
+            type: 'POST',
+            url:  '/dashboard/incidents/bulk-acknowledge',
+            success: function () {
+                $btn.prop('disabled', false).html(origHtml);
+                pollIncidents();
+            },
+            error: function () {
+                $btn.prop('disabled', false).html(origHtml);
+            },
+        });
+    });
+
+    // Combined keyword search box (filters already-cached data, no re-fetch)
+    $(document).on('input', '#incidents-search', function () {
+        renderIncidentsList();
+    });
+
     if ($("#incidents-list").length) {
+        loadResponders();
         pollIncidents();
         setInterval(pollIncidents, 30000);
+    }
+
+    // ── Incident response SLA stats ─────────────────────────────────────────────
+    function formatDuration(seconds) {
+        if (seconds === null || seconds === undefined) return '—';
+        if (seconds < 60) return Math.round(seconds) + 's';
+        var mins = seconds / 60;
+        if (mins < 60) return Math.round(mins) + 'm';
+        return (mins / 60).toFixed(1) + 'h';
+    }
+
+    function pollSlaStats() {
+        $.ajax({
+            url: '/dashboard/incidents/stats',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                $('#sla-avg-ack').text(formatDuration(data.avg_ack_seconds));
+                $('#sla-avg-resolve').text(formatDuration(data.avg_resolve_seconds));
+                $('#sla-open-resolved').text((data.open_incidents || 0) + ' / ' + (data.resolved_incidents || 0));
+            },
+            error: function () {}
+        });
+    }
+
+    if ($("#sla-stats").length) {
+        pollSlaStats();
+        setInterval(pollSlaStats, 60000);
     }
 
     // ── Duck health widget ─────────────────────────────────────────────────────

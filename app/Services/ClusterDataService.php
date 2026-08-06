@@ -375,4 +375,28 @@ class ClusterDataService
             ]];
         });
     }
+
+    /**
+     * GPS history/replay track for a single duck: oldest-first list of
+     * coordinates + battery readings, for drawing a polyline and a
+     * battery trend on the GPS tracking page.
+     *
+     * @return array<int, array>
+     */
+    public function getGpsHistory(string $duckId, int $limit = 50): array
+    {
+        return $this->repository->getGpsHistoryForDuck($duckId, $limit)
+            ->filter(fn (ClusterData $r) => $r->gps_lat !== null && $r->gps_lng !== null)
+            ->map(fn (ClusterData $r) => [
+                'lat'        => (float) $r->gps_lat,
+                'lng'        => (float) $r->gps_lng,
+                'batt'       => $r->gps_batt,
+                'spd'        => $r->gps_spd,
+                'source'     => $r->gps_from_phone ? 'Phone' : 'Satellite',
+                'created_at' => $r->created_at->toJSON(),
+                'label'      => $r->created_at->format('j M, H:i'),
+            ])
+            ->values()
+            ->toArray();
+    }
 }

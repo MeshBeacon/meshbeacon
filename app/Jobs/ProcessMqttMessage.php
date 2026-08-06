@@ -6,6 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\ClusterData;
 use App\Jobs\SendSosAck;
+use App\Jobs\SendTelegramAlert;
 use App\Jobs\SyncRecordToCloud;
 use App\Services\MqttService;
 use Illuminate\Support\Facades\Log;
@@ -99,6 +100,9 @@ class ProcessMqttMessage implements ShouldQueue
                     ->delay(now()->addSeconds($delaySec));
             }
             Log::info("ProcessMqttMessage: SOS ack queued (3 attempts) for {$record->duck_id}");
+
+            SendTelegramAlert::dispatch($record->duck_id, $record->display_text ?? '', $record->map_url);
+            Log::info("ProcessMqttMessage: Telegram alert queued for {$record->duck_id}");
         }
     }
 }

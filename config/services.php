@@ -54,4 +54,20 @@ return [
         'token' => env('CENTRAL_DMS_TOKEN', ''),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Telegram Bot (SOS alerting)
+    |--------------------------------------------------------------------------
+    |
+    | Free, low-friction alternative to WhatsApp/SMS for pushing SOS alerts
+    | to responders. Leave TELEGRAM_BOT_TOKEN empty to disable alerting
+    | entirely (SendTelegramAlert becomes a no-op).
+    |
+    */
+    'telegram' => [
+        'bot_token'      => env('TELEGRAM_BOT_TOKEN', ''),
+        'bot_username'   => env('TELEGRAM_BOT_USERNAME', ''),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET', ''),
+    ],
+
 ];

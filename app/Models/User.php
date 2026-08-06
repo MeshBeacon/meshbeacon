@@ -35,6 +35,7 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
+        'telegram_link_token',
     ];
 
     /**

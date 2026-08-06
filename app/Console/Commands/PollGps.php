@@ -24,7 +24,7 @@ class PollGps extends Command
                 topic:   234,
             );
 
-            $poll->next_run_at = now()->addMinutes(self::INTERVAL_MINUTES);
+            $poll->next_run_at = now()->addMinutes($poll->interval_minutes ?: self::INTERVAL_MINUTES);
             $poll->save();
 
             $this->line("GPS poll dispatched to {$poll->duck_id}. Next run: {$poll->next_run_at}");

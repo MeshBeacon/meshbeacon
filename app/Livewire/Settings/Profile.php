@@ -6,6 +6,7 @@ use App\Concerns\ProfileValidationRules;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -17,6 +18,10 @@ class Profile extends Component
 
     public string $email = '';
 
+    public bool $telegramLinked = false;
+
+    public string $telegramLinkToken = '';
+
     /**
      * Mount the component.
      */
@@ -24,6 +29,8 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->telegramLinked = (bool) Auth::user()->telegram_chat_id;
+        $this->telegramLinkToken = (string) (Auth::user()->telegram_link_token ?? '');
     }
 
     /**
@@ -62,6 +69,40 @@ class Profile extends Component
         $user->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
+    }
+
+    /**
+     * Generate a one-time code the user pastes/sends to the Telegram bot to
+     * prove ownership of their chat and link it to this account.
+     */
+    public function generateTelegramLinkToken(): void
+    {
+        $user  = Auth::user();
+        $token = Str::upper(Str::random(8));
+
+        $user->forceFill(['telegram_link_token' => $token])->save();
+
+        $this->telegramLinkToken = $token;
+    }
+
+    /**
+     * Unlink the currently-connected Telegram chat from this account.
+     */
+    public function unlinkTelegram(): void
+    {
+        Auth::user()->forceFill([
+            'telegram_chat_id'    => null,
+            'telegram_link_token' => null,
+        ])->save();
+
+        $this->telegramLinked = false;
+        $this->telegramLinkToken = '';
+    }
+
+    #[Computed]
+    public function telegramBotUsername(): string
+    {
+        return config('services.telegram.bot_username', '');
     }
 
     #[Computed]

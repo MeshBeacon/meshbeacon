@@ -82,6 +82,7 @@ class StatusController extends Controller
             'created_at_formatted' => $r->created_at->format('j M Y, H:i'),
             'poll_enabled'     => ($polls[$r->duck_id] ?? null)?->enabled ?? false,
             'poll_next_at'     => ($polls[$r->duck_id] ?? null)?->next_run_at?->toJSON() ?? null,
+            'poll_interval_minutes' => ($polls[$r->duck_id] ?? null)?->interval_minutes ?? 1,
         ]);
         return response()->json($data);
     }
@@ -128,17 +129,24 @@ class StatusController extends Controller
 
     public function toggleGpsPoll(Request $request): JsonResponse
     {
-        $duckId = $request->validate(['duck_id' => 'required|string'])['duck_id'];
+        $data = $request->validate([
+            'duck_id'          => 'required|string',
+            'interval_minutes' => 'nullable|integer|min:1|max:1440',
+        ]);
 
         $poll = GpsPoll::firstOrCreate(
-            ['duck_id' => $duckId],
-            ['enabled' => false, 'next_run_at' => null]
+            ['duck_id' => $data['duck_id']],
+            ['enabled' => false, 'interval_minutes' => 1, 'next_run_at' => null]
         );
+
+        if (array_key_exists('interval_minutes', $data) && $data['interval_minutes']) {
+            $poll->interval_minutes = $data['interval_minutes'];
+        }
 
         $poll->enabled = ! $poll->enabled;
 
         if ($poll->enabled) {
-            $poll->next_run_at = Carbon::now()->addMinutes(\App\Console\Commands\PollGps::INTERVAL_MINUTES);
+            $poll->next_run_at = Carbon::now()->addMinutes($poll->interval_minutes);
         } else {
             $poll->next_run_at = null;
         }
@@ -146,9 +154,51 @@ class StatusController extends Controller
         $poll->save();
 
         return response()->json([
-            'enabled'     => $poll->enabled,
-            'next_run_at' => $poll->next_run_at?->toJSON() ?? null,
+            'enabled'          => $poll->enabled,
+            'interval_minutes' => $poll->interval_minutes,
+            'next_run_at'      => $poll->next_run_at?->toJSON() ?? null,
         ]);
+    }
+
+    /**
+     * Set the auto-poll interval for a duck without toggling enabled state.
+     */
+    public function setGpsPollInterval(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'duck_id'          => 'required|string',
+            'interval_minutes' => 'required|integer|min:1|max:1440',
+        ]);
+
+        $poll = GpsPoll::firstOrCreate(
+            ['duck_id' => $data['duck_id']],
+            ['enabled' => false, 'interval_minutes' => 1, 'next_run_at' => null]
+        );
+
+        $poll->interval_minutes = $data['interval_minutes'];
+
+        if ($poll->enabled) {
+            $poll->next_run_at = Carbon::now()->addMinutes($poll->interval_minutes);
+        }
+
+        $poll->save();
+
+        return response()->json([
+            'enabled'          => $poll->enabled,
+            'interval_minutes' => $poll->interval_minutes,
+            'next_run_at'      => $poll->next_run_at?->toJSON() ?? null,
+        ]);
+    }
+
+    /**
+     * Last $limit GPS-topic points for a single duck, oldest first, for the
+     * history/replay map and battery trend on the GPS tracking page.
+     */
+    public function gpsHistory(string $duckId): JsonResponse
+    {
+        $points = $this->clusterDataService->getGpsHistory($duckId, 50);
+
+        return response()->json(['data' => $points]);
     }
 
     public function message(Request $request): JsonResponse
