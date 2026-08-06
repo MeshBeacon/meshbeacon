@@ -7,6 +7,7 @@ use App\Http\Controllers\MessageLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TelegramWebhookController;
+use App\Http\Middleware\PreventDashboardWritesWhenReadonly;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,14 +29,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/map-pins', [DashboardController::class, 'mapPins']);
     Route::get('/dashboard/duck-health', [DashboardController::class, 'duckHealth']);
     Route::get('/dashboard/topology', [DashboardController::class, 'topology']);
-    Route::post('/dashboard/sos-ack', [DashboardController::class, 'sosAck']);
     Route::get('/dashboard/incidents/stats', [DashboardController::class, 'incidentStats']);
     Route::get('/dashboard/incidents/responders', [DashboardController::class, 'responders']);
-    Route::post('/dashboard/incidents/bulk-acknowledge', [DashboardController::class, 'bulkAcknowledgeIncidents']);
-    Route::patch('/dashboard/incidents/{messageId}/status', [DashboardController::class, 'updateIncidentStatus']);
-    Route::patch('/dashboard/incidents/{messageId}/notes', [DashboardController::class, 'updateIncidentNotes']);
-    Route::patch('/dashboard/incidents/{messageId}/assign', [DashboardController::class, 'assignIncident']);
     Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
+
+    // Incident-dispatch write actions: blocked on a read-only (central
+    // aggregator) instance — see docs/HYBRID_DEPLOYMENT.md.
+    Route::middleware(PreventDashboardWritesWhenReadonly::class)->group(function () {
+        Route::post('/dashboard/sos-ack', [DashboardController::class, 'sosAck']);
+        Route::post('/dashboard/incidents/bulk-acknowledge', [DashboardController::class, 'bulkAcknowledgeIncidents']);
+        Route::patch('/dashboard/incidents/{messageId}/status', [DashboardController::class, 'updateIncidentStatus']);
+        Route::patch('/dashboard/incidents/{messageId}/notes', [DashboardController::class, 'updateIncidentNotes']);
+        Route::patch('/dashboard/incidents/{messageId}/assign', [DashboardController::class, 'assignIncident']);
+    });
     Route::get('/status', [StatusController::class, 'index']);
     Route::post('/status/send', [StatusController::class, 'message']);
     Route::post('/status/broadcast', [StatusController::class, 'broadcast']);

@@ -175,9 +175,7 @@
       @endphp
       <div class="flex items-center gap-1.5">
         <a href="/dashboard#incidents" data-incident-badge-duck="{{ $mamaduck->duck_id }}"
-          class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">
-          {!! $incLabel !!}
-        </a>
+          class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">{!! $incLabel !!}</a>
         <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Online') }}</button>
       </div>
     </div>
@@ -546,6 +544,7 @@
     var inc        = document.getElementById('incident-filter').value;
     var onlineOnly = document.getElementById('online-only-toggle').checked;
     var visible = 0;
+    var totalCards = document.querySelectorAll('#duck-cards-container [data-duck-id]').length;
 
     document.querySelectorAll('#duck-cards-container [data-duck-id]').forEach(function (card) {
       var id       = card.getAttribute('data-duck-id').toLowerCase();
@@ -583,7 +582,13 @@
 
     if (visible === 0) {
       empty.classList.remove('hidden');
-      if (inc !== '') {
+      if (totalCards === 0) {
+        // No ducks exist at all (not a filter side-effect) — same style of
+        // message as the "Online only" empty state, since there's nothing
+        // for the user to adjust here.
+        title.textContent = 'No ducks detected';
+        sub.textContent   = 'No MamaDuck or PapaDuck has checked in yet.';
+      } else if (inc !== '') {
         title.textContent = 'No ducks with ' + (incLabels[inc] || inc) + ' incident';
         sub.textContent   = 'There are no active incidents at this status.';
       } else if (onlineOnly && q === '' && u === '') {
@@ -609,6 +614,12 @@
   document.getElementById('incident-filter').addEventListener('change', applyFilters);
   document.getElementById('online-only-toggle').addEventListener('change', applyFilters);
   window.applyFilters = applyFilters;
+
+  // Run once on initial load so the empty-state message (e.g. "No ducks
+  // found") is shown immediately if no ducks are detected, the same way it
+  // already appears when a filter (like "Online only") is toggled and
+  // yields zero matches — instead of leaving a blank grid.
+  applyFilters();
 
   // ── Emergency Broadcast ──────────────────────────────────────────────────
   (function () {

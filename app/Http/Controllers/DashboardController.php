@@ -302,11 +302,18 @@ class DashboardController extends Controller
 
     /**
      * List of users selectable as incident responders.
+     *
+     * Admins are excluded: the `admin` role represents system/user
+     * management privileges, not field/duty responders. Incidents should
+     * only be assignable to operators, the users actually expected to
+     * act on them.
      */
     public function responders(): JsonResponse
     {
         return response()->json(
-            User::orderBy('name')->get(['id', 'name'])
+            User::where('role', User::ROLE_OPERATOR)
+                ->orderBy('name')
+                ->get(['id', 'name'])
         );
     }
 

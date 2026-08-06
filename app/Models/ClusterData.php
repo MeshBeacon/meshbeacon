@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClusterData extends Model
 {
-    protected $fillable = ['duck_id', 'topic', 'message_id', 'payload', 'path', 'origin', 'destination', 'hops', 'duck_type'];
+    protected $fillable = ['duck_id', 'topic', 'message_id', 'payload', 'path', 'origin', 'destination', 'hops', 'duck_type', 'synced', 'synced_at'];
+
+    protected $casts = [
+        'synced'    => 'boolean',
+        'synced_at' => 'datetime',
+    ];
 
     /**
      * Parse LAT/LNG from the payload and return a Google Maps URL, or null

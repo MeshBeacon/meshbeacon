@@ -52,6 +52,13 @@ return [
     'central_dms' => [
         'url'   => env('CENTRAL_DMS_URL', ''),
         'token' => env('CENTRAL_DMS_TOKEN', ''),
+
+        // When true, this instance's incident-dispatch write actions
+        // (acknowledge, assign, notes, resolve, bulk-acknowledge) are
+        // rejected with 403 and hidden in the UI. Intended for a hybrid
+        // central aggregator, where dispatch happens only at the field
+        // site and central is monitoring-only (see docs/HYBRID_DEPLOYMENT.md).
+        'dashboard_readonly' => (bool) env('DASHBOARD_READONLY', false),
     ],
 
     /*

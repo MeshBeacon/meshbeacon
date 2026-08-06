@@ -4,7 +4,7 @@
 <head>
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
-<body class="h-full">
+<body class="h-full" data-dashboard-readonly="{{ config('services.central_dms.dashboard_readonly') ? '1' : '0' }}">
 <script src="{{ asset('vendor/tailwindplus-elements/elements.min.js') }}" type="module"></script>
 <script src="{{ asset('vendor/jquery/jquery-3.0.0.min.js') }}"></script>
 <script src="{{ asset('vendor/datatables/dataTables.min.js') }}"></script>

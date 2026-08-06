@@ -10,6 +10,12 @@ OpenDMS supports three deployment modes, controlled entirely via the `.env` file
 | **Offline standalone** | `sqlite` | *(empty)* | No internet; field team only |
 | **Hybrid** | `sqlite` | `https://...` | Field node syncs to central when online |
 
+A central aggregator should also set `DASHBOARD_READONLY=true` so it can
+receive synced telemetry without being usable as a second, conflicting
+dispatch console — see [Read-Only Dashboard Mode](#central-server-read-only-dashboard-mode)
+below.
+
+
 In hybrid mode, the system uses a **store-and-forward outbox pattern**: every incoming
 LoRa message is written to the local SQLite database first, then a background queue
 worker attempts to push the record upstream to the central server. The worker retries
@@ -128,12 +134,106 @@ ClusterData::selectRaw("
 
 ## Central Server: Ingestion Endpoint
 
-The central DMS must expose a `POST /api/ingest` endpoint authenticated by Bearer token.
-The payload is the raw `ClusterData` column values as JSON. The field node's
-`SyncRecordToCloud` job considers any `2xx` response as success.
+The central DMS exposes `POST /api/ingest`, authenticated by Bearer token, which
+accepts the raw `ClusterData` column values as JSON and upserts them
+(deduplicated on `duck_id` + `message_id`, so a field node's retried requests
+never create duplicate rows). The field node's `SyncRecordToCloud` job
+considers any `2xx` response as success.
 
-The central server should be another OpenDMS instance running in production mode
-(`DB_CONNECTION=mysql` or `pgsql`, `CENTRAL_DMS_URL` empty).
+The central server should be another OpenDMS instance running in production
+mode (`DB_CONNECTION=mysql` or `pgsql`, `CENTRAL_DMS_URL` empty).
+
+### Configure `.env` on the central server
+
+Only `CENTRAL_DMS_TOKEN` needs to be set on the central server — it must be the
+**same pre-shared token** configured as `CENTRAL_DMS_TOKEN` on every field node
+that syncs to it. `CENTRAL_DMS_URL` is left empty here, since the central
+server doesn't sync *to* anything else.
+
+```env
+# Central server (production mode) — accepts inbound sync from field nodes
+DB_CONNECTION=mysql
+CENTRAL_DMS_URL=
+CENTRAL_DMS_TOKEN=your-pre-shared-api-token
+```
+
+If `CENTRAL_DMS_TOKEN` is left empty, `/api/ingest` responds `503 Service
+Unavailable` for every request — the endpoint refuses to run unconfigured
+rather than silently accepting unauthenticated data.
+
+### Configure `.env` on each field/remote node
+
+Already covered above in [Configure `.env` on the field node](#2-configure-env-on-the-field-node):
+set `CENTRAL_DMS_URL` to the central server's base URL (no trailing
+`/api/ingest`, the job appends that) and `CENTRAL_DMS_TOKEN` to the same
+value configured on the central server.
+
+### Testing the connection end-to-end
+
+1. On the central server, confirm the route is registered:
+   ```bash
+   php artisan route:list --path=api/ingest
+   ```
+2. From the field node (or any machine that can reach the central server),
+   send a manual test record:
+   ```bash
+   curl -i -X POST https://dms.example.gov.my/api/ingest \
+     -H "Authorization: Bearer your-pre-shared-api-token" \
+     -H "Content-Type: application/json" \
+     -d '{"duck_id":"TESTDUCK","topic":"test/topic","message_id":"manual-test-1"}'
+   ```
+   A `200` response with `{"message":"Record ingested","id":...}` confirms
+   the endpoint is reachable and the token is valid. A `401` means the token
+   is wrong; a `503` means `CENTRAL_DMS_TOKEN` isn't set on the central
+   server; a connection failure/timeout means firewall or DNS, not
+   application config.
+3. On the field node, verify the outbox is actually draining by checking the
+   `synced` counts (see [Monitoring Sync State](#monitoring-sync-state)
+   above) before and after triggering a real MamaDuck message, or by
+   tailing the queue worker log:
+   ```bash
+   journalctl -u opendms-queue -f
+   ```
+4. Automated coverage for both sides of this flow (the outbox job and the
+   ingest endpoint) lives in `tests/Feature/HybridSyncTest.php`:
+   ```bash
+   php artisan test --filter=HybridSyncTest
+   ```
+
+---
+
+## Central Server: Read-Only Dashboard Mode
+
+Live incident dispatch (acknowledge, assign, add notes, mark resolved) should
+only ever happen at the field site where the responder actually is — a
+central aggregator only ever *receives* raw telemetry (`ClusterData`), it
+never receives the derived `IncidentLog` dispatch state. If a central
+instance were also used as an active dispatch console, it and the field site
+could independently and inconsistently manage the same real-world incident.
+
+To make this structurally impossible rather than just a documented rule, set
+`DASHBOARD_READONLY=true` in the central server's `.env`:
+
+```env
+# Central server: monitoring-only, dispatch happens at the field site
+DASHBOARD_READONLY=true
+```
+
+With this set:
+- The 5 dispatch-mutating routes (`sos-ack`, `bulk-acknowledge`,
+  incident `status`/`notes`/`assign`) are rejected with `403 Forbidden` by
+  `PreventDashboardWritesWhenReadonly` middleware — enforced server-side,
+  independent of the UI.
+- The dashboard UI hides/disables the corresponding buttons and shows a
+  banner ("Read-only monitoring instance — incident dispatch happens at the
+  field site, not here.") so operators aren't confused by controls that
+  would otherwise 403.
+
+Leave `DASHBOARD_READONLY=false` (or unset, the default) on every field
+node, where dispatch actions must continue to work normally.
+
+Automated coverage: `tests/Feature/DashboardReadonlyTest.php`
+(`php artisan test --filter=DashboardReadonlyTest`).
 
 ---
 

@@ -63,14 +63,16 @@ class SyncRecordToCloud implements ShouldQueue
         $response = Http::withToken($centralToken)
             ->timeout(10)
             ->post($centralUrl . '/api/ingest', [
-                'duck_id'    => $record->duck_id,
-                'topic'      => $record->topic,
-                'message_id' => $record->message_id,
-                'payload'    => $record->payload,
-                'path'       => $record->path,
-                'hops'       => $record->hops,
-                'duck_type'  => $record->duck_type,
-                'created_at' => $record->created_at,
+                'duck_id'     => $record->duck_id,
+                'topic'       => $record->topic,
+                'message_id'  => $record->message_id,
+                'payload'     => $record->payload,
+                'path'        => $record->path,
+                'origin'      => $record->origin,
+                'destination' => $record->destination,
+                'hops'        => $record->hops,
+                'duck_type'   => $record->duck_type,
+                'created_at'  => $record->created_at,
             ]);
 
         if ($response->successful()) {

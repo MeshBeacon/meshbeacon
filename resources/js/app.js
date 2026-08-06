@@ -1,5 +1,13 @@
 //import ApexCharts from 'apexcharts'
 
+// True on a hybrid-deployment central aggregator instance (DASHBOARD_READONLY
+// env var) — see docs/HYBRID_DEPLOYMENT.md. Incident dispatch (acknowledge,
+// assign, notes, resolve) only ever happens at the field site; this flag
+// gates the corresponding UI here. The real enforcement is server-side
+// (PreventDashboardWritesWhenReadonly middleware) — this is just UX so
+// central operators aren't confused by controls that would 403.
+var DASHBOARD_READONLY = document.body && document.body.dataset.dashboardReadonly === "1";
+
 // Configure jQuery so every AJAX request:
 //  - sends Accept: application/json  → Laravel returns 401 JSON (not a login redirect)
 //  - sends the CSRF token for mutating requests
@@ -936,11 +944,22 @@ $(document).ready(function () {
                 if ($list.data("last-html") !== html) {
                     $list.html(html);
                     $list.data("last-html", html);
+
+                    // Read-only (central aggregator) instance: dispatch
+                    // controls are rendered above but must not be usable
+                    // here (server also rejects via 403 — this is just UX).
+                    if (DASHBOARD_READONLY) {
+                        $list
+                            .find('.inc-ack-btn, .inc-status-btn, .inc-notes-save, .inc-assign-select, .inc-notes-input')
+                            .prop('disabled', true)
+                            .addClass('opacity-40 pointer-events-none cursor-not-allowed');
+                    }
                 }
     }
 
     // One-click ACK re-send from incidents panel
     $(document).on('click', '.inc-ack-btn', function () {
+        if (DASHBOARD_READONLY) return;
         var $btn   = $(this);
         var duckId = $btn.data('duck');
         var msgId  = $btn.data('msgid');
@@ -961,6 +980,7 @@ $(document).ready(function () {
 
     // Incident lifecycle status update
     $(document).on('click', '.inc-status-btn', function () {
+        if (DASHBOARD_READONLY) return;
         var $btn   = $(this);
         var msgId  = $btn.data('msgid');
         var status = $btn.data('status');
@@ -1000,6 +1020,7 @@ $(document).ready(function () {
 
     // Assign an incident to a responder
     $(document).on('change', '.inc-assign-select', function () {
+        if (DASHBOARD_READONLY) return;
         var $sel   = $(this);
         var msgId  = $sel.data('msgid');
         var userId = $sel.val();
@@ -1015,6 +1036,7 @@ $(document).ready(function () {
 
     // Save a note on an incident
     $(document).on('click', '.inc-notes-save', function () {
+        if (DASHBOARD_READONLY) return;
         var $btn   = $(this);
         var msgId  = $btn.data('msgid');
         var $input = $btn.siblings('.inc-notes-input');
@@ -1035,6 +1057,7 @@ $(document).ready(function () {
 
     // Acknowledge every open incident in one action
     $(document).on('click', '#bulk-ack-btn', function () {
+        if (DASHBOARD_READONLY) return;
         var $btn = $(this);
         var origHtml = $btn.html();
         $btn.prop('disabled', true).text('Acknowledging…');

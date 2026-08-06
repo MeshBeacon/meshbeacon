@@ -64,12 +64,21 @@
      widgets. Header row stacks vertically on mobile so the action buttons
      don't overflow narrow screens. --}}
 <div id="incidents" class="mt-6 mb-2">
+  @if (config('services.central_dms.dashboard_readonly'))
+    <div class="mb-3 flex items-center gap-2 rounded-md bg-blue-500/10 px-3 py-2 text-xs text-blue-300 ring-1 ring-inset ring-blue-500/30">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
+        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm.75-10a.75.75 0 0 0-1.5 0v4c0 .199.079.39.22.53l2.5 2.5a.75.75 0 1 0 1.06-1.06L8.75 8.94V5Z" clip-rule="evenodd" />
+      </svg>
+      {{ __('Read-only monitoring instance — incident dispatch happens at the field site, not here.') }}
+    </div>
+  @endif
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
     <div class="flex items-center gap-3">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('Active Incidents') }}</h2>
       <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/30"></span>
     </div>
     <div class="flex items-center gap-2">
+      @unless (config('services.central_dms.dashboard_readonly'))
       <button id="bulk-ack-btn"
         class="inline-flex items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
@@ -77,6 +86,7 @@
         </svg>
         {{ __('Acknowledge All') }}
       </button>
+      @endunless
       <button id="notif-btn"
         onclick="requestNotificationPermission()"
         class="inline-flex items-center gap-1.5 rounded-md bg-white/5 px-2.5 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 transition-colors">
