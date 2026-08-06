@@ -1,0 +1,10 @@
+FROM jkaninda/nginx-fpm:stable
+COPY nginx/javascript-mime.conf /etc/nginx/conf.d 
+# Copy Laravel project files
+COPY . /var/www/html
+VOLUME /var/www/html/storage
+WORKDIR /var/www/html
+
+RUN ln -s ../vendor/livewire/livewire/dist public/livewire
+
+EXPOSE 80

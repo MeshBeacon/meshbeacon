@@ -91,7 +91,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">
           <path fill-rule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clip-rule="evenodd"/>
         </svg>
-        {{ $poll?->enabled ? 'Polling · 5min' : 'Auto-poll' }}
+        {{ $poll?->enabled ? 'Polling · 1min' : 'Auto-poll' }}
       </button>
       <span class="text-xs text-gray-500 {{ $poll?->enabled ? '' : 'hidden' }}"
             data-poll-next="{{ $record->duck_id }}">{{ ($poll?->enabled && $poll?->next_run_at) ? 'Requesting in ' . max(0, (int) now()->diffInSeconds($poll->next_run_at)) . ' secs' : '' }}</span>
@@ -346,7 +346,7 @@
     var cls = enabled
       ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
       : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
-    var label = enabled ? 'Polling \u00b7 5min' : 'Auto-poll';
+    var label = enabled ? 'Polling \u00b7 1min' : 'Auto-poll';
     var nextHtml = enabled && nextAt
       ? '<span class="text-xs text-gray-500" data-poll-next="' + escHtml(duckId) + '">' + secsLabel(nextAt) + '</span>'
       : '<span class="text-xs text-gray-500 hidden" data-poll-next="' + escHtml(duckId) + '"></span>';
@@ -598,7 +598,7 @@
         ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
         : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
       btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
-        (enabled ? 'Polling \u00b7 5min' : 'Auto-poll');
+        (enabled ? 'Polling \u00b7 1min' : 'Auto-poll');
 
       var card = btn.closest('[data-duck-id]');
       if (card) {
@@ -736,7 +736,7 @@
                   ? 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
                   : 'poll-toggle-btn inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
                 pollBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
-                  (pollEnabled ? 'Polling \u00b7 5min' : 'Auto-poll');
+                  (pollEnabled ? 'Polling \u00b7 1min' : 'Auto-poll');
               }
               var nextEl = card.querySelector('[data-poll-next="' + duckId + '"]');
               if (nextEl) {
@@ -759,7 +759,7 @@
   }
 
   pollGps();
-  setInterval(pollGps, 5000);
+  setInterval(pollGps, 10_000);
 </script>
 @endsection
 </x-layouts::app>

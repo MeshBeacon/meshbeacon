@@ -107,7 +107,7 @@ class StatusController extends Controller
             'message_id' => uniqid('BC-'),
             'payload'    => 'MSG,TEXT:' . $message,
             'hops'       => 0,
-            'duck_type'  => 'operator',
+            'duck_type'  => 0,
         ]);
 
         return response()->json(['message' => 'Emergency broadcast sent successfully!']);
@@ -169,7 +169,7 @@ class StatusController extends Controller
             'message_id' => uniqid('OUT-'),
             'payload'    => 'MSG,TEXT:' . $message,
             'hops'       => 0,
-            'duck_type'  => 'operator',
+            'duck_type'  => 0,
         ]);
 
         return response()->json(['message' => 'Form submitted successfully!']);

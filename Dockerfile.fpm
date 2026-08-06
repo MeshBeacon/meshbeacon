@@ -1,0 +1,21 @@
+FROM jkaninda/laravel-php-fpm:8.4
+# Modify file before COPY
+RUN sed -i 's/memory_limit = 256M/memory_limit = 4096M/g' /usr/local/etc/php/conf.d/php.ini
+# Copy Laravel project files
+COPY . /var/www/html
+COPY ./supervisor/* /etc/supervisor/conf.d/
+VOLUME /var/www/html/storage
+# Now we set root / at /var/www/html
+WORKDIR /var/www/html
+# Run command at WORKDIR
+RUN ln -s ../vendor/livewire/livewire/dist public/livewire
+# Build assets
+#RUN apt-get update
+#RUN apt-get install -y nodejs
+#RUN npm run build
+
+EXPOSE 9000
+# Fix permissions
+RUN chown -R www-data:www-data /var/www/html
+
+USER www-data

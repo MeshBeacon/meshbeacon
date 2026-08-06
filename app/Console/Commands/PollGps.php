@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class PollGps extends Command
 {
-    const INTERVAL_MINUTES = 5;
+    const INTERVAL_MINUTES = 1;
 
     protected $signature = 'gps:poll';
     protected $description = 'Send GPS requests to all ducks that have auto-polling enabled and are due.';

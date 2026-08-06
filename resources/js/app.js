@@ -842,7 +842,7 @@ $(document).ready(function () {
         var html = '';
         ducks.forEach(function (duck) {
             var dotColor = duck.status === 'online' ? '#22c55e' : duck.status === 'idle' ? '#eab308' : '#6b7280';
-            var typeLabel = duck.duck_type === 1 ? 'PapaDuck' : duck.duck_type === 2 ? 'MamaDuck' : 'Duck';
+            var typeLabel = duck.duck_type === 1 ? 'PapaDuck' : duck.duck_type === 2 ? 'MamaDuck' : duck.duck_type === 0 ? 'Operator' : 'Duck';
             var battHtml = duck.battery !== null
                 ? '<span style="font-size:0.65rem;font-weight:600;color:' + (duck.battery < 20 ? '#f87171' : duck.battery < 50 ? '#fde68a' : '#86efac') + '">' + duck.battery + '%</span>'
                 : '';

@@ -119,6 +119,30 @@
             var clusterGroup = L.markerClusterGroup();
             map.addLayer(clusterGroup);
 
+            var lastBounds = null;
+            var initialFitDone = false;
+
+            // Recenter control
+            var RecenterControl = L.Control.extend({
+              options: { position: 'topleft' },
+              onAdd: function () {
+                var btn = L.DomUtil.create('button', '');
+                btn.title = 'Recenter map';
+                btn.style.cssText = 'width:30px;height:30px;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
+                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#333"><path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-2.079 3.51-4.793 3.51-8.227 0-4.589-3.514-8.1-7.8-8.1S4.2 4.76 4.2 9.34c0 3.434 1.566 6.148 3.51 8.227a19.58 19.58 0 0 0 2.684 2.282 16.975 16.975 0 0 0 1.144.742ZM12 13.45a4.11 4.11 0 1 0 0-8.22 4.11 4.11 0 0 0 0 8.22Z" clip-rule="evenodd"/></svg>';
+                L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
+                L.DomEvent.on(btn, 'click', function () {
+                  if (lastBounds && lastBounds.length) {
+                    map.fitBounds(lastBounds, { maxZoom: 14, padding: [40, 40] });
+                  } else {
+                    map.setView([3.139, 101.6869], 6);
+                  }
+                });
+                return btn;
+              }
+            });
+            new RecenterControl().addTo(map);
+
             function makeIcon(badge) {
               var color = badge === 'Satellite' ? '#22c55e'
                         : badge === 'Phone'     ? '#3b82f6'
@@ -165,8 +189,15 @@
                   bounds.push([lat, lng]);
                 });
 
-                if (bounds.length) {
-                  map.fitBounds(bounds, { maxZoom: 14, padding: [40, 40] });
+                lastBounds = bounds;
+
+                // Only auto-fit on the first successful load; subsequent refreshes
+                // preserve the user's current pan/zoom position.
+                if (!initialFitDone) {
+                  initialFitDone = true;
+                  if (bounds.length) {
+                    map.fitBounds(bounds, { maxZoom: 14, padding: [40, 40] });
+                  }
                 }
               })
               .catch(function (e) { console.error('Map refresh error', e); });

@@ -28,7 +28,7 @@ class ClusterDataRepository
             COUNT(*) as total,
             COUNT(DISTINCT CASE WHEN duck_type = 1 THEN duck_id END) as papaducks,
             COUNT(DISTINCT CASE WHEN duck_type = 2 THEN duck_id END) as mamaducks
-        ")->first();
+        ")->where('topic', '!=', 'gps')->first();
     }
 
     /**
@@ -229,6 +229,7 @@ class ClusterDataRepository
     ): Collection {
         return ClusterData::where('created_at', '>=', $start)
             ->where('created_at', '<=', $end)
+            ->where('topic', '!=', 'gps')
             ->get($columns);
     }
 }

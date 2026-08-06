@@ -59,13 +59,18 @@
                   <button class="relative flex max-w-xs items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
                     <span class="absolute -inset-1.5"></span>
                     <span class="sr-only">Open user menu</span>
-                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full outline outline-1 -outline-offset-1 outline-white/10" />
+                    <span class="flex size-8 items-center justify-center rounded-full bg-gray-700 text-sm font-medium text-white outline outline-1 -outline-offset-1 outline-white/10">
+                      {{ auth()->user()->initials() }}
+                    </span>
                   </button>
 
                   <el-menu anchor="bottom end" popover class="m-0 w-48 origin-top-right rounded-md bg-gray-800 p-0 py-1 outline outline-1 -outline-offset-1 outline-white/10 transition [--anchor-gap:theme(spacing.2)] [transition-behavior:allow-discrete] data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-300 focus:bg-white/5 focus:outline-none">Your profile</a>
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-300 focus:bg-white/5 focus:outline-none">Settings</a>
-                    <a href="#" class="block px-4 py-2 text-sm text-gray-300 focus:bg-white/5 focus:outline-none">Sign out</a>
+                    <a href="{{ route('profile.edit') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-300 focus:bg-white/5 focus:outline-none">Your profile</a>
+                    <a href="{{ route('profile.edit') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-300 focus:bg-white/5 focus:outline-none">Settings</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" data-test="logout-button" class="block w-full px-4 py-2 text-start text-sm text-gray-300 cursor-pointer focus:bg-white/5 focus:outline-none">Sign out</button>
+                    </form>
                   </el-menu>
                 </el-dropdown>
               </div>
@@ -99,11 +104,13 @@
         <div class="border-t border-white/10 pb-3 pt-4">
           <div class="flex items-center px-5">
             <div class="shrink-0">
-              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-10 rounded-full outline outline-1 -outline-offset-1 outline-white/10" />
+              <span class="flex size-10 items-center justify-center rounded-full bg-gray-700 text-sm font-medium text-white outline outline-1 -outline-offset-1 outline-white/10">
+                {{ auth()->user()->initials() }}
+              </span>
             </div>
             <div class="ml-3">
-              <div class="text-base/5 font-medium text-white">Tom Cook</div>
-              <div class="text-sm font-medium text-gray-400">tom@example.com</div>
+              <div class="text-base/5 font-medium text-white">{{ auth()->user()->name }}</div>
+              <div class="text-sm font-medium text-gray-400">{{ auth()->user()->email }}</div>
             </div>
             <button type="button" class="relative ml-auto shrink-0 rounded-full p-1 text-gray-400 hover:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-yellow-500">
               <span class="absolute -inset-1.5"></span>
@@ -114,9 +121,12 @@
             </button>
           </div>
           <div class="mt-3 space-y-1 px-2">
-            <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Your profile</a>
-            <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Settings</a>
-            <a href="#" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Sign out</a>
+            <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Your profile</a>
+            <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">Settings</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" data-test="logout-button" class="block w-full rounded-md px-3 py-2 text-start text-base font-medium text-gray-400 cursor-pointer hover:bg-white/5 hover:text-white">Sign out</button>
+            </form>
           </div>
         </div>
       </el-disclosure>
