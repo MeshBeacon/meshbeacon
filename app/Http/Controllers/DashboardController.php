@@ -71,16 +71,19 @@ class DashboardController extends Controller
     {
         $feed       = $this->clusterDataService->getIncidentsFeed();
         $incidents  = collect($feed['data']);
-        $messageIds = $incidents->pluck('message_id');
 
         // Auto-open/update IncidentLog entries for newly-seen SOS events.
         //
-        // A duck can only ever be in one real emergency at a time, so a new
-        // SOS message for a duck that already has a non-resolved incident is
-        // treated as a retransmission of that SAME incident (bump the
-        // message/cluster reference) rather than spawning a duplicate — this
-        // keeps any existing acknowledgement/assignment/notes intact instead
-        // of resetting them to 'open'.
+        // The device only transmits once per physical button press (no
+        // periodic heartbeat/retransmission of the same event), so a new
+        // message_id always means the user pressed SOS again — a distinct,
+        // deliberate signal, not network noise. A duck can only ever be in
+        // one real emergency at a time, so this is treated as the SAME
+        // incident (bump the message/cluster reference, keep assignment and
+        // notes intact) rather than spawning a duplicate. But since a fresh
+        // press means the person still needs help, the incident is flipped
+        // back to 'open' (if it had been 'acknowledged') so responders are
+        // re-alerted instead of it silently staying acknowledged.
         $openLogsByDuck = IncidentLog::whereIn('duck_id', $incidents->pluck('duck_id'))
             ->where('status', '!=', 'resolved')
             ->get()->keyBy('duck_id');
@@ -93,6 +96,7 @@ class DashboardController extends Controller
                     $openLog->update([
                         'message_id'            => $inc['message_id'],
                         'cluster_data_id'        => $inc['id'],
+                        'status'                 => 'open',
                         'retransmission_count'   => $openLog->retransmission_count + 1,
                     ]);
                 }
@@ -102,12 +106,14 @@ class DashboardController extends Controller
             // No open incident for this duck. This is normally a brand-new
             // SOS event, but it can also be a previously-RESOLVED log whose
             // message_id got reused — e.g. a duck's onboard message counter
-            // wrapping around after a reboot. Scope the lookup to this exact
-            // duck (message_id alone is no longer guaranteed unique across
-            // ducks) and, if found, reopen it as a fresh incident rather than
-            // silently leaving a live SOS marked "resolved".
-            $existing = IncidentLog::where('message_id', $inc['message_id'])
-                ->where('duck_id', $inc['duck_id'])
+            // wrapping around after a reboot. A duck's message_id is NOT
+            // guaranteed unique over its full history (it can be reused by
+            // multiple past incidents for the same duck), so look up this
+            // duck's most recent log by duck_id — never by message_id alone
+            // — to avoid ambiguously reopening/displaying the wrong one of
+            // several historical rows that happen to share a reused id.
+            $existing = IncidentLog::where('duck_id', $inc['duck_id'])
+                ->orderByDesc('id')
                 ->first();
 
             if ($existing) {
@@ -142,12 +148,20 @@ class DashboardController extends Controller
             }
         }
 
+        // Enrich by duck_id, not message_id: message_id can be reused across
+        // a duck's history (see reopen logic above), so a duck's CURRENT
+        // incident is always its most recently created/updated log — never
+        // determined by matching the latest SOS message_id, which could
+        // collide with an older, unrelated (and already-resolved) log.
         $logs = IncidentLog::with('assignedTo:id,name')
-            ->whereIn('message_id', $messageIds)
-            ->get()->keyBy('message_id');
+            ->whereIn('duck_id', $incidents->pluck('duck_id'))
+            ->orderByDesc('id')
+            ->get()
+            ->unique('duck_id')
+            ->keyBy('duck_id');
 
         $enriched = $incidents->map(function ($inc) use ($logs) {
-            $log = $logs[$inc['message_id']] ?? null;
+            $log = $logs[$inc['duck_id']] ?? null;
             return array_merge($inc, [
                 'incident_log_id'      => $log?->id,
                 'incident_status'      => $log?->status ?? 'open',

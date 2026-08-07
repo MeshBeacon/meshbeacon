@@ -1821,7 +1821,16 @@ $(document).ready(function () {
                         var status = byDuck[duckId];
                         if (!status) {
                             var duckId2 = $(this).data('incident-badge-duck');
-                            $(this).addClass('hidden').text('');
+                            // `hidden` alone can lose the CSS cascade to the
+                            // permanent `inline-flex` utility on this element
+                            // (equal specificity, source-order dependent), so
+                            // use the `!hidden` (important) variant and also
+                            // strip any leftover color classes from the last
+                            // visible state.
+                            $(this)
+                                .removeClass('bg-red-500/20 text-red-300 ring-red-500/40 bg-amber-500/20 text-amber-300 ring-amber-500/40 bg-blue-500/20 text-blue-300 ring-blue-500/40')
+                                .addClass('!hidden')
+                                .text('');
                             var $card2 = $('[data-duck-id="' + duckId2 + '"]');
                             if ($card2.length) $card2.attr('data-incident-status', '');
                             return;
@@ -1833,7 +1842,7 @@ $(document).ready(function () {
                         };
                         var labelMap = { open: 'OPEN', acknowledged: "ACK'D", responding: 'RESP' };
                         $(this)
-                            .removeClass('hidden bg-red-500/20 text-red-300 ring-red-500/40 bg-amber-500/20 text-amber-300 ring-amber-500/40 bg-blue-500/20 text-blue-300 ring-blue-500/40')
+                            .removeClass('hidden !hidden bg-red-500/20 text-red-300 ring-red-500/40 bg-amber-500/20 text-amber-300 ring-amber-500/40 bg-blue-500/20 text-blue-300 ring-blue-500/40')
                             .addClass(colorMap[status] || colorMap['open'])
                             .text(labelMap[status] || 'OPEN');
 

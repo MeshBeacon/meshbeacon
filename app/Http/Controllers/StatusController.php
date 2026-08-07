@@ -23,10 +23,20 @@ class StatusController extends Controller
         $mamaducks      = $this->clusterDataService->getLatestPerDuck();
         $latestCoordsId = $this->clusterDataService->latestWithCoordsId($mamaducks);
 
+        // A duck can accumulate multiple historical IncidentLog rows, so
+        // filtering to non-resolved rows first (then keying by duck_id) can
+        // surface a stale open/acknowledged row while ignoring a newer,
+        // already-resolved one for the same duck — showing the badge as
+        // active when the duck's true latest incident has been resolved.
+        // Instead, pick each duck's single most recent log first, then check
+        // ITS status — mirroring DashboardController::incidents(), which
+        // must agree with this query or the badge can flash open before the
+        // JS poll (using that endpoint) corrects it moments later.
         $activeIncidents = IncidentLog::whereIn('duck_id', $mamaducks->pluck('duck_id'))
-            ->where('status', '!=', 'resolved')
-            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->get()
+            ->unique('duck_id')
+            ->reject(fn ($log) => $log->status === 'resolved')
             ->keyBy('duck_id');
 
         return view('status', compact('mamaducks', 'latestCoordsId', 'activeIncidents'));

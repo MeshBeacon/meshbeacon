@@ -175,7 +175,7 @@
       @endphp
       <div class="flex items-center gap-1.5">
         <a href="/dashboard#incidents" data-incident-badge-duck="{{ $mamaduck->duck_id }}"
-          class="{{ $activeInc ? '' : 'hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">{!! $incLabel !!}</a>
+          class="{{ $activeInc ? '' : '!hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">{!! $incLabel !!}</a>
         <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Online') }}</button>
       </div>
     </div>
@@ -390,13 +390,13 @@
         <dialog id="msg-dialog-{{ $mamaduck->duck_id }}" aria-labelledby="dialog-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
         <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
 
-        <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
-          <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+        <div tabindex="0" class="flex min-h-full items-stretch justify-center p-0 text-center focus:outline focus:outline-0 sm:items-center sm:p-4">
+          <el-dialog-panel class="relative flex h-full w-full transform flex-col overflow-hidden rounded-none bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:h-auto sm:max-w-sm sm:rounded-lg sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
 
-<form id="message-form-{{ $mamaduck->duck_id }}" class="duck-message-form" action="/status/send">
+<form id="message-form-{{ $mamaduck->duck_id }}" class="duck-message-form flex h-full flex-col" action="/status/send">
   @csrf
   <input type="hidden" name="duck_id" value="{{ $mamaduck->duck_id }}">
-  <div class="space-y-12">
+  <div class="flex-1 space-y-12 overflow-y-auto">
     <div class="border-b border-white/10 pb-3">
       <h2 class="text-base/7 font-semibold text-white">{{ __('Message') }} <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
       <p class="mt-1 text-sm/6 text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
@@ -420,7 +420,7 @@
     </div>
   </div>
 
-  <div class="mt-2 flex items-center gap-3">
+  <div class="mt-2 flex shrink-0 items-center gap-3">
             <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Send Message') }}</button>
             <span class="send-status text-xs"></span>
   </div>
@@ -437,9 +437,9 @@
     <el-dialog>
       <dialog id="broadcast-dialog" aria-labelledby="broadcast-dialog-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
         <el-dialog-backdrop class="fixed inset-0 bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
-        <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
-          <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-inset ring-red-600/60 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-md sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
-            <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+        <div tabindex="0" class="flex min-h-full items-stretch justify-center p-0 text-center focus:outline focus:outline-0 sm:items-center sm:p-4">
+          <el-dialog-panel class="relative flex h-full w-full transform flex-col overflow-hidden rounded-none bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 ring-2 ring-inset ring-red-600/60 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:h-auto sm:max-w-md sm:rounded-lg sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+            <div class="flex shrink-0 items-center gap-3 border-b border-white/10 pb-4 mb-4">
               <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-600/20 ring-1 ring-red-600/40">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-red-400">
                   <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -450,9 +450,9 @@
                 <p class="text-xs text-gray-400">{{ __('Message will be sent to') }} <span class="font-semibold text-red-400">{{ __('all') }}</span> {{ __('connected devices (topic 24).') }}</p>
               </div>
             </div>
-            <form id="broadcast-form">
+            <form id="broadcast-form" class="flex h-full flex-col">
               @csrf
-              <div class="space-y-4">
+              <div class="flex-1 space-y-4 overflow-y-auto">
                 <div>
                   <label for="broadcast-message" class="block text-sm font-medium text-white">{{ __('Broadcast message') }}</label>
                   <div class="mt-2">
@@ -463,7 +463,7 @@
                   <p class="mt-1 flex justify-end text-xs text-gray-500"><span id="bc-char-count">0</span>&nbsp;/ 200</p>
                 </div>
               </div>
-              <div class="mt-5 flex items-center gap-3">
+              <div class="mt-5 flex shrink-0 items-center gap-3">
                 <button type="submit" id="broadcast-send-btn"
                   class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
@@ -487,11 +487,11 @@
     <el-dialog>
       <dialog id="send-duck-dialog" aria-labelledby="send-duck-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
         <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
-        <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
-          <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
-            <form id="send-duck-form" class="duck-message-form" action="/status/send">
+        <div tabindex="0" class="flex min-h-full items-stretch justify-center p-0 text-center focus:outline focus:outline-0 sm:items-center sm:p-4">
+          <el-dialog-panel class="relative flex h-full w-full transform flex-col overflow-hidden rounded-none bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:h-auto sm:max-w-sm sm:rounded-lg sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+            <form id="send-duck-form" class="duck-message-form flex h-full flex-col" action="/status/send">
               @csrf
-              <div class="space-y-12">
+              <div class="flex-1 space-y-12 overflow-y-auto">
                 <div class="border-b border-white/10 pb-3">
                   <h2 id="send-duck-title" class="text-base/7 font-semibold text-white">{{ __('Messaging') }}</h2>
                   <p class="mt-1 text-sm/6 text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
@@ -511,7 +511,7 @@
                   </div>
                 </div>
               </div>
-              <div class="mt-2 flex items-center gap-3">
+              <div class="mt-2 flex shrink-0 items-center gap-3">
                 <button type="submit" command="close" commandfor="send-duck-dialog"
                   class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
                   {{ __('Send Message') }}
@@ -615,11 +615,17 @@
   document.getElementById('online-only-toggle').addEventListener('change', applyFilters);
   window.applyFilters = applyFilters;
 
-  // Run once on initial load so the empty-state message (e.g. "No ducks
-  // found") is shown immediately if no ducks are detected, the same way it
-  // already appears when a filter (like "Online only") is toggled and
-  // yields zero matches — instead of leaving a blank grid.
-  applyFilters();
+  // On initial load, only show the empty-state message if there are truly no
+  // ducks at all. We deliberately do NOT call applyFilters() here — some
+  // browsers restore form field values (search text, the "Online only"
+  // checkbox) across a plain page refresh, and running the full filter pass
+  // on load would apply that leftover state and hide ducks that should be
+  // shown by default. Ducks should always load unfiltered on first view.
+  if (document.querySelectorAll('#duck-cards-container [data-duck-id]').length === 0) {
+    document.getElementById('duck-empty-title').textContent = 'No ducks detected';
+    document.getElementById('duck-empty-sub').textContent   = 'No MamaDuck or PapaDuck has checked in yet.';
+    document.getElementById('duck-empty-state').classList.remove('hidden');
+  }
 
   // ── Emergency Broadcast ──────────────────────────────────────────────────
   (function () {
