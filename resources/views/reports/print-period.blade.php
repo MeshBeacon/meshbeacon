@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{ __('OpenDMS After-Action Report') }} &mdash; {{ $from->toDateString() }} to {{ $to->toDateString() }}</title>
+  <title>{{ __('MeshBeacon After-Action Report') }} &mdash; {{ $from->toDateString() }} to {{ $to->toDateString() }}</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 2rem; }
     h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
@@ -27,7 +27,7 @@
     <button onclick="window.print()">{{ __('Print / Save as PDF') }}</button>
   </div>
 
-  <h1>{{ __('OpenDMS After-Action Report') }}</h1>
+  <h1>{{ __('MeshBeacon After-Action Report') }}</h1>
   <p class="subtitle">{{ __('Operational period:') }} {{ $from->toFormattedDateString() }} &mdash; {{ $to->toFormattedDateString() }}</p>
 
   <h2>{{ __('Message & Relay Summary') }}</h2>

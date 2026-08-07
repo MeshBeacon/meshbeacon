@@ -894,7 +894,15 @@ $(document).ready(function () {
                     if (isCompact) {
                         // Condensed card for the kiosk screen — no operator
                         // controls (ack/status/assign/notes), just enough to
-                        // tell what/who/how urgent/when at a glance.
+                        // tell what/who/how urgent/when at a glance. The
+                        // kiosk is ops-room-only (not public-facing), so
+                        // showing WHO is assigned is useful for the room to
+                        // coordinate — but kept subtle (small, muted, and
+                        // omitted entirely when unassigned) so it doesn't
+                        // compete with the SOS/status badges.
+                        var assigneeLine = inc.assigned_to_name
+                            ? '<div style="font-size:0.68rem;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&rarr; ' + escapeHtml(inc.assigned_to_name) + '</div>'
+                            : '';
                         html +=
                             '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';padding:0.625rem 0.875rem;display:flex;flex-direction:column;gap:4px;">' +
                             '<div style="display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
@@ -904,6 +912,7 @@ $(document).ready(function () {
                             statusBadge +
                             '</div>' +
                             '<div style="font-size:0.78rem;color:#d1d5db;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + msgText + '</div>' +
+                            assigneeLine +
                             '<div style="font-size:0.68rem;color:#6b7280;">' + timeStr + '</div>' +
                             '</div>';
                         return;

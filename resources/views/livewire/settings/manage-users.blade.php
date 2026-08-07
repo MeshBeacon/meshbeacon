@@ -8,7 +8,7 @@
             <div class="grid grid-cols-1 gap-x-8 gap-y-8 py-10 first:pt-0 lg:grid-cols-3">
                 <div class="px-4 sm:px-0">
                     <h2 class="text-base/7 font-semibold text-white">{{ __('Add a new user') }}</h2>
-                    <p class="mt-1 text-sm/6 text-gray-400">{{ __('Create accounts and manage roles for this OpenDMS instance') }}</p>
+                    <p class="mt-1 text-sm/6 text-gray-400">{{ __('Create accounts and manage roles for this MeshBeacon instance') }}</p>
                 </div>
 
                 <form wire:submit="createUser" class="bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10 sm:rounded-xl lg:col-span-2">

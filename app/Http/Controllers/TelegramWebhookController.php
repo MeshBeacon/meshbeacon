@@ -68,7 +68,7 @@ class TelegramWebhookController extends Controller
         $user = User::where('telegram_link_token', $token)->first();
 
         if (!$user) {
-            $this->telegram->sendMessage($chatId, 'This linking code is invalid or has expired. Please generate a new one from your OpenDMS profile settings.');
+            $this->telegram->sendMessage($chatId, 'This linking code is invalid or has expired. Please generate a new one from your MeshBeacon profile settings.');
 
             return;
         }
@@ -82,7 +82,7 @@ class TelegramWebhookController extends Controller
 
         $this->telegram->sendMessage(
             $chatId,
-            "\u{2705} This Telegram account is now linked to OpenDMS responder <b>{$user->name}</b>. You will receive SOS alerts here."
+            "\u{2705} This Telegram account is now linked to MeshBeacon responder <b>{$user->name}</b>. You will receive SOS alerts here."
         );
     }
 }

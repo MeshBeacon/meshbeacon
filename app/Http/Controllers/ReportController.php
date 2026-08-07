@@ -58,7 +58,7 @@ class ReportController extends Controller
     {
         [$from, $to] = $this->resolveRange($request);
         $incidents   = $this->reportService->getIncidentsInRange($from, $to, $request->query('q'));
-        $filename    = 'opendms-report_' . $from->toDateString() . '_to_' . $to->toDateString() . '.csv';
+        $filename    = 'meshbeacon-report_' . $from->toDateString() . '_to_' . $to->toDateString() . '.csv';
 
         return response()->streamDownload(function () use ($incidents) {
             $out = fopen('php://output', 'w');
@@ -105,7 +105,7 @@ class ReportController extends Controller
     {
         $log      = IncidentLog::with('assignedTo:id,name')->where('message_id', $messageId)->firstOrFail();
         $timeline = $this->reportService->getIncidentTimeline($messageId);
-        $filename = 'opendms-incident_' . $messageId . '.csv';
+        $filename = 'meshbeacon-incident_' . $messageId . '.csv';
 
         return response()->streamDownload(function () use ($log, $timeline) {
             $out = fopen('php://output', 'w');

@@ -14,8 +14,8 @@
     "Kiosk Mode": "Mod Kiosk",
     "Tip: if this will run on a shared/unattended screen, log in there with \"Remember me\" checked so it stays signed in after a reboot.": "Petua: jika ini akan berjalan pada skrin dikongsi/tanpa pengawasan, log masuk di sana dengan \"Ingat saya\" ditanda supaya kekal log masuk selepas but semula.",
 
-    "OpenDMS — Kiosk": "OpenDMS — Kiosk",
-    "OpenDMS — Live Operations": "OpenDMS — Operasi Langsung",
+    "MeshBeacon — Kiosk": "MeshBeacon — Kiosk",
+    "MeshBeacon — Live Operations": "MeshBeacon — Operasi Langsung",
     "Exit kiosk": "Keluar mod kiosk",
     "Unattended display: make sure you logged in here with \"Remember me\" checked so this screen stays signed in if it reboots or loses power.": "Paparan tanpa pengawasan: pastikan anda log masuk di sini dengan \"Ingat saya\" ditanda supaya skrin ini kekal log masuk jika ia but semula atau kehilangan kuasa.",
     "PapaDucks": "PapaDucks",
@@ -160,7 +160,7 @@
     "Battery trend": "Trend Bateri",
     "Oldest → newest, hover a bar for details": "Terlama → terbaharu, tuding bar untuk butiran",
 
-    "OpenDMS Incident Report": "Laporan Insiden OpenDMS",
+    "MeshBeacon Incident Report": "Laporan Insiden MeshBeacon",
     "Print / Save as PDF": "Cetak / Simpan sebagai PDF",
     "Message ID:": "ID Mesej:",
     "Incident Details": "Butiran Insiden",
@@ -175,7 +175,7 @@
     "Time": "Masa",
     "No timeline data found for this message.": "Tiada data garis masa ditemui untuk mesej ini.",
 
-    "OpenDMS After-Action Report": "Laporan Selepas Tindakan OpenDMS",
+    "MeshBeacon After-Action Report": "Laporan Selepas Tindakan MeshBeacon",
     "Operational period:": "Tempoh operasi:",
     "No messages in this period.": "Tiada mesej dalam tempoh ini.",
     "No relay data in this period.": "Tiada data geganti dalam tempoh ini.",
@@ -278,7 +278,7 @@
     "Resend verification email": "Hantar semula e-mel pengesahan",
     "Log out": "Log keluar",
     "Manage Users": "Urus Pengguna",
-    "Create accounts and manage roles for this OpenDMS instance": "Cipta akaun dan urus peranan untuk instans OpenDMS ini",
+    "Create accounts and manage roles for this MeshBeacon instance": "Cipta akaun dan urus peranan untuk instans MeshBeacon ini",
     "Add a new user": "Tambah pengguna baharu",
     "Confirm Password": "Sahkan Kata Laluan",
     "Role": "Peranan",

@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/livewire-starter-kit",
+    "name": "meshbeacon/meshbeacon",
     "type": "project",
-    "description": "The official Laravel starter kit for Livewire.",
+    "description": "MeshBeacon — mesh-network disaster response and incident management platform.",
     "keywords": [
         "laravel",
         "framework"

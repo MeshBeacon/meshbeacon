@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>{{ __('OpenDMS — Kiosk') }}</title>
+  <title>{{ __('MeshBeacon — Kiosk') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-gray-900 overflow-hidden">
@@ -21,7 +21,7 @@
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-9">
-        <h1 class="text-xl font-bold tracking-tight text-white">{{ __('OpenDMS — Live Operations') }}</h1>
+        <h1 class="text-xl font-bold tracking-tight text-white">{{ __('MeshBeacon — Live Operations') }}</h1>
       </div>
       <div class="flex items-center gap-4">
         <span class="relative flex size-2.5">

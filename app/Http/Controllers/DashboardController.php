@@ -146,10 +146,7 @@ class DashboardController extends Controller
                 // but resolve any that are found before reopening, so the
                 // "one open row per duck" DB constraint never blocks this
                 // update.
-                IncidentLog::where('duck_id', $inc['duck_id'])
-                    ->where('id', '!=', $log->id)
-                    ->where('status', '!=', 'resolved')
-                    ->update(['status' => 'resolved', 'resolved_at' => now()]);
+                $this->resolveStraySiblings($log);
 
                 $log->update([
                     'cluster_data_id'      => $inc['id'],
@@ -214,6 +211,13 @@ class DashboardController extends Controller
             ->first();
 
         if ($log) {
+            // See resolveStraySiblings(): a leftover non-resolved row for
+            // this duck (from before this canonical-lookup fix, or any
+            // other data-integrity anomaly) would otherwise collide with
+            // the "one open row per duck" unique constraint the instant
+            // this row is touched, since it's staying/becoming non-resolved.
+            $this->resolveStraySiblings($log);
+
             $log->update([
                 'message_id'      => $data['message_id'],
                 'status'          => 'acknowledged',
@@ -256,6 +260,26 @@ class DashboardController extends Controller
             ->firstOrFail();
     }
 
+    /**
+     * Resolve any OTHER non-resolved IncidentLog rows sharing the same
+     * duck_id as $log. At most one non-resolved row per duck should ever
+     * exist (enforced by a DB-level unique constraint on MySQL/MariaDB via
+     * a generated `open_duck_id` column, and a true partial unique index on
+     * SQLite/Postgres), but a stray extra row can still occur from data
+     * predating this invariant, a partially-applied migration, or a rare
+     * insert race. Left alone, such a row silently absorbs future updates
+     * meant for the duck's real (displayed) incident, AND makes any update
+     * that keeps/sets $log non-resolved throw a
+     * UniqueConstraintViolationException. Call this before any such update.
+     */
+    private function resolveStraySiblings(IncidentLog $log): void
+    {
+        IncidentLog::where('duck_id', $log->duck_id)
+            ->where('id', '!=', $log->id)
+            ->where('status', '!=', 'resolved')
+            ->update(['status' => 'resolved', 'resolved_at' => now()]);
+    }
+
     public function updateIncidentStatus(Request $request, string $messageId): JsonResponse
     {
         $data = $request->validate([
@@ -264,6 +288,10 @@ class DashboardController extends Controller
         ]);
 
         $log = $this->resolveIncidentLog($messageId);
+
+        if ($data['status'] !== 'resolved') {
+            $this->resolveStraySiblings($log);
+        }
 
         $update = ['status' => $data['status']];
         if (array_key_exists('notes', $data)) {

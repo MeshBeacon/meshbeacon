@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>{{ __('OpenDMS Incident Report') }} &mdash; {{ $log->message_id }}</title>
+  <title>{{ __('MeshBeacon Incident Report') }} &mdash; {{ $log->message_id }}</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; color: #111827; margin: 2rem; }
     h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
@@ -26,7 +26,7 @@
     <button onclick="window.print()">{{ __('Print / Save as PDF') }}</button>
   </div>
 
-  <h1>{{ __('OpenDMS Incident Report') }}</h1>
+  <h1>{{ __('MeshBeacon Incident Report') }}</h1>
   <p class="subtitle">{{ __('Message ID:') }} {{ $log->message_id }}</p>
 
   <h2>{{ __('Incident Details') }}</h2>
