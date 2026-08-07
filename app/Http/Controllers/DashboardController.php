@@ -84,66 +84,82 @@ class DashboardController extends Controller
         // press means the person still needs help, the incident is flipped
         // back to 'open' (if it had been 'acknowledged') so responders are
         // re-alerted instead of it silently staying acknowledged.
-        $openLogsByDuck = IncidentLog::whereIn('duck_id', $incidents->pluck('duck_id'))
-            ->where('status', '!=', 'resolved')
-            ->get()->keyBy('duck_id');
+        //
+        // IMPORTANT: this must key off each duck's single most recent log
+        // row (highest id) — the SAME row the enrichment step below shows
+        // to the UI — never a separate "any non-resolved row for this duck"
+        // lookup. If a duck ever ends up with more than one non-resolved
+        // row (a data-integrity anomaly the unique index is meant to
+        // prevent, but which can still occur, e.g. from a partially-applied
+        // migration or a rare insert race), a status-filtered lookup can
+        // silently pick a DIFFERENT, hidden row than the one displayed —
+        // so every future SOS keeps updating that hidden row while the
+        // visible one stays stuck in its last state forever, with no error
+        // ever surfacing. Always operating on "this duck's latest row"
+        // makes the auto-open logic and the enrichment/display logic
+        // provably consistent, and self-healing if a stray duplicate ever
+        // exists (the newest row always wins, on both reads and writes).
+        $logsByDuck = IncidentLog::whereIn('duck_id', $incidents->pluck('duck_id'))
+            ->orderByDesc('id')
+            ->get()
+            ->unique('duck_id')
+            ->keyBy('duck_id');
 
         foreach ($incidents as $inc) {
-            $openLog = $openLogsByDuck[$inc['duck_id']] ?? null;
+            $log = $logsByDuck[$inc['duck_id']] ?? null;
 
-            if ($openLog) {
-                if ($openLog->message_id !== $inc['message_id']) {
-                    $openLog->update([
-                        'message_id'            => $inc['message_id'],
-                        'cluster_data_id'        => $inc['id'],
-                        'status'                 => 'open',
-                        'retransmission_count'   => $openLog->retransmission_count + 1,
-                    ]);
-                }
-                continue;
-            }
-
-            // No open incident for this duck. This is normally a brand-new
-            // SOS event, but it can also be a previously-RESOLVED log whose
-            // message_id got reused — e.g. a duck's onboard message counter
-            // wrapping around after a reboot. A duck's message_id is NOT
-            // guaranteed unique over its full history (it can be reused by
-            // multiple past incidents for the same duck), so look up this
-            // duck's most recent log by duck_id — never by message_id alone
-            // — to avoid ambiguously reopening/displaying the wrong one of
-            // several historical rows that happen to share a reused id.
-            $existing = IncidentLog::where('duck_id', $inc['duck_id'])
-                ->orderByDesc('id')
-                ->first();
-
-            if ($existing) {
-                // Only actually reopen if this is a genuinely NEW
-                // transmission (a different ClusterData row) than what the
-                // resolved log already recorded. The active-incidents feed
-                // keeps returning a duck's latest message for up to 24
-                // hours regardless of resolution status, so without this
-                // check, the very same stale alert a responder just
-                // resolved would flip back to 'open' again on the next
-                // poll — even though nothing new was received from the
-                // device.
-                if ($existing->cluster_data_id !== $inc['id']) {
-                    $existing->update([
-                        'cluster_data_id'      => $inc['id'],
-                        'status'               => 'open',
-                        'notes'                => null,
-                        'assigned_to'          => null,
-                        'assigned_at'          => null,
-                        'acknowledged_at'      => null,
-                        'resolved_at'          => null,
-                        'retransmission_count' => 1,
-                    ]);
-                }
-            } else {
+            if (!$log) {
                 IncidentLog::create([
                     'message_id'      => $inc['message_id'],
                     'duck_id'         => $inc['duck_id'],
                     'cluster_data_id' => $inc['id'],
                     'status'          => 'open',
+                ]);
+                continue;
+            }
+
+            if ($log->status !== 'resolved') {
+                if ($log->message_id !== $inc['message_id']) {
+                    $log->update([
+                        'message_id'            => $inc['message_id'],
+                        'cluster_data_id'        => $inc['id'],
+                        'status'                 => 'open',
+                        'retransmission_count'   => $log->retransmission_count + 1,
+                    ]);
+                }
+                continue;
+            }
+
+            // The duck's latest log is resolved. Only actually reopen if
+            // this is a genuinely NEW transmission (a different ClusterData
+            // row) than what the resolved log already recorded. The
+            // active-incidents feed keeps returning a duck's latest message
+            // for up to 24 hours regardless of resolution status, so
+            // without this check, the very same stale alert a responder
+            // just resolved would flip back to 'open' again on the next
+            // poll — even though nothing new was received from the device.
+            if ($log->cluster_data_id !== $inc['id']) {
+                // Self-heal: a stray non-resolved row for this duck should
+                // never exist (it would mean an older row was silently
+                // absorbing SOS updates while this newer, resolved row sat
+                // ignored — the exact bug this whole method now prevents),
+                // but resolve any that are found before reopening, so the
+                // "one open row per duck" DB constraint never blocks this
+                // update.
+                IncidentLog::where('duck_id', $inc['duck_id'])
+                    ->where('id', '!=', $log->id)
+                    ->where('status', '!=', 'resolved')
+                    ->update(['status' => 'resolved', 'resolved_at' => now()]);
+
+                $log->update([
+                    'cluster_data_id'      => $inc['id'],
+                    'status'               => 'open',
+                    'notes'                => null,
+                    'assigned_to'          => null,
+                    'assigned_at'          => null,
+                    'acknowledged_at'      => null,
+                    'resolved_at'          => null,
+                    'retransmission_count' => 1,
                 ]);
             }
         }
@@ -186,11 +202,15 @@ class DashboardController extends Controller
 
         SendSosAck::dispatch($data['duck_id'], 1);
 
-        // Resolve the duck's current open incident (rather than an exact
-        // message_id match) so an SOS retransmission that arrived after the
-        // page last polled doesn't spawn a duplicate incident.
+        // Resolve the duck's current incident (its single most recent log
+        // row, matching what incidents()/the UI displays) rather than an
+        // exact message_id match, so an SOS retransmission that arrived
+        // after the page last polled doesn't spawn a duplicate incident.
+        // Using duck_id's latest row — not a "status != resolved" filter —
+        // avoids ever silently acknowledging a different, hidden row than
+        // the one the operator is actually looking at.
         $log = IncidentLog::where('duck_id', $data['duck_id'])
-            ->where('status', '!=', 'resolved')
+            ->orderByDesc('id')
             ->first();
 
         if ($log) {
@@ -226,8 +246,13 @@ class DashboardController extends Controller
 
         $duckId = ClusterData::where('message_id', $messageId)->value('duck_id');
 
+        // Fall back to the duck's single most recent log row — the same
+        // one incidents()/the UI displays — rather than any row merely
+        // matching "status != resolved", which could silently resolve to a
+        // different, hidden row if a duck ever ends up with more than one
+        // non-resolved log.
         return IncidentLog::where('duck_id', $duckId)
-            ->where('status', '!=', 'resolved')
+            ->orderByDesc('id')
             ->firstOrFail();
     }
 
