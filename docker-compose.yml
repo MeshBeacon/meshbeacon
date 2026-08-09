@@ -1,104 +1,92 @@
+x-app-common: &app-common
+  build:
+    context: .
+    dockerfile: Dockerfile.compose
+  image: ${MESHBEACON_IMAGE:-meshbeacon:local}
+  env_file:
+    - .env
+  volumes:
+    - app-database:/var/www/database
+    - app-storage:/var/www/storage
+    - public-assets:/var/www/public
+
 services:
   migrate:
-    image: docker.io/muhammadn/opendms:1.0.3
-    env_file: .env
+    <<: *app-common
     user: "0:0"
-    volumes:
-      - .env:/var/www/.env
-      - ./database:/var/www/database
-    # Seeds a default admin account on first run (idempotent - safe to
-    # re-run on every container start) so Settings > Manage Users is
-    # reachable even though public self-registration is disabled.
+    restart: "no"
     command: >
-      sh -c "php artisan migrate --no-interaction --force &&
+      sh -ec "php artisan migrate --no-interaction --force &&
       php artisan db:seed --no-interaction --force"
 
   permissions:
-    image: docker.io/muhammadn/opendms:1.0.3
+    <<: *app-common
     user: "0:0"
+    restart: "no"
     depends_on:
-      - app
-    volumes:
-      - .env:/var/www/.env
-      - ./database:/var/www/database
-    entrypoint: >
-      sh -c "chmod 777 /var/www/database &&
-      chmod 777 /var/www/database/database.sqlite && 
-      chown www-data:www-data /var/www/database/database.sqlite"
+      migrate:
+        condition: service_completed_successfully
+    command: >
+      sh -ec "chown -R www-data:www-data /var/www/database /var/www/storage &&
+      chmod -R ug+rwX /var/www/database /var/www/storage &&
+      chmod -R a+rX /var/www/public"
 
-  # Main HTTP Web App Service
   app:
-    image: docker.io/muhammadn/opendms:1.0.3
-    restart: always
-    env_file: .env
-    depends_on: 
-      - migrate
-    volumes:
-      - .env:/var/www/.env
-      - .:/var/www
-      - ./database:/var/www/database
+    <<: *app-common
+    restart: unless-stopped
+    depends_on:
+      permissions:
+        condition: service_completed_successfully
 
   webserver:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "${MESHBEACON_PORT:-8080}:80"
     volumes:
-      - .env:/var/www/.env
-      - .:/var/www
-      - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - public-assets:/var/www/public:ro
+      - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
 
-  # Dedicated Background Queue Worker
   mqtt-worker:
-    image: docker.io/muhammadn/opendms:1.0.3
+    <<: *app-common
+    restart: unless-stopped
     depends_on:
       - app
-    restart: always
-    env_file: .env
-    volumes:
-      - .:/var/www
-      - .env:/var/www/.env
-      - ./database:/var/www/database
-    # Executes background jobs explicitly
     command: php artisan app:mqtt-subscribe
 
-  # Dedicated Queue Worker
   queue-worker:
-    image: docker.io/muhammadn/opendms:1.0.3
+    <<: *app-common
+    restart: unless-stopped
     depends_on:
       - app
-    restart: always
-    env_file: .env
-    user: "0:0"
-    volumes:
-      - .:/var/www
-      - .env:/var/www/.env
-      - ./database:/var/www/database
-    command: php artisan queue:work --tries=5 --timeout=0
+    command: php artisan queue:work --queue=sync,default --tries=5 --timeout=0
 
-  # Dedicated Task Scheduler
   scheduler:
-    image: docker.io/muhammadn/opendms:1.0.3
+    <<: *app-common
+    restart: unless-stopped
     depends_on:
       - app
-    restart: always
-    env_file: .env
-    volumes:
-      - .:/var/www
-      - .env:/var/www/.env
-      - ./database:/var/www/database
-    # Shell loop mimics cron to evaluate schedules every 60 seconds safely
-    command: /bin/sh -c "while true; do php artisan schedule:run --no-interaction; sleep 60; done"
+    command: >
+      /bin/sh -ec "while true; do
+      php artisan schedule:run --no-interaction;
+      sleep 60;
+      done"
 
-  # Mosquitto MQTT server
   mqtt-server:
     image: eclipse-mosquitto:2.1.2-alpine
-    restart: always
+    restart: unless-stopped
     ports:
-      - "1883:1883"
+      - "${MQTT_BIND_ADDRESS:-0.0.0.0}:${MQTT_BIND_PORT:-1883}:1883"
     volumes:
-      - ./services/mosquitto/config:/mosquitto/config
-      - ./services/mosquitto/data:/mosquitto/data
-      - ./services/mosquitto/log:/mosquitto/log
+      - ./services/mosquitto/config:/mosquitto/config:ro
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+
+volumes:
+  app-database:
+  app-storage:
+  public-assets:
+  mqtt-data:
+  mqtt-log:
