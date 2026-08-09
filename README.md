@@ -1,7 +1,7 @@
 # MeshBeacon
 
 <p align="center">
-  <img src="docs/images/meshbeacon-login.png" alt="MeshBeacon sign-in screen" width="900">
+  <img src="docs/images/meshbeacon-dashboard.png" alt="MeshBeacon operations dashboard" width="643">
 </p>
 
 <h3 align="center">Offline-first incident operations for mesh-connected response teams.</h3>
