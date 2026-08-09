@@ -10,7 +10,9 @@ use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Middleware\PreventDashboardWritesWhenReadonly;
 
 Route::get('/', function () {
-    return view('welcome');
+    return auth()->check()
+        ? redirect('/dashboard')
+        : redirect()->route('login');
 })->name('home');
 
 // Unauthenticated: called by Telegram's servers, protected by a secret path

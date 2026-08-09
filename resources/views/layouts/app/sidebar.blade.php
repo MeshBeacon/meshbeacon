@@ -21,11 +21,11 @@
             <flux:spacer />
 
             <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
+                <flux:sidebar.item icon="folder-git-2" href="https://github.com/9M2PJU/meshbeacon" target="_blank">
                     {{ __('Repository') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
+                <flux:sidebar.item icon="book-open-text" href="https://github.com/9M2PJU/meshbeacon/tree/main/docs" target="_blank">
                     {{ __('Documentation') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
