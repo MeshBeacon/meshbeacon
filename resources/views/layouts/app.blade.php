@@ -180,6 +180,10 @@
       </div>
     </div>
   </main>
+  
+  <footer class="py-6 text-center text-sm text-gray-500">
+    &copy; {{ date('Y') }} MeshBeacon. {{ __('All rights reserved.') }}
+  </footer>
 </div>
 @fluxScripts
 </body>

@@ -201,6 +201,9 @@
     </div>
   </div>
 
+  <footer class="mt-auto text-center text-xs text-gray-500 shrink-0">
+    &copy; {{ date('Y') }} MeshBeacon. {{ __('All rights reserved.') }}
+  </footer>
 </div>
 
 <script>
