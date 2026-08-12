@@ -6,11 +6,11 @@
     <x-settings.layout>
         <div class="grid grid-cols-1 gap-x-8 gap-y-8 py-10 first:pt-0 lg:grid-cols-3" wire:cloak>
             <div class="px-4 sm:px-0">
-                <h2 class="text-base/7 font-semibold text-white">{{ __('Two Factor Authentication') }}</h2>
-                <p class="mt-1 text-sm/6 text-gray-400">{{ __('Manage your two-factor authentication settings') }}</p>
+                <h2 class="text-base/7 font-semibold text-gray-900 dark:text-white">{{ __('Two Factor Authentication') }}</h2>
+                <p class="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">{{ __('Manage your two-factor authentication settings') }}</p>
             </div>
 
-            <div class="bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10 sm:rounded-xl lg:col-span-2">
+            <div class="bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 sm:rounded-xl lg:col-span-2">
                 <div class="px-4 py-6 sm:p-8">
                     @if ($twoFactorEnabled)
                         <div class="space-y-4">
@@ -18,7 +18,7 @@
                                 <flux:badge color="green">{{ __('Enabled') }}</flux:badge>
                             </div>
 
-                            <p class="text-sm/6 text-gray-400">
+                            <p class="text-sm/6 text-gray-500 dark:text-gray-400">
                                 {{ __('With two-factor authentication enabled, you will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
                             </p>
 
@@ -26,7 +26,7 @@
 
                             <div class="flex justify-start">
                                 <button type="button" wire:click="disable"
-                                    class="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+                                    class="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
                                     {{ __('Disable 2FA') }}
                                 </button>
                             </div>
@@ -37,12 +37,12 @@
                                 <flux:badge color="red">{{ __('Disabled') }}</flux:badge>
                             </div>
 
-                            <p class="text-sm/6 text-gray-400">
+                            <p class="text-sm/6 text-gray-500 dark:text-gray-400">
                                 {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
                             </p>
 
                             <button type="button" wire:click="enable"
-                                class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                                 {{ __('Enable 2FA') }}
                             </button>
                         </div>
