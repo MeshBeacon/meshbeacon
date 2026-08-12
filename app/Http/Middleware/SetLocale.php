@@ -22,7 +22,9 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $locale = $request->user()?->locale
-            ?? $request->session()->get('locale')
+            // Machine health routes deliberately skip StartSession so they
+            // remain useful during a database outage.
+            ?? ($request->hasSession() ? $request->session()->get('locale') : null)
             ?? config('app.locale');
 
         if (in_array($locale, self::SUPPORTED_LOCALES, true)) {

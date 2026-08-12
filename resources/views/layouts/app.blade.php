@@ -24,6 +24,7 @@
                 @php
                   $navLinks = [
                     'dashboard' => ['/dashboard', __('Dashboard')],
+                    'operations' => ['/operations', __('Operations')],
                     'status' => ['/status', __('Status')],
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
@@ -143,6 +144,12 @@
         @if(request()->is('messages'))
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Messages') }}</h1>
+          @yield('page-actions')
+        </div>
+        @endif
+        @if(request()->is('operations'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Operations') }}</h1>
           @yield('page-actions')
         </div>
         @endif

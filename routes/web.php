@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MessageLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TelegramWebhookController;
 use App\Http\Middleware\PreventDashboardWritesWhenReadonly;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return auth()->check()
@@ -21,6 +22,27 @@ Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'ha
 
 // Available to guests too, so the login page can be switched before authenticating.
 Route::post('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
+
+// Machine-facing health routes do not need a session. Keeping them outside
+// session startup lets liveness remain useful while the database is down.
+$healthMiddleware = [
+    'web',
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \App\Http\Middleware\SetLocale::class,
+];
+
+Route::get('/health/live', [HealthController::class, 'live'])
+    ->withoutMiddleware($healthMiddleware)
+    ->name('health.live');
+
+Route::get('/health/ready', [HealthController::class, 'ready'])
+    ->withoutMiddleware($healthMiddleware)
+    ->name('health.ready');
+
+Route::get('/metrics', [HealthController::class, 'metrics'])
+    ->withoutMiddleware($healthMiddleware)
+    ->name('metrics');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -65,6 +87,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
+
+    Route::get('/operations', [HealthController::class, 'operations'])->name('operations');
+    Route::get('/operations/status', [HealthController::class, 'operationsStatus'])->name('operations.status');
 });
 
 require __DIR__.'/settings.php';

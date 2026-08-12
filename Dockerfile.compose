@@ -70,6 +70,7 @@ RUN php artisan package:discover --ansi \
     && mkdir -p public/flux \
     && ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js \
     && ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js \
+    && chmod +x services/docker/worker-entrypoint.sh \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database
 
 USER www-data
