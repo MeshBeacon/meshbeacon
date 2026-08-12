@@ -1,14 +1,11 @@
-<div class="px-4 sm:px-6 lg:px-8 py-8">
-    <div class="sm:flex sm:items-center">
+<div>
+    <div class="sm:flex sm:items-center mb-4">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('TAK Forwarding Logs') }}</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">A record of all Cursor on Target (CoT) XML events automatically forwarded to the TAK network.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">A record of all Cursor on Target (CoT) XML events automatically forwarded to the TAK network.</p>
         </div>
     </div>
-    <div class="mt-8 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                <div class="ring-1 ring-gray-200 dark:ring-white/15 sm:rounded-lg">
+    <div class="flow-root">
+        <div class="-mx-4 sm:mx-0 sm:rounded-lg ring-1 ring-gray-200 dark:ring-white/15">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-white/15">
                         <thead>
                             <tr>
@@ -43,8 +40,6 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
-            </div>
         </div>
     </div>
     <div class="mt-4">
