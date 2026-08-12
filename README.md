@@ -41,13 +41,13 @@
 
 ### Linux with Docker
 
-If a user wants the default installation, they can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
+If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
 ```
 
-If they do want to configure it beforehand, they can simply pass the environment variables inline with the install command. For example, if you already downloaded `install.sh`:
+If you want to configure it beforehand, you can simply pass the environment variables inline with the install command. For example, if you already downloaded `install.sh`:
 
 ```sh
 MESHBEACON_PORT=9000 MESHBEACON_ADMIN_EMAIL="admin@mydomain.com" ./install.sh
