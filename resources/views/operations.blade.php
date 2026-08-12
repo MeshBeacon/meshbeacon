@@ -1,6 +1,6 @@
-<x-layouts::app :title="__('Operations')">
+<x-layouts::app :title="__('System Health')">
 @section('content')
-<div id="operations-page" data-status-url="{{ route('operations.status') }}" class="space-y-6">
+<div id="operations-page" data-status-url="{{ route('system-health.status') }}" class="space-y-6">
   <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <p class="text-sm text-gray-400">{{ __('Runtime health and service activity') }}</p>
@@ -87,6 +87,10 @@
     disabled: '{{ __('Disabled') }}',
     blocked: '{{ __('Blocked') }}',
     unknown: '{{ __('Unknown') }}',
+    connected: '{{ __('Connected') }}',
+    starting: '{{ __('Starting') }}',
+    disconnected: '{{ __('Disconnected') }}',
+    error: '{{ __('Error') }}',
   };
 
   const formatTime = (value) => value ? new Date(value).toLocaleString() : '-';

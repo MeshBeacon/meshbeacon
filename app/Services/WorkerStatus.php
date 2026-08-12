@@ -69,7 +69,7 @@ class WorkerStatus
         }
 
         try {
-            return now()->diffInSeconds($state['last_heartbeat_at'])
+            return now()->diffInSeconds($state['last_heartbeat_at'], true)
                 <= (int) config('observability.worker_heartbeat_ttl', 45);
         } catch (Throwable) {
             return false;

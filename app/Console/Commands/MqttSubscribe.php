@@ -6,6 +6,7 @@ use App\Jobs\ProcessMqttMessage;
 use App\Services\MqttStatus;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use PhpMqtt\Client\Contracts\MqttClient as MqttClientContract;
 use PhpMqtt\Client\Facades\MQTT;
 use Throwable;
 
@@ -42,6 +43,33 @@ class MqttSubscribe extends Command
 
         try {
             $mqtt = MQTT::connection();
+
+            // Refresh the heartbeat only while the client itself reports an
+            // active connection, and only when real message traffic hasn't
+            // already kept last_heartbeat_at fresh. This keeps the idle
+            // keepalive heartbeat from competing with markMessage() for the
+            // shared MqttStatus persist-throttle window during busy periods,
+            // while still preventing a dead/reconnecting broker link from
+            // being masked as healthy.
+            $lastCheckedAt = 0.0;
+            $mqtt->registerLoopEventHandler(function (MqttClientContract $mqtt) use ($status, &$lastCheckedAt): void {
+                if (! $mqtt->isConnected()) {
+                    return;
+                }
+
+                $now = microtime(true);
+
+                if ($now - $lastCheckedAt < 5) {
+                    return;
+                }
+
+                $lastCheckedAt = $now;
+
+                if ($status->needsWorkerHeartbeat()) {
+                    $status->markWorkerHeartbeat();
+                }
+            });
+
             $mqtt->subscribe('hub/event', function (string $topic, string $message) use ($status): void {
                 $status->markMessage();
                 ProcessMqttMessage::dispatch($message);

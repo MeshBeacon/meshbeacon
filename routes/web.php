@@ -47,8 +47,6 @@ Route::get('/metrics', [HealthController::class, 'metrics'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
-    Route::get('/operations', [HealthController::class, 'operations']);
-    Route::get('/operations/status', [HealthController::class, 'operationsStatus']);
     Route::get('/kiosk', [DashboardController::class, 'kiosk']);
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
@@ -91,8 +89,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
 
-    Route::get('/operations', [HealthController::class, 'operations'])->name('operations');
-    Route::get('/operations/status', [HealthController::class, 'operationsStatus'])->name('operations.status');
+    Route::get('/system-health', [HealthController::class, 'operations'])->name('system-health');
+    Route::get('/system-health/status', [HealthController::class, 'operationsStatus'])->name('system-health.status');
 });
 
 require __DIR__.'/settings.php';
