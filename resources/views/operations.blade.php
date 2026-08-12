@@ -6,38 +6,58 @@
       <p class="text-sm text-gray-400">{{ __('Runtime health and service activity') }}</p>
       <p id="operations-updated" class="mt-1 text-xs text-gray-500">{{ __('Loading status…') }}</p>
     </div>
-    <div id="operations-overall" class="inline-flex w-fit items-center gap-2 rounded-md bg-white/5 px-3 py-2 text-sm font-medium text-gray-300 ring-1 ring-inset ring-white/10">
-      <span class="size-2 rounded-full bg-gray-500"></span>
-      <span>{{ __('Checking') }}</span>
+    <div id="operations-overall" class="inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10">
+      <span class="relative flex size-2">
+        <span id="operations-overall-ping" class="absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+        <span id="operations-overall-dot" class="relative inline-flex size-2 rounded-full bg-gray-500"></span>
+      </span>
+      <span id="operations-overall-label">{{ __('Checking') }}</span>
     </div>
   </div>
 
-  <dl id="operations-checks" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-    <div class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Database') }}</dt>
-      <dd data-check="database" class="mt-2 text-sm text-gray-300">{{ __('Checking…') }}</dd>
-    </div>
-    <div class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Migrations') }}</dt>
-      <dd data-check="migrations" class="mt-2 text-sm text-gray-300">{{ __('Checking…') }}</dd>
-    </div>
-    <div class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('MQTT broker') }}</dt>
-      <dd data-check="mqtt" class="mt-2 text-sm text-gray-300">{{ __('Checking…') }}</dd>
-    </div>
-    <div class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Queue') }}</dt>
-      <dd data-check="queue" class="mt-2 text-sm text-gray-300">{{ __('Checking…') }}</dd>
-    </div>
-    <div class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10 sm:col-span-2">
-      <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Workers') }}</dt>
-      <dd data-check="workers" class="mt-2 text-sm text-gray-300">{{ __('Checking…') }}</dd>
-    </div>
-  </dl>
+  <div>
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-white">{{ __('Health checks') }}</h2>
+    <dl id="operations-checks" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+        <div class="flex items-center justify-between gap-2">
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Database') }}</dt>
+          <span data-check-dot="database" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
+        </div>
+        <dd data-check="database" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+      </div>
+      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+        <div class="flex items-center justify-between gap-2">
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Migrations') }}</dt>
+          <span data-check-dot="migrations" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
+        </div>
+        <dd data-check="migrations" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+      </div>
+      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+        <div class="flex items-center justify-between gap-2">
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('MQTT broker') }}</dt>
+          <span data-check-dot="mqtt" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
+        </div>
+        <dd data-check="mqtt" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+      </div>
+      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+        <div class="flex items-center justify-between gap-2">
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Queue') }}</dt>
+          <span data-check-dot="queue" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
+        </div>
+        <dd data-check="queue" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+      </div>
+      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10 sm:col-span-2">
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Workers') }}</dt>
+        <dd id="operations-workers" class="mt-2 space-y-1.5 text-sm font-medium text-white">
+          <p class="text-gray-400">{{ __('Checking…') }}</p>
+        </dd>
+      </div>
+    </dl>
+  </div>
 
   <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-    <section class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <h2 class="text-sm font-semibold text-white">{{ __('Queue activity') }}</h2>
+    <section class="rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('Queue activity') }}</h2>
       <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
           <dt class="text-gray-500">{{ __('Pending jobs') }}</dt>
@@ -54,8 +74,8 @@
       </dl>
     </section>
 
-    <section class="rounded-lg bg-gray-900/50 p-4 ring-1 ring-inset ring-white/10">
-      <h2 class="text-sm font-semibold text-white">{{ __('MQTT activity') }}</h2>
+    <section class="rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('MQTT activity') }}</h2>
       <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
           <dt class="text-gray-500">{{ __('Connection') }}</dt>
@@ -93,6 +113,25 @@
     error: '{{ __('Error') }}',
   };
 
+  const overallLabels = {
+    ok: '{{ __('Operational') }}',
+    degraded: '{{ __('Degraded') }}',
+    down: '{{ __('System down') }}',
+  };
+  const overallStyle = {
+    ok: { text: 'text-emerald-400', dot: 'bg-emerald-400', ping: 'bg-emerald-400' },
+    degraded: { text: 'text-amber-400', dot: 'bg-amber-400', ping: 'bg-amber-400' },
+    down: { text: 'text-red-400', dot: 'bg-red-500', ping: 'bg-red-500' },
+  };
+  const dotColor = {
+    ok: 'bg-emerald-400',
+    warning: 'bg-amber-400',
+    failed: 'bg-red-500',
+    disabled: 'bg-gray-500',
+    blocked: 'bg-gray-500',
+    unknown: 'bg-gray-500',
+  };
+
   const formatTime = (value) => value ? new Date(value).toLocaleString() : '-';
   const setText = (id, value) => {
     const element = document.getElementById(id);
@@ -101,22 +140,43 @@
 
   function renderStatus(payload) {
     const overall = document.getElementById('operations-overall');
-    const overallLabel = overall?.querySelector('span:last-child');
-    const overallDot = overall?.querySelector('span:first-child');
-    const overallOk = payload.status === 'ok';
+    const overallLabel = document.getElementById('operations-overall-label');
+    const overallDot = document.getElementById('operations-overall-dot');
+    const overallPing = document.getElementById('operations-overall-ping');
+    const overallState = payload.ready === false ? 'down' : (payload.status === 'degraded' ? 'degraded' : 'ok');
+    const style = overallStyle[overallState];
 
-    if (overallLabel) overallLabel.textContent = overallOk ? '{{ __('Operational') }}' : '{{ __('Degraded') }}';
-    if (overallDot) overallDot.className = `size-2 rounded-full ${overallOk ? 'bg-emerald-400' : 'bg-amber-400'}`;
+    if (overall) overall.className = `inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium ${style.text} ring-1 ring-inset ring-white/10`;
+    if (overallLabel) overallLabel.textContent = overallLabels[overallState];
+    if (overallDot) overallDot.className = `relative inline-flex size-2 rounded-full ${style.dot}`;
+    if (overallPing) overallPing.className = `absolute inline-flex h-full w-full rounded-full opacity-75 ${overallState === 'ok' ? `animate-ping ${style.ping}` : style.ping}`;
     setText('operations-updated', `{{ __('Updated') }} ${formatTime(payload.generated_at)}`);
 
     for (const [name, check] of Object.entries(payload.checks)) {
-      const element = document.querySelector(`[data-check="${name}"]`);
-      if (!element) continue;
       if (name === 'workers') {
-        element.textContent = Object.entries(check).map(([worker, state]) => `${worker}: ${labels[state.status] || state.status}`).join(' | ');
-      } else {
-        element.textContent = labels[check.status] || check.status;
+        const workersEl = document.getElementById('operations-workers');
+        if (workersEl) {
+          workersEl.innerHTML = '';
+          for (const [worker, state] of Object.entries(check)) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between gap-2';
+            row.innerHTML = `
+              <span class="text-sm capitalize text-gray-300">${worker}</span>
+              <span class="inline-flex items-center gap-1.5 text-sm font-medium text-white">
+                <span class="size-2 shrink-0 rounded-full ${dotColor[state.status] || 'bg-gray-500'}"></span>
+                ${labels[state.status] || state.status}
+              </span>`;
+            workersEl.appendChild(row);
+          }
+        }
+        continue;
       }
+
+      const element = document.querySelector(`[data-check="${name}"]`);
+      if (element) element.textContent = labels[check.status] || check.status;
+
+      const dot = document.querySelector(`[data-check-dot="${name}"]`);
+      if (dot) dot.className = `size-2 shrink-0 rounded-full ${dotColor[check.status] || 'bg-gray-500'}`;
     }
 
     const queue = payload.checks.queue;
@@ -139,7 +199,13 @@
       renderStatus(await response.json());
     } catch (error) {
       setText('operations-updated', '{{ __('Status unavailable') }}');
-      const overallLabel = document.querySelector('#operations-overall span:last-child');
+      const overall = document.getElementById('operations-overall');
+      const overallLabel = document.getElementById('operations-overall-label');
+      const overallDot = document.getElementById('operations-overall-dot');
+      const overallPing = document.getElementById('operations-overall-ping');
+      if (overall) overall.className = 'inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10';
+      if (overallDot) overallDot.className = 'relative inline-flex size-2 rounded-full bg-gray-500';
+      if (overallPing) overallPing.className = 'absolute inline-flex h-full w-full rounded-full opacity-75 bg-gray-500';
       if (overallLabel) overallLabel.textContent = '{{ __('Unable to check') }}';
     }
   }

@@ -7,6 +7,14 @@ COPY ./supervisor/* /etc/supervisor/conf.d/
 VOLUME /var/www/html/storage
 # Now we set root / at /var/www/html
 WORKDIR /var/www/html
+
+RUN composer install --no-dev --optimize-autoloader
+RUN chmod +x services/docker/worker-entrypoint.sh
+
+#RUN mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
+#RUN chmod -R 777 /var/www/html/storage
+#RUN php artisan config:clear && php artisan cache:clear && php artisan view:clear
+
 # Run command at WORKDIR
 # Nginx's generated config serves *.js/*.css as static files with no
 # fallback to PHP, so Flux's dynamically-routed script (normally served
