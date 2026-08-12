@@ -199,6 +199,10 @@ The deployment method you choose determines which files you need to edit to cust
 
 ## Configuration
 
+- [Custom Domains & BunkerWeb WAF](docs/CUSTOM_DOMAINS.md)
+- [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
+- [OpenTAKServer Integration](docs/TAK_BRIDGE.md)
+
 The full template lives in [.env.example](.env.example).
 
 | Variable | Purpose | Example |
