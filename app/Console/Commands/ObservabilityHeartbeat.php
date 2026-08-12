@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\MqttStatus;
 use App\Services\WorkerStatus;
 use Illuminate\Console\Command;
 
@@ -12,7 +11,12 @@ class ObservabilityHeartbeat extends Command
 
     protected $description = 'Record a worker heartbeat for operational readiness checks.';
 
-    public function handle(WorkerStatus $workers, MqttStatus $mqtt): int
+    /**
+     * This only proves the worker's OS process is alive. It intentionally does
+     * not touch MqttStatus: that must only reflect a genuine broker connection,
+     * which MqttSubscribe reports for itself from inside the MQTT client loop.
+     */
+    public function handle(WorkerStatus $workers): int
     {
         $worker = (string) $this->argument('worker');
 
@@ -21,10 +25,6 @@ class ObservabilityHeartbeat extends Command
         }
 
         $workers->heartbeat($worker);
-
-        if ($worker === 'mqtt') {
-            $mqtt->markWorkerHeartbeat();
-        }
 
         return self::SUCCESS;
     }

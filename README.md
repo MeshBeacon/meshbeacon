@@ -127,6 +127,10 @@ The field node keeps the local record when the central server is unavailable. Re
 
 Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
 
+### Tuning healthcheck cadence for constrained field hardware
+
+Each `app`, `mqtt-worker`, `queue-worker`, and `scheduler` healthcheck runs `php artisan observability:check`, which boots a short-lived PHP CLI process on every poll. The defaults (`MESHBEACON_HC_INTERVAL=10s`, `MESHBEACON_WORKER_HC_INTERVAL=15s`) suit an always-on server, but on constrained field hardware (a Raspberry Pi, for example) polling that often across several containers adds up in CPU and memory churn for little practical benefit. Set both variables in `.env` to a larger interval, such as `30s`-`60s`, to reduce that overhead - the underlying heartbeat TTLs (`OBSERVABILITY_MQTT_HEARTBEAT_TTL`, `OBSERVABILITY_WORKER_HEARTBEAT_TTL`, both 45s by default) already tolerate slower detection than the default poll cadence provides.
+
 ## Pre-built Docker images
 
 Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
@@ -207,6 +211,8 @@ The full template lives in [.env.example](.env.example).
 | `APP_DEBUG` | Debug mode | `false` |
 | `MESHBEACON_IMAGE` | Compose image | `meshbeacon:local` |
 | `MESHBEACON_PORT` | Web host port | `8080` |
+| `MESHBEACON_HC_INTERVAL` | `app` container healthcheck poll interval | `10s` |
+| `MESHBEACON_WORKER_HC_INTERVAL` | `mqtt-worker`/`queue-worker`/`scheduler` healthcheck poll interval | `15s` |
 | `MESHBEACON_ADMIN_EMAIL` | First administrator email | `admin@example.com` |
 | `MESHBEACON_ADMIN_PASSWORD` | First administrator password | A strong unique value |
 | `DB_CONNECTION` | Database driver | `sqlite`, `mysql`, or `pgsql` |

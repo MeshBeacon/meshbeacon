@@ -89,7 +89,7 @@ class QueueStatus
             $state = $this->snapshot();
             $lastActivity = $state['last_processing_at'] ?? $state['last_processed_at'];
 
-            if ($lastActivity && now()->diffInSeconds($lastActivity) < self::PERSIST_INTERVAL) {
+            if ($lastActivity && now()->diffInSeconds($lastActivity, true) < self::PERSIST_INTERVAL) {
                 return;
             }
 

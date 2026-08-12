@@ -28,14 +28,14 @@ class HealthTest extends TestCase
 
     public function test_operations_page_requires_authentication(): void
     {
-        $this->get('/operations')
+        $this->get('/system-health')
             ->assertRedirect('/login');
     }
 
     public function test_authenticated_users_can_view_operations_page(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/operations')
+            ->get('/system-health')
             ->assertOk()
             ->assertSee('Runtime health and service activity');
     }

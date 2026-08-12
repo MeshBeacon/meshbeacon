@@ -50,6 +50,22 @@ class MqttStatus
     }
 
     /**
+     * Whether an idle-keepalive heartbeat is actually needed right now. Real
+     * message traffic already refreshes last_heartbeat_at via markMessage(),
+     * so this only returns true once that value is getting stale - keeping the
+     * synthetic heartbeat from competing with message persistence for the
+     * shared persist-throttle window during periods of active traffic.
+     */
+    public function needsWorkerHeartbeat(): bool
+    {
+        $state = $this->snapshot();
+        $ttl = (int) config('observability.mqtt_heartbeat_ttl', 45);
+        $refreshAfter = max(5, intdiv($ttl, 2));
+
+        return ! $this->isRecent($state['last_heartbeat_at'], $refreshAfter);
+    }
+
+    /**
      * Record an incoming packet and periodically persist its timestamp.
      */
     public function markMessage(): void
@@ -97,7 +113,8 @@ class MqttStatus
             'last_message_at' => null,
             'last_heartbeat_at' => null,
             'last_error' => null,
-            'last_persisted_at' => null,
+            'last_message_persisted_at' => null,
+            'last_heartbeat_persisted_at' => null,
         ];
 
         try {
@@ -122,6 +139,24 @@ class MqttStatus
     }
 
     /**
+     * The connection state to display. A cached "connected" status is only
+     * trustworthy while the heartbeat stays fresh; once it goes stale (worker
+     * crashed, was killed, or the broker link died silently) this reports
+     * "disconnected" instead of echoing the last known status forever.
+     */
+    public function connectionState(): string
+    {
+        $state = $this->snapshot();
+
+        if ($state['status'] === 'connected'
+            && ! $this->isRecent($state['last_heartbeat_at'], (int) config('observability.mqtt_heartbeat_ttl', 45))) {
+            return 'disconnected';
+        }
+
+        return $state['status'];
+    }
+
+    /**
      * @param  array<string, mixed>  $changes
      */
     private function update(array $changes, bool $force = false): void
@@ -131,7 +166,15 @@ class MqttStatus
             $previousStatus = $state['status'];
             $state = array_merge($state, $changes);
             $now = now();
-            $lastPersistedAt = $state['last_persisted_at'];
+
+            // Message and heartbeat writes are throttled independently so a
+            // synthetic keepalive heartbeat can never consume the persist
+            // window that real message activity needs in order to record
+            // itself (and vice versa).
+            $throttleKey = array_key_exists('last_message_at', $changes)
+                ? 'last_message_persisted_at'
+                : 'last_heartbeat_persisted_at';
+            $lastPersistedAt = $state[$throttleKey];
 
             $shouldPersist = $force
                 || $previousStatus !== $state['status']
@@ -142,7 +185,7 @@ class MqttStatus
                 return;
             }
 
-            $state['last_persisted_at'] = $now->toIso8601String();
+            $state[$throttleKey] = $now->toIso8601String();
             Cache::forever(self::CACHE_KEY, $state);
         } catch (Throwable) {
             // Observability must never stop message ingestion.
@@ -156,7 +199,7 @@ class MqttStatus
         }
 
         try {
-            return now()->diffInSeconds($timestamp) <= $ttl;
+            return now()->diffInSeconds($timestamp, true) <= $ttl;
         } catch (Throwable) {
             return false;
         }

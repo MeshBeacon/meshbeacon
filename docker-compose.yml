@@ -51,7 +51,7 @@ services:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "php", "artisan", "observability:check", "app"]
-      interval: 10s
+      interval: ${MESHBEACON_HC_INTERVAL:-10s}
       timeout: 10s
       retries: 5
       start_period: 15s
@@ -85,7 +85,7 @@ services:
     command: ["/var/www/services/docker/worker-entrypoint.sh", "mqtt", "php", "artisan", "app:mqtt-subscribe"]
     healthcheck:
       test: ["CMD", "php", "artisan", "observability:check", "worker", "--worker=mqtt"]
-      interval: 15s
+      interval: ${MESHBEACON_WORKER_HC_INTERVAL:-15s}
       timeout: 10s
       retries: 4
       start_period: 20s
@@ -99,7 +99,7 @@ services:
     command: ["/var/www/services/docker/worker-entrypoint.sh", "queue", "php", "artisan", "queue:work", "--queue=sync,default", "--tries=5", "--timeout=0"]
     healthcheck:
       test: ["CMD", "php", "artisan", "observability:check", "worker", "--worker=queue"]
-      interval: 15s
+      interval: ${MESHBEACON_WORKER_HC_INTERVAL:-15s}
       timeout: 10s
       retries: 4
       start_period: 20s
@@ -113,7 +113,7 @@ services:
     command: ["/var/www/services/docker/worker-entrypoint.sh", "scheduler", "/bin/sh", "-ec", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
     healthcheck:
       test: ["CMD", "php", "artisan", "observability:check", "worker", "--worker=scheduler"]
-      interval: 15s
+      interval: ${MESHBEACON_WORKER_HC_INTERVAL:-15s}
       timeout: 10s
       retries: 4
       start_period: 20s

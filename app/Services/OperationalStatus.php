@@ -277,7 +277,7 @@ class OperationalStatus
             'status' => ! $required ? 'disabled' : ($connectionHealthy ? 'ok' : 'failed'),
             'ready' => ! $required || $connectionHealthy,
             'required' => $required,
-            'connection_status' => $state['status'],
+            'connection_status' => $this->mqttStatus->connectionState(),
             'connected_at' => $state['connected_at'],
             'last_message_at' => $state['last_message_at'],
             'last_heartbeat_at' => $state['last_heartbeat_at'],

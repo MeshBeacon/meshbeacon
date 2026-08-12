@@ -24,11 +24,11 @@
                 @php
                   $navLinks = [
                     'dashboard' => ['/dashboard', __('Dashboard')],
-                    'operations' => ['/operations', __('Operations')],
                     'status' => ['/status', __('Status')],
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
                     'messages' => ['/messages', __('Messages')],
+                    'operations' => ['/system-health', __('System Health')],
                   ];
                 @endphp
                 <div class="ml-10 flex items-baseline space-x-4">
@@ -40,6 +40,18 @@
             </div>
             <div class="hidden md:block">
               <div class="ml-4 flex items-center gap-3 md:ml-6">
+                <a href="/system-health" class="system-health-indicator inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10 hover:bg-white/5"
+                  data-label-ok="{{ __('All systems normal') }}"
+                  data-label-degraded="{{ __('Degraded') }}"
+                  data-label-down="{{ __('System down') }}"
+                  data-label-unknown="{{ __('Status unknown') }}">
+                  <span class="relative flex size-2">
+                    <span class="system-health-dot-ping absolute inline-flex h-full w-full rounded-full bg-gray-500 opacity-0"></span>
+                    <span class="system-health-dot relative inline-flex size-2 rounded-full bg-gray-500"></span>
+                  </span>
+                  <span class="system-health-label">{{ __('Checking…') }}</span>
+                </a>
+
                 @include('partials.locale-switcher')
 
                 <!-- Profile dropdown -->
@@ -99,6 +111,17 @@
             </div>
           </div>
           <div class="mt-3 space-y-1 px-2">
+            <a href="/system-health" class="system-health-indicator flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white"
+              data-label-ok="{{ __('All systems normal') }}"
+              data-label-degraded="{{ __('Degraded') }}"
+              data-label-down="{{ __('System down') }}"
+              data-label-unknown="{{ __('Status unknown') }}">
+              <span class="relative flex size-2">
+                <span class="system-health-dot-ping absolute inline-flex h-full w-full rounded-full bg-gray-500 opacity-0"></span>
+                <span class="system-health-dot relative inline-flex size-2 rounded-full bg-gray-500"></span>
+              </span>
+              <span class="system-health-label">{{ __('Checking…') }}</span>
+            </a>
             <div class="px-3 pb-2">@include('partials.locale-switcher')</div>
             <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">{{ __('Your profile') }}</a>
             <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white">{{ __('Settings') }}</a>
@@ -147,9 +170,9 @@
           @yield('page-actions')
         </div>
         @endif
-        @if(request()->is('operations'))
+        @if(request()->is('system-health'))
         <div class="flex items-center justify-between">
-          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Operations') }}</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('System Health') }}</h1>
           @yield('page-actions')
         </div>
         @endif
@@ -260,6 +283,40 @@ if (chartEl && typeof ApexCharts !== 'undefined') {
 
   loadHourlyData();
   setInterval(loadHourlyData, 60_000);
+}
+
+const healthIndicators = document.querySelectorAll('.system-health-indicator');
+
+if (healthIndicators.length) {
+  const applyHealthState = (state, label) => {
+    const dotColor  = { ok: 'bg-fg-success', degraded: 'bg-yellow-500', down: 'bg-red-500', unknown: 'bg-gray-500' }[state];
+    const showPing  = state === 'down';
+
+    healthIndicators.forEach((el) => {
+      const dot  = el.querySelector('.system-health-dot');
+      const ping = el.querySelector('.system-health-dot-ping');
+      const text = el.querySelector('.system-health-label');
+
+      dot.className  = `system-health-dot relative inline-flex size-2 rounded-full ${dotColor}`;
+      ping.className  = `system-health-dot-ping absolute inline-flex h-full w-full rounded-full ${dotColor} ${showPing ? 'animate-ping opacity-75' : 'opacity-0'}`;
+      text.textContent = label ?? el.dataset[`label${state.charAt(0).toUpperCase()}${state.slice(1)}`];
+    });
+  };
+
+  async function pollSystemHealth() {
+    try {
+      const response = await fetch('{{ route('system-health.status') }}', { headers: { 'Accept': 'application/json' } });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const report = await response.json();
+      const state  = report.ready === false ? 'down' : (report.status === 'degraded' ? 'degraded' : 'ok');
+      applyHealthState(state, healthIndicators[0]?.dataset[`label${state.charAt(0).toUpperCase()}${state.slice(1)}`]);
+    } catch (e) {
+      applyHealthState('unknown', healthIndicators[0]?.dataset.labelUnknown);
+    }
+  }
+
+  pollSystemHealth();
+  setInterval(pollSystemHealth, 20_000);
 }
 </script>
 </html>
