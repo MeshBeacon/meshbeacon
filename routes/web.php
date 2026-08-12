@@ -23,6 +23,7 @@ Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'ha
 // Available to guests too, so the login page can be switched before authenticating.
 Route::post('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
 
+
 // Machine-facing health routes do not need a session. Keeping them outside
 // session startup lets liveness remain useful while the database is down.
 $healthMiddleware = [
@@ -46,6 +47,8 @@ Route::get('/metrics', [HealthController::class, 'metrics'])
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/operations', [HealthController::class, 'operations']);
+    Route::get('/operations/status', [HealthController::class, 'operationsStatus']);
     Route::get('/kiosk', [DashboardController::class, 'kiosk']);
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
