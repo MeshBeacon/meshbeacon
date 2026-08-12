@@ -205,7 +205,7 @@
   </main>
   
   <footer class="py-6 text-center text-sm text-gray-500">
-    &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">MeshBeacon</a>. {{ __('All rights reserved.') }}
+    &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">MeshBeacon</a>
   </footer>
 </div>
 @fluxScripts
