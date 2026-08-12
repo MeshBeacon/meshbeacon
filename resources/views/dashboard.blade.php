@@ -67,7 +67,7 @@
       </svg>
     </div>
     <input id="incidents-search" type="text" placeholder="{{ __('Search duck, notes, assignee…') }}"
-      class="w-full rounded-md min-w-0 bg-gray-100 dark:bg-white/5 pl-9 pr-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500" />
+      class="w-full rounded-md min-w-0 bg-gray-100 dark:bg-white/5 pl-9 pr-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500" />
   </div>
   <div id="incidents-list" class="@container">
     <p class="text-xs text-gray-500 italic">{{ __('Loading…') }}</p>

@@ -2,7 +2,7 @@
 @section('page-actions')
   <div class="flex items-center gap-2">
     <button command="show-modal" commandfor="send-duck-dialog"
-      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M1 8.74C1 9.99 2.01 11 3.26 11h1.04l.56 2.8a.75.75 0 0 0 1.46-.2L6.998 11H9.5C10.881 11 12 9.881 12 8.5v-5C12 2.119 10.881 1 9.5 1h-6C2.119 1 1 2.119 1 3.5v5.24ZM13 5.36c.44.17.75.6.75 1.11V8.5a3 3 0 0 1-3 3H9.499l-.044.222A2.75 2.75 0 0 0 12 9.5V4.25c.57.22 1 .77 1 1.11Z" clip-rule="evenodd" />
       </svg>
@@ -76,7 +76,7 @@
       </label>
 
       <el-select id="incident-filter" name="incident-filter" value="" class="block w-36">
-        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
+        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500 sm:text-sm/6">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Incidents') }}</el-selectedcontent>
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 dark:text-gray-400 sm:size-4">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -84,9 +84,9 @@
         </button>
         <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
           @foreach ([['', __('All Incidents')], ['any', __('Has Incident')], ['open', __('Open')], ['acknowledged', __('Acknowledged')], ['responding', __('Responding')]] as [$val, $label])
-          <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ $label }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
@@ -97,40 +97,40 @@
       </el-select>
 
       <el-select id="urgency-filter" name="urgency-filter" value="" class="block w-36">
-        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
+        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500 sm:text-sm/6">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Urgency') }}</el-selectedcontent>
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 dark:text-gray-400 sm:size-4">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
           </svg>
         </button>
         <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
-          <el-option value="" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('All Urgency') }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
             </span>
           </el-option>
-          <el-option value="0" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="0" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Low') }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
             </span>
           </el-option>
-          <el-option value="1" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="1" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Medium') }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
             </span>
           </el-option>
-          <el-option value="2" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="2" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('Critical') }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
@@ -146,7 +146,7 @@
           </svg>
         </div>
         <input id="duck-search" type="text" placeholder="{{ __('Search duck ID…') }}"
-          class="w-56 rounded-md bg-white dark:bg-gray-800 py-1.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+          class="w-56 rounded-md bg-white dark:bg-gray-800 py-1.5 pl-9 pr-3 text-sm text-gray-900 dark:text-white placeholder-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
       </div>
     </div>
   </div>
@@ -202,7 +202,7 @@
                 <div class="flex items-start gap-1.5">
                   <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
-                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                     {{ $mamaduck->gps_batt }}%
                   </span>
@@ -252,7 +252,7 @@
                 <div class="flex items-start gap-1.5">
                   <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
-                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                     {{ $mamaduck->gps_batt }}%
                   </span>
@@ -315,7 +315,7 @@
     </div>
     <div data-gps-warning-duck="{{ $mamaduck->duck_id }}">
     @if ($mamaduck->gps_unavailable)
-      <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-yellow-400">
+      <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-orange-600 dark:text-orange-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
@@ -371,7 +371,7 @@
                 </iframe>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
-                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-yellow-400 hover:text-yellow-300">{{ __('Open in Google Maps') }} &rarr;</a>
+                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in Google Maps') }} &rarr;</a>
                 <button command="close" commandfor="{{ $mapDialogId }}" class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">{{ __('Close') }}</button>
               </div>
             </el-dialog-panel>
@@ -398,7 +398,7 @@
   <input type="hidden" name="duck_id" value="{{ $mamaduck->duck_id }}">
   <div class="flex-1 space-y-12 overflow-y-auto">
     <div class="border-b border-gray-200 dark:border-white/10 pb-3">
-      <h2 class="text-base/7 font-semibold text-gray-900 dark:text-white">{{ __('Message') }} <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
+      <h2 class="text-base/7 font-semibold text-gray-900 dark:text-white">{{ __('Message') }} <span class="font-mono text-orange-600 dark:text-orange-400">{{ $mamaduck->duck_id }}</span></h2>
       <p class="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
 
         <!-- Last known GPS location - updated by pollHistory() -->
@@ -413,7 +413,7 @@
         <div class="col-span-full mt-4">
           <label for="about" class="block text-sm/6 font-medium text-gray-900 dark:text-white">{{ __('New message') }}</label>
           <div class="mt-2">
-            <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500 sm:text-sm/6"></textarea>
+            <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500 sm:text-sm/6"></textarea>
           </div>
           <p class="mt-1 flex justify-end text-xs text-gray-500"><span class="char-count">0</span>&nbsp;/ 200</p>
         </div>
@@ -421,7 +421,7 @@
   </div>
 
   <div class="mt-2 flex shrink-0 items-center gap-3">
-            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">{{ __('Send Message') }}</button>
+            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">{{ __('Send Message') }}</button>
             <span class="send-status text-xs"></span>
   </div>
 </form>
@@ -499,13 +499,13 @@
                     <label class="block text-sm/6 font-medium text-gray-900 dark:text-white">{{ __('Duck ID') }}</label>
                     <div class="mt-2">
                       <input type="text" name="duck_id" maxlength="50" placeholder="e.g. MAMAMUHAMMAD"
-                        class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+                        class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
                     </div>
                   </div>
                   <div class="col-span-full mt-4">
                     <label class="block text-sm/6 font-medium text-gray-900 dark:text-white">{{ __('New message') }}</label>
                     <div class="mt-2">
-                      <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500 sm:text-sm/6"></textarea>
+                      <textarea name="message" rows="3" maxlength="200" class="msg-textarea block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500 sm:text-sm/6"></textarea>
                     </div>
                     <p class="mt-1 flex justify-end text-xs text-gray-500"><span class="char-count">0</span>&nbsp;/ 200</p>
                   </div>
@@ -513,7 +513,7 @@
               </div>
               <div class="mt-2 flex shrink-0 items-center gap-3">
                 <button type="submit" command="close" commandfor="send-duck-dialog"
-                  class="duck-send-message w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+                  class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
                   {{ __('Send Message') }}
                 </button>
                 <span class="send-status text-xs"></span>

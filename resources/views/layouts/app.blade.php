@@ -26,7 +26,7 @@
             <div class="flex items-center">
               <a href="/dashboard" class="flex items-center gap-3 shrink-0 group">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-10 group-hover:opacity-80 transition-opacity">
-                <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-yellow-400 transition-colors">MeshBeacon</span>
+                <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-orange-600 dark:text-orange-400 transition-colors">MeshBeacon</span>
               </a>
               <div class="hidden md:block">
                 @php
@@ -53,7 +53,7 @@
               <div class="ml-4 flex items-center gap-3 md:ml-6">
                 @include('partials.locale-switcher')
 
-                <button type="button" onclick="const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.theme = t; document.documentElement.classList.toggle('dark');" class="rounded-full bg-white dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-yellow-500" title="{{ __('Toggle theme') }}">
+                <button type="button" onclick="const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.theme = t; document.documentElement.classList.toggle('dark');" class="rounded-full bg-white dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-orange-500" title="{{ __('Toggle theme') }}">
                   <span class="sr-only">{{ __('Toggle dark mode') }}</span>
                   <svg class="size-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
@@ -65,7 +65,7 @@
 
                 <!-- Profile dropdown -->
                 <el-dropdown class="relative ml-3">
-                  <button class="relative flex max-w-xs items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+                  <button class="relative flex max-w-xs items-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
                     <span class="absolute -inset-1.5"></span>
                     <span class="sr-only">{{ __('Open user menu') }}</span>
                     <span class="flex size-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-sm font-medium text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10">
@@ -85,7 +85,7 @@
             </div>
             <div class="-mr-2 flex md:hidden">
               <!-- Mobile menu button -->
-              <button type="button" command="--toggle" commandfor="mobile-menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-yellow-500">
+              <button type="button" command="--toggle" commandfor="mobile-menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-orange-500">
                 <span class="absolute -inset-0.5"></span>
                 <span class="sr-only">{{ __('Open main menu') }}</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 [[aria-expanded='true']_&]:hidden">

@@ -2,23 +2,23 @@
 @section('page-actions')
   <div class="flex flex-wrap items-center gap-2">
     <input id="report-from" type="date" value="{{ $from }}"
-      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
     <span class="text-sm text-gray-500 dark:text-gray-400">to</span>
     <input id="report-to" type="date" value="{{ $to }}"
-      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
     <button id="report-apply-btn" type="button"
-      class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       {{ __('Apply') }}
     </button>
     <a id="report-export-csv" href="{{ route('reports.export', ['from' => $from, 'to' => $to]) }}"
-      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M8 1a.75.75 0 0 1 .75.75v6.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 1.06-1.06l2.72 2.72V1.75A.75.75 0 0 1 8 1ZM3.5 12.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
       </svg>
       {{ __('CSV') }}
     </a>
     <a id="report-export-print" href="{{ route('reports.print', ['from' => $from, 'to' => $to]) }}" target="_blank"
-      class="inline-flex items-center gap-1.5 rounded-md bg-yellow-500 px-3 py-1.5 text-sm font-semibold text-gray-900 hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-gray-900 hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M5 2.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2.5H5V2.5ZM4 6a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h1v1.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V12h1a1 1 0 0 0 1-1V8a2 2 0 0 0-2-2H4Zm2 6v-1h4v1H6Z" />
       </svg>
@@ -109,7 +109,7 @@
         </svg>
       </div>
       <input id="report-incidents-search" type="text" placeholder="{{ __('Search duck, notes, assignee…') }}"
-        class="w-full rounded-md min-w-0 bg-gray-100 dark:bg-white/5 pl-9 pr-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+        class="w-full rounded-md min-w-0 bg-gray-100 dark:bg-white/5 pl-9 pr-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
     </div>
     <div class="overflow-x-auto rounded-lg ring-1 ring-gray-200 dark:ring-white/10">
       <table class="min-w-full divide-y divide-white/10">
@@ -273,9 +273,9 @@
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${formatDuration(inc.ack_seconds)}</td>
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${formatDuration(inc.resolve_seconds)}</td>
           <td class="px-3 py-2 text-right text-sm">
-            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/export" class="text-yellow-400 hover:text-yellow-300">CSV</a>
+            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/export" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">CSV</a>
             <span class="text-gray-600">&middot;</span>
-            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/print" target="_blank" class="text-yellow-400 hover:text-yellow-300">Print</a>
+            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/print" target="_blank" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Print</a>
           </td>
         </tr>
       `).join('');
