@@ -13,10 +13,10 @@
 <p align="center">Receive telemetry, track incidents, send mesh commands, and keep working when the uplink disappears.</p>
 
 <p align="center">
-  <a href="https://github.com/9M2PJU/meshbeacon/actions/workflows/tests.yml"><img src="https://github.com/9M2PJU/meshbeacon/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests"></a>
-  <a href="https://github.com/9M2PJU/meshbeacon/actions/workflows/lint.yml"><img src="https://github.com/9M2PJU/meshbeacon/actions/workflows/lint.yml/badge.svg?branch=main" alt="Lint"></a>
-  <a href="https://github.com/9M2PJU/meshbeacon/blob/main/LICENSE"><img src="https://img.shields.io/github/license/9M2PJU/meshbeacon" alt="Apache 2.0 license"></a>
-  <a href="https://github.com/9M2PJU/meshbeacon"><img src="https://img.shields.io/github/stars/9M2PJU/meshbeacon?style=flat" alt="GitHub stars"></a>
+  <a href="https://github.com/MeshBeacon/meshbeacon/actions/workflows/tests.yml"><img src="https://github.com/MeshBeacon/meshbeacon/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests"></a>
+  <a href="https://github.com/MeshBeacon/meshbeacon/actions/workflows/lint.yml"><img src="https://github.com/MeshBeacon/meshbeacon/actions/workflows/lint.yml/badge.svg?branch=main" alt="Lint"></a>
+  <a href="https://github.com/MeshBeacon/meshbeacon/blob/main/LICENSE"><img src="https://img.shields.io/github/license/MeshBeacon/meshbeacon" alt="Apache 2.0 license"></a>
+  <a href="https://github.com/MeshBeacon/meshbeacon"><img src="https://img.shields.io/github/stars/MeshBeacon/meshbeacon?style=flat" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
@@ -44,13 +44,13 @@
 The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/9M2PJU/meshbeacon/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
 ```
 
 Set options before the shell runs when you need a different directory, port, or administrator:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/9M2PJU/meshbeacon/main/install.sh | \
+curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | \
   MESHBEACON_INSTALL_DIR=/opt/meshbeacon \
   MESHBEACON_PORT=8080 \
   MESHBEACON_ADMIN_EMAIL=admin@example.com \
@@ -62,7 +62,7 @@ The default directory is `$HOME/meshbeacon`. The installer prints the generated 
 ### FreeBSD without Docker
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/9M2PJU/meshbeacon/main/install.sh | sudo sh
+curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sudo sh
 ```
 
 The FreeBSD path installs PHP, Composer, Node, Mosquitto, and the required PHP extensions with `pkg`. It starts the web server and workers with FreeBSD `daemon`. Put the PHP development server behind a production web server and process supervisor before exposing it to the Internet.
@@ -124,7 +124,7 @@ Compose uses named volumes for the SQLite database, Laravel storage, public asse
 ## Manual Docker setup
 
 ```sh
-git clone https://github.com/9M2PJU/meshbeacon.git
+git clone https://github.com/MeshBeacon/meshbeacon.git
 cd meshbeacon
 cp .env.example .env
 ```

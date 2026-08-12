@@ -2,7 +2,7 @@
 
 set -eu
 
-project_repo_url=${MESHBEACON_REPO_URL:-https://github.com/9M2PJU/meshbeacon.git}
+project_repo_url=${MESHBEACON_REPO_URL:-https://github.com/MeshBeacon/meshbeacon.git}
 project_ref=${MESHBEACON_REF:-main}
 system_name=$(uname -s)
 
