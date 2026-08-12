@@ -144,7 +144,7 @@ MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
 If you are setting up Docker Compose manually, set the image in your `.env` file before pulling and starting the stack:
 
 ```sh
-echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/meshbeacon:latest" >> .env
+echo "MESHBEACON_IMAGE=ghcr.io/MeshBeacon/meshbeacon:latest" >> .env
 docker compose pull
 docker compose up -d
 ```
