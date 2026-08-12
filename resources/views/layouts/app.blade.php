@@ -42,9 +42,9 @@
                     'about' => ['/about', __('About')],
                   ];
                 @endphp
-                <div class="ml-10 flex items-baseline space-x-2">
+                <div class="ml-4 flex items-baseline space-x-1">
                   @foreach ($navLinks as $path => [$href, $label])
-                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-2 py-2 text-sm font-medium text-gray-900 dark:text-white" @else class="rounded-md px-2 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" @endif>{{ $label }}</a>
+                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-white" @else class="rounded-md px-2 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" @endif>{{ $label }}</a>
                   @endforeach
                 </div>
               </div>
