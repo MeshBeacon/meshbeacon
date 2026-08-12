@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ProcessMqttMessage;
+use App\Services\MqttStatus;
 use Illuminate\Console\Command;
-use PhpMqtt\Client\Facades\MQTT;
 use Illuminate\Support\Facades\Log;
+use PhpMqtt\Client\Facades\MQTT;
+use Throwable;
 
 class MqttSubscribe extends Command
 {
@@ -20,18 +23,57 @@ class MqttSubscribe extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Subscribe to the MeshBeacon MQTT event stream.';
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(MqttStatus $status): int
     {
-      Log::info("Processing MQTT messages...");
-      $mqtt = MQTT::connection();
-      $mqtt->subscribe('hub/event', function (string $topic, string $message) {
-        dispatch(new \App\Jobs\ProcessMqttMessage($message));
-      }, 0);
-      $mqtt->loop(true);
+        $host = config('mqtt-client.connections.default.host');
+        $port = config('mqtt-client.connections.default.port');
+        $status->markStarting();
+
+        Log::info('mqtt.worker_starting', [
+            'host' => $host,
+            'port' => $port,
+            'topic' => 'hub/event',
+        ]);
+
+        try {
+            $mqtt = MQTT::connection();
+            $mqtt->subscribe('hub/event', function (string $topic, string $message) use ($status): void {
+                $status->markMessage();
+                ProcessMqttMessage::dispatch($message);
+
+                Log::debug('mqtt.message_received', [
+                    'topic' => $topic,
+                    'payload_bytes' => strlen($message),
+                ]);
+            }, 0);
+
+            $status->markConnected();
+            Log::info('mqtt.connected', [
+                'host' => $host,
+                'port' => $port,
+                'topic' => 'hub/event',
+            ]);
+
+            $mqtt->loop(true);
+            $status->markDisconnected('subscriber_loop_exited');
+            Log::warning('mqtt.disconnected', ['reason' => 'subscriber_loop_exited']);
+
+            return self::SUCCESS;
+        } catch (Throwable $exception) {
+            $status->markError($exception);
+            Log::error('mqtt.worker_error', [
+                'host' => $host,
+                'port' => $port,
+                'exception_class' => get_class($exception),
+                'exception_message' => $exception->getMessage(),
+            ]);
+
+            return self::FAILURE;
+        }
     }
 }

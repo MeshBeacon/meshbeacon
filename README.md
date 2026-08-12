@@ -127,6 +127,23 @@ The field node keeps the local record when the central server is unavailable. Re
 
 Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
 
+## Pre-built Docker images
+
+Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
+
+To use the pre-built image with the automated installer, pass the `MESHBEACON_IMAGE_SOURCE=ghcr` environment variable:
+
+```sh
+MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
+```
+
+If you are setting up Docker Compose manually, set the image in your `.env` file before starting the stack:
+
+```sh
+echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/meshbeacon:latest" >> .env
+docker compose up -d
+```
+
 ## Manual Docker setup
 
 ```sh
