@@ -141,8 +141,31 @@ prepare_environment() {
     mqtt_bind_port=${MQTT_BIND_PORT:-$(get_env_value MQTT_BIND_PORT)}
     [ -n "$mqtt_bind_port" ] || mqtt_bind_port=1883
 
+    image_source=${MESHBEACON_IMAGE_SOURCE:-$(get_env_value MESHBEACON_IMAGE_SOURCE)}
+    [ -n "$image_source" ] || image_source=local
+
     image=${MESHBEACON_IMAGE:-$(get_env_value MESHBEACON_IMAGE)}
     [ -n "$image" ] || image=meshbeacon:local
+
+    ghcr_image=${MESHBEACON_GHCR_IMAGE:-$(get_env_value MESHBEACON_GHCR_IMAGE)}
+    [ -n "$ghcr_image" ] || ghcr_image=ghcr.io/9m2pju/meshbeacon:latest
+
+    case "$image_source" in
+        local|build)
+            image_source=local
+            ;;
+        ghcr|pull)
+            image_source=ghcr
+            case "$image" in
+                meshbeacon:local)
+                    image=$ghcr_image
+                    ;;
+            esac
+            ;;
+        *)
+            die "MESHBEACON_IMAGE_SOURCE must be local or ghcr."
+            ;;
+    esac
 
     app_url=${MESHBEACON_APP_URL:-$(get_env_value APP_URL)}
     [ -n "$app_url" ] || app_url="http://localhost:$port"
@@ -164,7 +187,9 @@ prepare_environment() {
     set_env_value APP_ENV production
     set_env_value APP_DEBUG false
     set_env_value APP_URL "$app_url"
+    set_env_value MESHBEACON_IMAGE_SOURCE "$image_source"
     set_env_value MESHBEACON_IMAGE "$image"
+    set_env_value MESHBEACON_GHCR_IMAGE "$ghcr_image"
     set_env_value MESHBEACON_PORT "$port"
     set_env_value MQTT_BIND_ADDRESS "$mqtt_bind_address"
     set_env_value MQTT_BIND_PORT "$mqtt_bind_port"
@@ -198,20 +223,28 @@ install_linux() {
 
     mkdir -p services/mosquitto/data services/mosquitto/log
 
-    log "Building the application image locally"
-    if docker buildx version >/dev/null 2>&1; then
-        docker buildx build \
-            --load \
-            --provenance=false \
-            --file Dockerfile.compose \
-            --tag "$image" \
-            .
-    else
-        docker build \
-            --file Dockerfile.compose \
-            --tag "$image" \
-            .
-    fi
+    case "$image_source" in
+        local)
+            log "Building the application image locally"
+            if docker buildx version >/dev/null 2>&1; then
+                docker buildx build \
+                    --load \
+                    --provenance=false \
+                    --file Dockerfile.compose \
+                    --tag "$image" \
+                    .
+            else
+                docker build \
+                    --file Dockerfile.compose \
+                    --tag "$image" \
+                    .
+            fi
+            ;;
+        ghcr)
+            log "Pulling the application image from $image"
+            docker pull "$image"
+            ;;
+    esac
 
     log "Starting MeshBeacon"
     docker compose up -d --no-build

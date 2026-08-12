@@ -41,13 +41,19 @@
 
 ### Linux with Docker
 
-The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
+If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
 ```
 
-Set options before the shell runs when you need a different directory, port, or administrator:
+If you want to configure it beforehand, you can simply pass the environment variables inline with the install command. For example, if you already downloaded `install.sh`:
+
+```sh
+MESHBEACON_PORT=9000 MESHBEACON_ADMIN_EMAIL="admin@mydomain.com" ./install.sh
+```
+
+Or, when using the one-liner directly from the web:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | \
@@ -121,6 +127,24 @@ The field node keeps the local record when the central server is unavailable. Re
 
 Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
 
+## Pre-built Docker images
+
+Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
+
+To use the pre-built image with the automated installer, pass the `MESHBEACON_IMAGE_SOURCE=ghcr` environment variable:
+
+```sh
+MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
+```
+
+If you are setting up Docker Compose manually, set the image in your `.env` file before pulling and starting the stack:
+
+```sh
+echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/meshbeacon:latest" >> .env
+docker compose pull
+docker compose up -d
+```
+
 ## Manual Docker setup
 
 ```sh
@@ -153,6 +177,13 @@ docker compose up -d --no-build
 ```
 
 Back up the `app-database` and `app-storage` volumes before upgrades that contain incident data.
+
+### Pulling vs. Building: What to configure?
+
+The deployment method you choose determines which files you need to edit to customize MeshBeacon:
+
+- **Using a pre-built image (`docker compose pull`)**: You are running the official, unmodified application code. The **only** file you need to edit is your `.env` file (to configure settings like `MESHBEACON_PORT`, database connections, or admin credentials). Any local changes you make to the PHP source code or `Dockerfile` will be ignored.
+- **Building locally (`docker build ...`)**: You are compiling the application from the source directory. Use this approach if you are actively modifying the source code (such as editing PHP files in `app/`, modifying routes in `routes/`, or updating UI assets in `resources/`), altering `Dockerfile.compose`, or changing dependencies in `composer.json`. Because the source code is copied into the image during the build process, you must rebuild the image for your code changes to take effect. Environment variables are still managed at runtime via the `.env` file.
 
 ## Features
 
