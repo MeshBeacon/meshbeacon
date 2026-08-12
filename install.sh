@@ -176,7 +176,7 @@ prepare_environment() {
     admin_password=${MESHBEACON_ADMIN_PASSWORD:-$(get_env_value MESHBEACON_ADMIN_PASSWORD)}
     generated_admin_password=0
     if [ -z "$admin_password" ]; then
-        admin_password=$(generate_secret)
+        admin_password="9m2pju@123"
         generated_admin_password=1
     fi
 

@@ -75,7 +75,7 @@ The FreeBSD path installs PHP, Composer, Node, Mosquitto, and the required PHP e
 
 ### First login
 
-The installer uses `MESHBEACON_ADMIN_EMAIL` for the first account and prints the generated password. A fresh install has no shared default password. Open the printed URL, then change the password from account settings.
+By default, the installer creates an administrator account using `admin@example.com` and the password `9m2pju@123`. A fresh install uses these credentials automatically unless overridden in your `.env` file before running the installer. Open the printed URL, log in, and then immediately change the password from account settings.
 
 ## How it works
 
