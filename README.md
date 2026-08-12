@@ -280,6 +280,14 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 - Keep `.env`, `auth.json`, Composer credentials, database files, and native Mosquitto data out of Git.
 - Review the Livewire Flux license before redistributing an image that includes it.
 
+## Web Application Firewall (WAF)
+
+MeshBeacon deployments utilize a **Defense in Depth** approach. The `docker-compose.yml` is configured out-of-the-box with [BunkerWeb](https://www.bunkerweb.io/), an enterprise-grade Nginx WAF. 
+
+- **WAF Layer (`waf`)**: Takes over the public port (e.g., `8080`) and reverse-proxies clean traffic to the webserver.
+- **Protection**: Utilizes the OWASP Core Rule Set to drop SQL Injection (SQLi), Cross-Site Scripting (XSS), zero-day vulnerability exploits, and brute force login attempts.
+- **Internal Routing**: The primary Nginx container (`webserver`) and Laravel application (`app`) are kept safely behind the Docker internal network to prevent bypasses and false-positives.
+
 ## Development
 
 Requirements: PHP 8.2+, Composer, Node.js 22, npm, SQLite, and an MQTT broker.
