@@ -142,7 +142,7 @@ prepare_environment() {
     [ -n "$mqtt_bind_port" ] || mqtt_bind_port=1883
 
     image_source=${MESHBEACON_IMAGE_SOURCE:-$(get_env_value MESHBEACON_IMAGE_SOURCE)}
-    [ -n "$image_source" ] || image_source=local
+    [ -n "$image_source" ] || image_source=ghcr
 
     image=${MESHBEACON_IMAGE:-$(get_env_value MESHBEACON_IMAGE)}
     [ -n "$image" ] || image=meshbeacon:local

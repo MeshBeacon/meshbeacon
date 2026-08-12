@@ -41,7 +41,7 @@
 
 ### Linux with Docker
 
-If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
+If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, pulls the pre-built Docker image from GHCR, and starts the stack.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
@@ -128,17 +128,17 @@ The field node keeps the local record when the central server is unavailable. Re
 
 Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
 
-## Pre-built Docker images
+## Docker images
 
-Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
+The Linux installer automatically downloads pre-built multi-architecture images from the GitHub Container Registry (GHCR) by default. 
 
-To use the pre-built image with the automated installer, pass the `MESHBEACON_IMAGE_SOURCE=ghcr` environment variable:
+If you want to build the Docker image locally from source (e.g., you are making code modifications), you must provide your own `auth.json` file containing your Livewire Flux Pro license key, and pass the `MESHBEACON_IMAGE_SOURCE=local` environment variable:
 
 ```sh
-MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
+MESHBEACON_IMAGE_SOURCE=local ./install.sh
 ```
 
-If you are setting up Docker Compose manually, set the image in your `.env` file before pulling and starting the stack:
+If you are setting up Docker Compose manually and want to use the pre-built image, set the image in your `.env` file before pulling and starting the stack:
 
 ```sh
 echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/MeshBeacon:latest" >> .env
