@@ -116,7 +116,8 @@ The field node keeps the local record when the central server is unavailable. Re
 
 | Service | Role |
 | --- | --- |
-| `webserver` | Nginx on the configured host port |
+| `waf` | BunkerWeb ModSecurity WAF reverse proxy on the configured host port |
+| `webserver` | Internal Nginx webserver |
 | `app` | PHP-FPM Laravel application |
 | `migrate` | Runs migrations and creates the first administrator |
 | `permissions` | Sets volume ownership, then exits |
@@ -270,6 +271,7 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 
 ## Security checklist
 
+- The Docker Compose stack includes BunkerWeb WAF by default to protect against SQLi, XSS, and brute force attacks.
 - Keep `APP_DEBUG=false` outside development.
 - Protect `APP_KEY`, database credentials, MQTT credentials, and hybrid tokens.
 - Change the first administrator password after the first login.
