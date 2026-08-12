@@ -134,7 +134,7 @@
     <header class="py-10">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         @if(request()->is('dashboard'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('MeshBeacon Dashboard') }}</h1>
           <a href="/kiosk" title="{{ __('Tip: if this will run on a shared/unattended screen, log in there with "Remember me" checked so it stays signed in after a reboot.') }}" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 dark:bg-white/5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
@@ -145,47 +145,47 @@
         </div>
         @endif
         @if(request()->is('status'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Status') }}</h1>
           @yield('page-actions')
         </div>
         @endif
         @if(request()->is('gps'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Tracking') }}</h1>
           @yield('page-actions')
         </div>
         @endif
         @if(request()->is('reports'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Reports') }}</h1>
           @yield('page-actions')
         </div>
         @endif
         @if(request()->is('messages'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Messages') }}</h1>
           @yield('page-actions')
         </div>
         @endif
         @if(request()->is('operations'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Operations') }}</h1>
           @yield('page-actions')
         </div>
         @endif
         @if(request()->is('tak/logs'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('TAK Logs') }}</h1>
         </div>
         @endif
         @if(request()->is('telegram/logs'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Telegram Logs') }}</h1>
         </div>
         @endif
         @if(request()->is('about'))
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('About MeshBeacon') }}</h1>
         </div>
         @endif
