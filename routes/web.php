@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MessageLogController;
 use App\Http\Controllers\ReportController;
@@ -22,8 +23,16 @@ Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'ha
 // Available to guests too, so the login page can be switched before authenticating.
 Route::post('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
 
+// Observability and metrics endpoints (unauthenticated)
+Route::get('/health/live', [HealthController::class, 'live']);
+Route::get('/health/ready', [HealthController::class, 'ready']);
+Route::get('/metrics', [HealthController::class, 'metrics']);
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/operations', [HealthController::class, 'operations']);
+    Route::get('/operations/status', [HealthController::class, 'operationsStatus']);
     Route::get('/kiosk', [DashboardController::class, 'kiosk']);
     Route::get('/dashboard/timeline', [DashboardController::class, 'timeline']);
     Route::get('/dashboard/hourly', [DashboardController::class, 'hourly']);
