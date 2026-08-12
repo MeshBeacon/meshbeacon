@@ -24,3 +24,4 @@ yarn-error.log
 /services/mosquitto/log/*
 /services/mosquitto/data/*
 /package-lock.json
+/public/hot
