@@ -7,8 +7,6 @@ COPY ./supervisor/* /etc/supervisor/conf.d/
 VOLUME /var/www/html/storage
 # Now we set root / at /var/www/html
 WORKDIR /var/www/html
-
-RUN composer install --no-dev --optimize-autoloader
 RUN chmod +x services/docker/worker-entrypoint.sh
 
 #RUN mkdir -p /var/www/html/storage/framework/{cache,sessions,views}

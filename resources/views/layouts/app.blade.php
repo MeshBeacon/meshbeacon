@@ -28,7 +28,6 @@
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
                     'messages' => ['/messages', __('Messages')],
-                    'operations' => ['/system-health', __('System Health')],
                   ];
                 @endphp
                 <div class="ml-10 flex items-baseline space-x-4">
