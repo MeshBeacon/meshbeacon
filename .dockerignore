@@ -4,14 +4,17 @@
 .env.*
 !.env.example
 node_modules
+vendor
 npm-debug.log
 
-# Locally-generated bootstrap caches must never ship in an image build —
-# they bake in the absolute base_path() of whatever machine ran
-# `artisan config:cache`/`route:cache`, which breaks storage/view paths
-# on any other machine/container (see tempnam() production incident).
+# Locally-generated bootstrap caches must never ship in an image build.
+# They can contain absolute paths from the machine that generated them.
 bootstrap/cache/*.php
 !bootstrap/cache/.gitignore
+
+public/build
+public/hot
+public/storage
 
 storage/framework/cache/*
 storage/framework/sessions/*
@@ -24,6 +27,9 @@ storage/debugbar/*
 !storage/framework/testing/.gitignore
 !storage/framework/views/.gitignore
 !storage/logs/.gitignore
+
+services/mosquitto/data/*
+services/mosquitto/log/*
 
 tests
 .phpunit.result.cache

@@ -16,16 +16,26 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         // Since public self-registration is disabled, a fresh install needs
-        // at least one admin account seeded so someone can sign in and
-        // provision further users via Settings > Manage Users. Guarded so
-        // re-running the seeder (e.g. on every container start) is safe and
-        // won't error out once an admin already exists.
+        // at least one admin account. Re-running the seeder is safe once an
+        // administrator already exists.
         if (! User::query()->where('role', User::ROLE_ADMIN)->exists()) {
-            User::factory()->create([
+            $adminPassword = (string) env('MESHBEACON_ADMIN_PASSWORD', '');
+
+            if ($adminPassword === '') {
+                throw new \RuntimeException(
+                    'Set MESHBEACON_ADMIN_PASSWORD before seeding the database.'
+                );
+            }
+
+            $admin = new User([
                 'name' => 'Admin',
-                'email' => 'admin@example.com',
+                'email' => env('MESHBEACON_ADMIN_EMAIL', 'admin@example.com'),
+                'password' => $adminPassword,
                 'role' => User::ROLE_ADMIN,
             ]);
+
+            $admin->email_verified_at = now();
+            $admin->save();
         }
     }
 }
