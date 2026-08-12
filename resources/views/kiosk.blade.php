@@ -220,7 +220,7 @@
   </div>
 
   <footer class="mt-auto text-center text-xs text-gray-500 shrink-0">
-    &copy; {{ date('Y') }} MeshBeacon. {{ __('All rights reserved.') }}
+    &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">MeshBeacon</a>. {{ __('All rights reserved.') }}
   </footer>
 </div>
 

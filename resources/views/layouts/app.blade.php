@@ -28,7 +28,7 @@
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-10 group-hover:opacity-80 transition-opacity">
                 <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-orange-600 dark:text-orange-400 transition-colors">MeshBeacon</span>
               </a>
-              <div class="hidden md:block">
+              <div class="hidden lg:block">
                 @php
                   $navLinks = [
                     'dashboard' => ['/dashboard', __('Dashboard')],
@@ -42,14 +42,14 @@
                     'about' => ['/about', __('About')],
                   ];
                 @endphp
-                <div class="ml-10 flex items-baseline space-x-4">
+                <div class="ml-10 flex items-baseline space-x-2">
                   @foreach ($navLinks as $path => [$href, $label])
-                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white" @else class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" @endif>{{ $label }}</a>
+                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-2 py-2 text-sm font-medium text-gray-900 dark:text-white" @else class="rounded-md px-2 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" @endif>{{ $label }}</a>
                   @endforeach
                 </div>
               </div>
             </div>
-            <div class="hidden md:block">
+            <div class="hidden lg:block">
               <div class="ml-4 flex items-center gap-3 md:ml-6">
                 @include('partials.locale-switcher')
 
@@ -83,7 +83,7 @@
                 </el-dropdown>
               </div>
             </div>
-            <div class="-mr-2 flex md:hidden">
+            <div class="-mr-2 flex lg:hidden">
               <!-- Mobile menu button -->
               <button type="button" command="--toggle" commandfor="mobile-menu" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-orange-500">
                 <span class="absolute -inset-0.5"></span>
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <el-disclosure id="mobile-menu" hidden class="border-b border-gray-200 dark:border-white/10 md:hidden [&:not([hidden])]:block">
+      <el-disclosure id="mobile-menu" hidden class="border-b border-gray-200 dark:border-white/10 lg:hidden [&:not([hidden])]:block">
         <div class="space-y-1 px-2 py-3 sm:px-3">
           <!-- Current: "bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white", Default: "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" -->
           @foreach ($navLinks as $path => [$href, $label])
@@ -205,7 +205,7 @@
   </main>
   
   <footer class="py-6 text-center text-sm text-gray-500">
-    &copy; {{ date('Y') }} MeshBeacon. {{ __('All rights reserved.') }}
+    &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">MeshBeacon</a>. {{ __('All rights reserved.') }}
   </footer>
 </div>
 @fluxScripts
