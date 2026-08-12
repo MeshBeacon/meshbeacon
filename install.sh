@@ -267,6 +267,7 @@ start_native_process() {
     process_log=$2
     process_pidfile=$3
     process_command=$4
+    process_user=${5:-www}
 
     if [ -f "$process_pidfile" ]; then
         process_pid=$(cat "$process_pidfile")
@@ -278,7 +279,7 @@ start_native_process() {
     fi
 
     log "Starting $process_name"
-    run_root daemon -u www -o "$process_log" -p "$process_pidfile" sh -c "$process_command"
+    run_root daemon -u "$process_user" -o "$process_log" -p "$process_pidfile" sh -c "$process_command"
 }
 
 install_freebsd() {
@@ -358,7 +359,8 @@ EOF
         "MQTT broker" \
         "$project_path/storage/logs/mosquitto.log" \
         "$project_path/storage/mosquitto.pid" \
-        "exec /usr/local/sbin/mosquitto -c '$service_dir/mosquitto.conf'"
+        "exec /usr/local/sbin/mosquitto -c '$service_dir/mosquitto.conf'" \
+        "mosquitto"
     sleep 2
     start_native_process \
         "MQTT worker" \
