@@ -290,13 +290,22 @@ MeshBeacon deployments utilize a **Defense in Depth** approach. The `docker-comp
 
 ## MeshBeacon to TAK CoT Bridge
 
-MeshBeacon integrates seamlessly with TAK (Android Team Awareness Kit) via the **MeshBeacon to TAK CoT Bridge**. 
-This standalone service acts as a translator that:
-1. Listens to the MeshBeacon MQTT broker for live GPS events from devices on the field.
-2. Translates the GPS locations into standard CoT (Cursor on Target) XML format.
-3. Broadcasts the events directly to the TAK Multicast group (e.g., `239.2.3.1:4242`), allowing field operators to see the live position of MeshBeacon nodes on their maps in real-time.
+MeshBeacon integrates seamlessly with TAK (Team Awareness Kit) via the **MeshBeacon TAK CoT Bridge**. 
+This standalone service acts as an instant translator bridging the physical mesh network hardware with your tactical awareness software.
 
-A log of forwarded TAK events is synchronized back to the MeshBeacon dashboard for auditing.
+### How it Works
+1. Listens to the MeshBeacon MQTT broker (`hub/event` topic) for live GPS updates from devices on the field.
+2. Automatically translates the GPS locations and IDs into the standard **Cursor on Target (CoT)** XML format.
+3. Broadcasts these XML events directly to the TAK Multicast group (e.g., `239.2.3.1:4242`) or a direct UDP port, instantly appearing as live pins on maps.
+
+### Using with OpenTAKServer (OTS) and TAK Clients
+To integrate MeshBeacon with a broader TAK ecosystem including **OpenTAKServer (OTS)** and end-user clients like **ATAK** (Android), **iTAK** (iOS), and **WinTAK** (Windows):
+
+1. **Configure the Bridge**: In the bridge's `docker-compose.yml`, set the `TAK_IP` and `TAK_PORT` environment variables to the IP address and UDP port of your OpenTAKServer instance (or leave it as the multicast default if running a local subnet without a dedicated server).
+2. **Connect Clients**: Ensure your ATAK/iTAK/WinTAK devices are properly authenticated and connected to your OpenTAKServer.
+3. **Observe**: As soon as a MeshBeacon node (like a PapaDuck or MamaDuck) reports a location, the bridge will translate and forward it. The node will instantly populate as a live CoT marker on all connected clients.
+
+A log of all outgoing CoT events is synchronized and can be monitored live directly from the **TAK Logs** page in the MeshBeacon dashboard.
 Read the full setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
 
 ## Development
