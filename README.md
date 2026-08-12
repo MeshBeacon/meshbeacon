@@ -177,6 +177,13 @@ docker compose up -d --no-build
 
 Back up the `app-database` and `app-storage` volumes before upgrades that contain incident data.
 
+### Pulling vs. Building: What to configure?
+
+The deployment method you choose determines which files you need to edit to customize MeshBeacon:
+
+- **Using a pre-built image (`docker compose pull`)**: You are running the official, unmodified application code. The **only** file you need to edit is your `.env` file (to configure settings like `MESHBEACON_PORT`, database connections, or admin credentials). Any local changes you make to the PHP source code or `Dockerfile` will be ignored.
+- **Building locally (`docker build ...`)**: You are compiling the application from the source directory. Use this approach if you are actively modifying the source code (such as editing PHP files in `app/`, modifying routes in `routes/`, or updating UI assets in `resources/`), altering `Dockerfile.compose`, or changing dependencies in `composer.json`. Because the source code is copied into the image during the build process, you must rebuild the image for your code changes to take effect. Environment variables are still managed at runtime via the `.env` file.
+
 ## Features
 
 - MQTT ingestion from `hub/event` and commands on `hub/command`.
