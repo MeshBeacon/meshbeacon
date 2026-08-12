@@ -55,9 +55,21 @@ class TelegramService
                 ]);
             }
 
+            \App\Models\TelegramLog::create([
+                'chat_id' => $chatId,
+                'text'    => $text,
+                'status'  => $response->successful() ? 'sent' : 'failed',
+            ]);
+
             return $response->successful();
         } catch (\Throwable $e) {
             Log::error('TelegramService: sendMessage exception', ['error' => $e->getMessage()]);
+
+            \App\Models\TelegramLog::create([
+                'chat_id' => $chatId,
+                'text'    => $text,
+                'status'  => 'error',
+            ]);
 
             return false;
         }

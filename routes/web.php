@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/messages/json', [MessageLogController::class, 'json']);
     
     Route::get('/tak/logs', \App\Livewire\TakLogViewer::class)->name('tak.logs');
+    Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
 
     Route::get('/about', function () {
         return view('about');

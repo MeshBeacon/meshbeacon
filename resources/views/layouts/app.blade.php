@@ -37,6 +37,7 @@
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
                     'tak/logs' => ['/tak/logs', __('TAK Logs')],
+                    'telegram/logs' => ['/telegram/logs', __('Telegram Logs')],
                     'messages' => ['/messages', __('Messages')],
                     'about' => ['/about', __('About')],
                   ];
@@ -176,6 +177,11 @@
         @if(request()->is('tak/logs'))
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('TAK Logs') }}</h1>
+        </div>
+        @endif
+        @if(request()->is('telegram/logs'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Telegram Logs') }}</h1>
         </div>
         @endif
         @if(request()->is('about'))
