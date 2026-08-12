@@ -290,7 +290,7 @@ install_freebsd() {
 
     log "Installing FreeBSD packages"
     run_root pkg install -y \
-        git \
+        curl \
         "$php_package" \
         "${php_package}-bcmath" \
         "${php_package}-curl" \
@@ -300,27 +300,20 @@ install_freebsd() {
         "${php_package}-pdo_sqlite" \
         "${php_package}-xml" \
         "${php_package}-zip" \
-        composer \
-        "$node_package" \
         mosquitto
 
     command_exists php || die "The selected PHP package did not provide the php command. Set MESHBEACON_PHP_PACKAGE to a supported package."
-    command_exists composer || die "Composer was not installed."
-    command_exists npm || die "The selected Node package did not provide npm. Set MESHBEACON_NODE_PACKAGE to a package that includes npm."
     command_exists daemon || die "The FreeBSD daemon utility is required."
 
+    log "Downloading the latest compiled MeshBeacon release"
+    run_root mkdir -p "$install_dir"
     cd "$install_dir"
+    curl -fsSL https://github.com/MeshBeacon/meshbeacon/releases/latest/download/meshbeacon.tar.gz | run_root tar -xz --strip-components=1 -C "$install_dir"
+
+    prepare_environment
+
     mkdir -p database services/mosquitto/data services/mosquitto/log storage/logs
     touch database/database.sqlite
-
-    log "Installing PHP and JavaScript dependencies"
-    COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-    npm install --no-audit --no-fund
-    npm run build
-    php artisan vendor:publish --tag=laravel-assets --ansi --force
-    mkdir -p public/flux
-    ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js
-    ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js
 
     php artisan migrate --no-interaction --force
     php artisan db:seed --no-interaction --force
@@ -328,6 +321,7 @@ install_freebsd() {
     run_root chown -R www:www "$install_dir/database" "$install_dir/storage" "$install_dir/bootstrap/cache"
     run_root chmod -R ug+rwX "$install_dir/database" "$install_dir/storage" "$install_dir/bootstrap/cache"
     run_root chmod -R a+rX "$install_dir"
+    run_root chown www:www "$install_dir/.env"
     run_root chmod 600 "$install_dir/.env"
 
     service_dir=/usr/local/etc/meshbeacon
@@ -390,11 +384,10 @@ EOF
     fi
 }
 
-clone_project
-prepare_environment
-
 case "$system_name" in
     Linux)
+        clone_project
+        prepare_environment
         install_linux
         ;;
     FreeBSD)
