@@ -93,13 +93,11 @@ class ProcessMqttMessage implements ShouldQueue
             && str_contains($record->payload ?? '', 'SOS');
 
         if (($isSosAlert || $isSosStatus) && $record->duck_id) {
-            // Dispatch 3 attempts with increasing delays so the device gets
-            // multiple chances to receive the ACK over LoRa (lossy at distance).
-            foreach ([0, 10, 20] as $i => $delaySec) {
-                SendSosAck::dispatch($record->duck_id, $i + 1)
-                    ->delay(now()->addSeconds($delaySec));
-            }
-            Log::info("ProcessMqttMessage: SOS ack queued (3 attempts) for {$record->duck_id}");
+            // SendSosAck retries itself (with backoff) over the lossy LoRa
+            // link and gives up cleanly if all attempts fail, so a single
+            // dispatch here is enough.
+            SendSosAck::dispatch($record->duck_id);
+            Log::info("ProcessMqttMessage: SOS ack queued for {$record->duck_id}");
 
             SendTelegramAlert::dispatch($record->duck_id, $record->display_text ?? '', $record->map_url);
             Log::info("ProcessMqttMessage: Telegram alert queued for {$record->duck_id}");

@@ -4,7 +4,7 @@
 .env.*
 !.env.example
 node_modules
-vendor
+#vendor
 npm-debug.log
 
 # Locally-generated bootstrap caches must never ship in an image build.
@@ -15,6 +15,9 @@ bootstrap/cache/*.php
 public/build
 public/hot
 public/storage
+!public/build/manifest.json
+!public/build/assets
+!public/flux
 
 storage/framework/cache/*
 storage/framework/sessions/*
