@@ -37,14 +37,25 @@ class MqttSubscribe extends Command
         Log::info('mqtt.worker_starting', [
             'host' => $host,
             'port' => $port,
-            'topic' => 'hub/event',
+            'topics' => ['hub/event', 'hub/tak/log'],
         ]);
 
         try {
             $mqtt = MQTT::connection();
+            
             $mqtt->subscribe('hub/event', function (string $topic, string $message) use ($status): void {
                 $status->markMessage();
                 ProcessMqttMessage::dispatch($message);
+
+                Log::debug('mqtt.message_received', [
+                    'topic' => $topic,
+                    'payload_bytes' => strlen($message),
+                ]);
+            }, 0);
+
+            $mqtt->subscribe('hub/tak/log', function (string $topic, string $message) use ($status): void {
+                $status->markMessage();
+                \App\Jobs\ProcessTakLog::dispatch($message);
 
                 Log::debug('mqtt.message_received', [
                     'topic' => $topic,
@@ -56,7 +67,7 @@ class MqttSubscribe extends Command
             Log::info('mqtt.connected', [
                 'host' => $host,
                 'port' => $port,
-                'topic' => 'hub/event',
+                'topics' => ['hub/event', 'hub/tak/log'],
             ]);
 
             $mqtt->loop(true);

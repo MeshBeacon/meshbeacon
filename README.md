@@ -141,7 +141,7 @@ MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
 If you are setting up Docker Compose manually, set the image in your `.env` file before pulling and starting the stack:
 
 ```sh
-echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/meshbeacon:latest" >> .env
+echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/MeshBeacon:latest" >> .env
 docker compose pull
 docker compose up -d
 ```
@@ -209,7 +209,7 @@ The full template lives in [.env.example](.env.example).
 | `MESHBEACON_IMAGE` | Compose image | `meshbeacon:local` |
 | `MESHBEACON_PORT` | Web host port | `8080` |
 | `MESHBEACON_ADMIN_EMAIL` | First administrator email | `admin@example.com` |
-| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | A strong unique value |
+| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | `9m2pju@123` |
 | `DB_CONNECTION` | Database driver | `sqlite`, `mysql`, or `pgsql` |
 | `DB_DATABASE` | SQLite path or database name | `/var/www/database/database.sqlite` |
 | `QUEUE_CONNECTION` | Queue backend | `database` |
@@ -287,6 +287,17 @@ MeshBeacon deployments utilize a **Defense in Depth** approach. The `docker-comp
 - **WAF Layer (`waf`)**: Takes over the public port (e.g., `8080`) and reverse-proxies clean traffic to the webserver.
 - **Protection**: Utilizes the OWASP Core Rule Set to drop SQL Injection (SQLi), Cross-Site Scripting (XSS), zero-day vulnerability exploits, and brute force login attempts.
 - **Internal Routing**: The primary Nginx container (`webserver`) and Laravel application (`app`) are kept safely behind the Docker internal network to prevent bypasses and false-positives.
+
+## MeshBeacon to TAK CoT Bridge
+
+MeshBeacon integrates seamlessly with TAK (Android Team Awareness Kit) via the **MeshBeacon to TAK CoT Bridge**. 
+This standalone service acts as a translator that:
+1. Listens to the MeshBeacon MQTT broker for live GPS events from devices on the field.
+2. Translates the GPS locations into standard CoT (Cursor on Target) XML format.
+3. Broadcasts the events directly to the TAK Multicast group (e.g., `239.2.3.1:4242`), allowing field operators to see the live position of MeshBeacon nodes on their maps in real-time.
+
+A log of forwarded TAK events is synchronized back to the MeshBeacon dashboard for auditing.
+Read the full setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
 
 ## Development
 

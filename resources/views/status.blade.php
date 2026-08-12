@@ -194,7 +194,7 @@
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-red-400">{{ __('SOS — Hardware Button Triggered') }}</p>
+          <p class="text-xs font-semibold text-red-400">{{ __('SOS - Hardware Button Triggered') }}</p>
           <p class="text-xs text-red-300/80">{{ __('This SOS was sent because the physical SOS button on the device was pressed.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
@@ -244,7 +244,7 @@
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-orange-400">{{ __('SOS — Mobile Phone Triggered') }}</p>
+          <p class="text-xs font-semibold text-orange-400">{{ __('SOS - Mobile Phone Triggered') }}</p>
           <p class="text-xs text-orange-300/80">{{ __('This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
@@ -294,7 +294,7 @@
           <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">{{ __('Roger — Device Confirmed') }}</p>
+          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">{{ __('Roger - Device Confirmed') }}</p>
           <p class="text-xs text-green-400/80">{{ __('The person holding the device triple-clicked the button to confirm they have received your message.') }}</p>
         </div>
       </div>
@@ -307,7 +307,7 @@
             <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
           </svg>
           <div>
-            <p class="text-xs font-bold text-red-400 uppercase tracking-wide">{{ __('Critical — Immediate Attention Required') }}</p>
+            <p class="text-xs font-bold text-red-400 uppercase tracking-wide">{{ __('Critical - Immediate Attention Required') }}</p>
             <p class="text-xs text-red-300/80">{{ __('This message has been marked as critical urgency and must be attended to immediately.') }}</p>
           </div>
         </div>
@@ -319,14 +319,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
-        {{ __('GPS location unavailable — no satellite fix') }}
+        {{ __('GPS location unavailable - no satellite fix') }}
       </p>
     @elseif ($mamaduck->gps_hardware_absent)
       <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
         </svg>
-        {{ __('No GPS hardware — this device cannot report location') }}
+        {{ __('No GPS hardware - this device cannot report location') }}
       </p>
     @endif
     </div>
@@ -401,10 +401,10 @@
       <h2 class="text-base/7 font-semibold text-white">{{ __('Message') }} <span class="font-mono text-yellow-400">{{ $mamaduck->duck_id }}</span></h2>
       <p class="mt-1 text-sm/6 text-gray-400">{{ __('This messaging is on a best-effort basis') }}</p>
 
-        <!-- Last known GPS location — updated by pollHistory() -->
+        <!-- Last known GPS location - updated by pollHistory() -->
         <div data-gps-duck="{{ $mamaduck->duck_id }}" class="mt-3"></div>
 
-        <!-- Conversation history — populated by pollHistory() in app.js -->
+        <!-- Conversation history - populated by pollHistory() in app.js -->
         <div class="mt-3 h-48 overflow-y-auto rounded-md bg-white/5 p-3 space-y-2 outline outline-1 -outline-offset-1 outline-white/10"
              data-history-duck="{{ $mamaduck->duck_id }}">
           <p class="text-center text-xs text-gray-500">{{ __('Loading…') }}</p>
@@ -552,16 +552,16 @@
       var online   = card.getAttribute('data-online') === '1';
       var incStatus = card.getAttribute('data-incident-status') || '';
 
-      // Online-only gate (AND — always applied when active)
+      // Online-only gate (AND - always applied when active)
       if (onlineOnly && !online) { card.style.display = 'none'; return; }
 
-      // Incident filter (AND — always applied when active)
+      // Incident filter (AND - always applied when active)
       if (inc !== '') {
         var incMatch = inc === 'any' ? incStatus !== '' : incStatus === inc;
         if (!incMatch) { card.style.display = 'none'; return; }
       }
 
-      // Neither search nor urgency active — show all (that passed gates above)
+      // Neither search nor urgency active - show all (that passed gates above)
       if (q === '' && u === '') { card.style.display = ''; visible++; return; }
 
       // Only urgency active
@@ -570,7 +570,7 @@
       // Only search active
       if (q !== '' && u === '') { var show = id.includes(q); card.style.display = show ? '' : 'none'; if (show) visible++; return; }
 
-      // Both active — OR
+      // Both active - OR
       var show = id.includes(q) || urgency === u; card.style.display = show ? '' : 'none'; if (show) visible++;
     });
 
@@ -583,7 +583,7 @@
     if (visible === 0) {
       empty.classList.remove('hidden');
       if (totalCards === 0) {
-        // No ducks exist at all (not a filter side-effect) — same style of
+        // No ducks exist at all (not a filter side-effect) - same style of
         // message as the "Online only" empty state, since there's nothing
         // for the user to adjust here.
         title.textContent = 'No ducks detected';
@@ -616,7 +616,7 @@
   window.applyFilters = applyFilters;
 
   // On initial load, only show the empty-state message if there are truly no
-  // ducks at all. We deliberately do NOT call applyFilters() here — some
+  // ducks at all. We deliberately do NOT call applyFilters() here - some
   // browsers restore form field values (search text, the "Online only"
   // checkbox) across a plain page refresh, and running the full filter pass
   // on load would apply that leftover state and hide ducks that should be

@@ -124,9 +124,9 @@
   <div class="px-4 py-3 sm:px-6 flex flex-col gap-1.5 grow" data-gps-body="{{ $record->duck_id }}">
     @if ($record->gps_fix_zero)
         @php
-          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix — device active, no phone connected')
-                    : ($record->gps_from_phone ? __('No GPS fix — phone GPS unavailable')
-                    : __('No GPS fix — no satellite signal'));
+          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix - device active, no phone connected')
+                    : ($record->gps_from_phone ? __('No GPS fix - phone GPS unavailable')
+                    : __('No GPS fix - no satellite signal'));
           $lastCoord = $lastKnownCoords[$record->duck_id] ?? null;
         @endphp
         <div class="grow flex flex-col gap-1.5">
@@ -659,7 +659,7 @@
     });
   })();
 
-  // ── Poll toggle (per-card) — delegated ──────────────────────────────────
+  // ── Poll toggle (per-card) - delegated ──────────────────────────────────
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('.poll-toggle-btn');
     if (!btn) return;
@@ -710,7 +710,7 @@
     .catch(function () { btn.disabled = false; });
   });
 
-  // ── Poll interval selector (per-card) — delegated ───────────────────────
+  // ── Poll interval selector (per-card) - delegated ───────────────────────
   document.addEventListener('change', function (e) {
     var sel = e.target.closest('.poll-interval-select');
     if (!sel) return;
@@ -830,7 +830,7 @@
       });
   });
 
-  // ── Request GPS (per-card buttons) — delegated so new cards work ────────
+  // ── Request GPS (per-card buttons) - delegated so new cards work ────────
   var GPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" /></svg> Request';
 
   document.addEventListener('click', function (e) {

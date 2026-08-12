@@ -87,6 +87,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
+    
+    Route::get('/tak/logs', \App\Livewire\TakLogViewer::class)->name('tak.logs');
+
+    Route::get('/about', function () {
+        return view('about');
+    })->name('about');
 
     Route::get('/operations', [HealthController::class, 'operations'])->name('operations');
     Route::get('/operations/status', [HealthController::class, 'operationsStatus'])->name('operations.status');

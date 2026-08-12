@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>{{ __('MeshBeacon — Kiosk') }}</title>
+  <title>{{ __('MeshBeacon - Kiosk') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-gray-900 overflow-hidden">
@@ -15,20 +15,27 @@
 
 <div class="flex h-screen flex-col p-4 gap-4">
 
-  {{-- Top bar: branding, live clock, exit link. No interactive controls —
+  {{-- Top bar: branding, live clock, exit link. No interactive controls -
        this screen is meant to be viewed, not operated. --}}
   <div class="shrink-0">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-9">
-        <h1 class="text-xl font-bold tracking-tight text-white">{{ __('MeshBeacon — Live Operations') }}</h1>
+        <h1 class="text-xl font-bold tracking-tight text-white">{{ __('MeshBeacon - Live Operations') }}</h1>
       </div>
       <div class="flex items-center gap-4">
         <span class="relative flex size-2.5">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
           <span class="relative inline-flex size-2.5 rounded-full bg-green-500"></span>
         </span>
-        <span id="kiosk-clock" class="text-2xl font-semibold tabular-nums text-white"></span>
+        <div class="flex items-baseline gap-1">
+          <span id="kiosk-clock-myt" class="text-2xl font-semibold tabular-nums text-white"></span>
+          <span class="text-sm font-medium text-gray-400">MYT</span>
+        </div>
+        <div class="flex items-baseline gap-1">
+          <span id="kiosk-clock-utc" class="text-2xl font-semibold tabular-nums text-white"></span>
+          <span class="text-sm font-medium text-gray-400">UTC</span>
+        </div>
         @include('partials.locale-switcher')
         <a href="/dashboard" class="text-xs font-medium text-gray-500 hover:text-gray-300">{{ __('Exit kiosk') }}</a>
       </div>
@@ -198,9 +205,11 @@
 
 <script>
   function updateKioskClock() {
-    var el = document.getElementById('kiosk-clock');
-    if (!el) return;
-    el.textContent = new Date().toLocaleTimeString('en-GB', { hourCycle: 'h23' });
+    var elMyt = document.getElementById('kiosk-clock-myt');
+    var elUtc = document.getElementById('kiosk-clock-utc');
+    var now = new Date();
+    if (elMyt) elMyt.textContent = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hourCycle: 'h23' });
+    if (elUtc) elUtc.textContent = now.toLocaleTimeString('en-GB', { timeZone: 'UTC', hourCycle: 'h23' });
   }
   updateKioskClock();
   setInterval(updateKioskClock, 1000);

@@ -18,6 +18,9 @@
                     <flux:sidebar.item icon="chart-bar" :href="route('operations')" :current="request()->routeIs('operations')" wire:navigate>
                         {{ __('Operations') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
+                        {{ __('TAK Logs') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
