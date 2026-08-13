@@ -2,6 +2,10 @@
 @vite('resources/js/app.js')
 <html class="h-full bg-gray-900 dark">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f2937">
+  <link rel="manifest" href="{{ asset('manifest.json') }}">
   <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body class="h-full" data-dashboard-readonly="{{ config('services.central_dms.dashboard_readonly') ? '1' : '0' }}">
@@ -24,6 +28,7 @@
                 @php
                   $navLinks = [
                     'dashboard' => ['/dashboard', __('Dashboard')],
+                    'analytics' => ['/analytics', __('Analytics')],
                     'status' => ['/status', __('Status')],
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
@@ -175,6 +180,12 @@
           @yield('page-actions')
         </div>
         @endif
+        @if(request()->is('analytics'))
+        <div class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Analytics & Node Health') }}</h1>
+          @yield('page-actions')
+        </div>
+        @endif
       </div>
     </header>
   </div>
@@ -191,6 +202,15 @@
   </main>
 </div>
 @fluxScripts
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.error('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+</script>
 </body>
 
 <script type="module">

@@ -8,6 +8,7 @@
             @endif
             @if (auth()->user()->isAdmin())
                 <flux:navlist.item :href="route('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
+                <flux:navlist.item :href="route('settings.rules')" wire:navigate>{{ __('Automated Rules') }}</flux:navlist.item>
             @endif
         </flux:navlist>
     </div>

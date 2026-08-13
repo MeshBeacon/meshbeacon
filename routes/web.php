@@ -57,6 +57,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/incidents/stats', [DashboardController::class, 'incidentStats']);
     Route::get('/dashboard/incidents/responders', [DashboardController::class, 'responders']);
     Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
+    
+    Route::get('/analytics', [DashboardController::class, 'analytics']);
+    Route::get('/analytics/data', [DashboardController::class, 'analyticsData']);
+    
+    // Offline map tiles
+    Route::get('/tiles/{z}/{x}/{y}.png', [\App\Http\Controllers\TileController::class, 'serveTile'])
+        ->where(['z' => '[0-9]+', 'x' => '[0-9]+', 'y' => '[0-9]+'])
+        ->name('tiles.serve');
 
     // Incident-dispatch write actions: blocked on a read-only (central
     // aggregator) instance — see docs/HYBRID_DEPLOYMENT.md.

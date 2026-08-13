@@ -61,6 +61,10 @@ return [
         'dashboard_readonly' => (bool) env('DASHBOARD_READONLY', false),
     ],
 
+    'map' => [
+        'mbtiles_path' => env('MAP_MBTILES_PATH', storage_path('app/map.mbtiles')),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Telegram Bot (SOS alerting)

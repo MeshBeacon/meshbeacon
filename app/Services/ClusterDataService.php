@@ -399,4 +399,45 @@ class ClusterDataService
             ->values()
             ->toArray();
     }
+
+    /**
+     * Data series for the Analytics/Node Health charts.
+     */
+    public function getAnalyticsSeries(): array
+    {
+        // For analytics, fetch the latest 500 records that likely have battery or RSSI data
+        $records = ClusterData::where('payload', 'like', '%BATT:%')
+            ->orWhere('payload', 'like', '%RSSI:%')
+            ->orderByDesc('id')
+            ->limit(500)
+            ->get()
+            ->reverse(); // oldest first
+
+        $batterySeries = [];
+        $rssiSeries = [];
+
+        foreach ($records as $r) {
+            $duckId = $r->duck_id;
+            $timestamp = $r->created_at->getTimestampMs();
+
+            if ($r->gps_batt !== null) {
+                if (!isset($batterySeries[$duckId])) {
+                    $batterySeries[$duckId] = ['name' => $duckId, 'data' => []];
+                }
+                $batterySeries[$duckId]['data'][] = [$timestamp, $r->gps_batt];
+            }
+
+            if ($r->gps_rssi !== null) {
+                if (!isset($rssiSeries[$duckId])) {
+                    $rssiSeries[$duckId] = ['name' => $duckId, 'data' => []];
+                }
+                $rssiSeries[$duckId]['data'][] = [$timestamp, $r->gps_rssi];
+            }
+        }
+
+        return [
+            'batterySeries' => array_values($batterySeries),
+            'rssiSeries'    => array_values($rssiSeries),
+        ];
+    }
 }

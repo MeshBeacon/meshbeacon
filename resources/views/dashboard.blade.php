@@ -138,10 +138,20 @@
           (function () {
             var map = L.map('duck-map', { zoomControl: true }).setView([3.139, 101.6869], 6);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            var localUrl = '/tiles/{z}/{x}/{y}.png';
+            var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            
+            var tileLayer = L.tileLayer(navigator.onLine ? osmUrl : localUrl, {
               maxZoom: 19,
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              attribution: '&copy; MeshBeacon / OpenStreetMap'
             }).addTo(map);
+
+            window.addEventListener('offline', function() {
+                tileLayer.setUrl(localUrl);
+            });
+            window.addEventListener('online', function() {
+                tileLayer.setUrl(osmUrl);
+            });
 
             var clusterGroup = L.markerClusterGroup();
             map.addLayer(clusterGroup);

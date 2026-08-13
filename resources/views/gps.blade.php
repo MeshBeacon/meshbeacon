@@ -792,9 +792,15 @@
 
     if (!historyMap) {
       historyMap = L.map('gps-history-map');
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors',
+      var localUrl = '/tiles/{z}/{x}/{y}.png';
+      var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      
+      var tileLayer = L.tileLayer(navigator.onLine ? osmUrl : localUrl, {
+        attribution: '&copy; MeshBeacon / OpenStreetMap',
       }).addTo(historyMap);
+
+      window.addEventListener('offline', function() { tileLayer.setUrl(localUrl); });
+      window.addEventListener('online', function() { tileLayer.setUrl(osmUrl); });
     }
     setTimeout(function () { historyMap.invalidateSize(); }, 50);
 
