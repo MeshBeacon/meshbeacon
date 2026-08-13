@@ -26,40 +26,40 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return null;
-    
+        }
 
         if (preg_match('/TEXT:([^,\n]+)/i', $this->payload, $matches)) {
             return trim($matches[1]);
-    
+        }
 
         return $this->payload;
-
+    }
 
     public function getMapUrlAttribute(): ?string
     {
         if (!$this->payload) {
             return null;
-    
+        }
 
         if (preg_match('/LAT:(-?\d+(?:\.\d+)?),LNG:(-?\d+(?:\.\d+)?)/', $this->payload, $matches)) {
             return 'https://www.google.com/maps?q=' . $matches[1] . ',' . $matches[2];
-    
+        }
 
         return null;
-
+    }
 
     public function getMapEmbedUrlAttribute(): ?string
     {
         if (!$this->payload) {
             return null;
-    
+        }
 
         if (preg_match('/LAT:(-?\d+(?:\.\d+)?),LNG:(-?\d+(?:\.\d+)?)/', $this->payload, $matches)) {
             return 'https://maps.google.com/maps?q=' . $matches[1] . ',' . $matches[2] . '&z=15&output=embed';
-    
+        }
 
         return null;
-
+    }
 
     /**
      * Returns true when the payload is an SOS triggered from a mobile phone
@@ -69,11 +69,11 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return false;
-    
+        }
 
         return (bool) preg_match('/\bSOS\b/i', $this->payload)
             && !preg_match('/\bSRC:DEVICE\b/i', $this->payload);
-
+    }
 
     /**
      * Returns true when the payload is an SOS triggered by a hardware button press.
@@ -83,10 +83,10 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return false;
-    
+        }
 
         return (bool) preg_match('/\bSOS\b.*\bSRC:DEVICE\b/i', $this->payload);
-
+    }
 
     /**
      * Returns true when the payload is a "Roger" confirmation sent by triple-clicking
@@ -96,11 +96,11 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return false;
-    
+        }
 
         return (bool) preg_match('/\bSRC:DEVICE\b/i', $this->payload)
             && (bool) preg_match('/\bTEXT:Roger\b/i', $this->payload);
-
+    }
 
     /**
      * Returns true when the payload contains LAT:none or LNG:none,
@@ -110,10 +110,10 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return false;
-    
+        }
 
         return (bool) preg_match('/LAT:none|LNG:none/i', $this->payload);
-
+    }
 
     /**
      * Returns true when the payload is a device SOS (SRC:DEVICE present) but
@@ -125,12 +125,12 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return false;
-    
+        }
 
         return $this->sos_from_device
             && $this->map_url === null
             && !$this->gps_unavailable;
-
+    }
 
     /**
      * Parse the URGENT:<int> field from the payload and return a Urgency enum.
@@ -140,14 +140,14 @@ class ClusterData extends Model
     {
         if (!$this->payload) {
             return null;
-    
+        }
 
         if (preg_match('/URGENCY:(\d+)/i', $this->payload, $matches)) {
             return Urgency::tryFrom((int) $matches[1]);
-    
+        }
 
         return null;
-
+    }
 
     /**
      * Returns true when the GPS coordinates in this record came from the companion
@@ -170,7 +170,7 @@ class ClusterData extends Model
         // Soft SOS (phone-originated): GPS is always from the phone
         if ($this->sos_from_mobile && $this->map_url !== null) return true;
         return false;
-
+    }
 
     /**
      * Returns true when the GPS payload reports no fix (FIX:0).
@@ -178,7 +178,7 @@ class ClusterData extends Model
     public function getGpsFixZeroAttribute(): bool
     {
         return (bool) preg_match('/\bFIX:0\b/i', $this->payload ?? '');
-
+    }
 
     /**
      * Returns true when GPS is unavailable because no phone was connected
@@ -187,7 +187,7 @@ class ClusterData extends Model
     public function getGpsNoPhoneAttribute(): bool
     {
         return (bool) preg_match('/\bREASON:NO_PHONE\b|\bREASON:NO_RESPONSE\b/i', $this->payload ?? '');
-
+    }
 
     /**
      * Badge label for display — finer-grained than gps_source_label.
@@ -200,7 +200,7 @@ class ClusterData extends Model
         if ($this->gps_fix_zero)   return 'No Fix';
         if ($this->gps_from_phone) return 'Phone';
         return 'Satellite';
-
+    }
 
     /**
      * Number of visible satellites reported by the hardware GPS module.
@@ -210,9 +210,9 @@ class ClusterData extends Model
     {
         if (preg_match('/SATS:(\d+)/i', $this->payload ?? '', $m)) {
             return (int) $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Human-readable GPS source label for display.
@@ -223,7 +223,7 @@ class ClusterData extends Model
         if ($this->gps_fix_zero)   return 'No Fix';
         if ($this->gps_from_phone) return 'Phone';
         return 'Satellite';
-
+    }
 
     /**
      * Latitude string extracted from the payload, or null when absent.
@@ -233,9 +233,9 @@ class ClusterData extends Model
     {
         if (preg_match('/LAT:(-?\d+(?:\.\d+)?)/', $this->payload ?? '', $m)) {
             return $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Longitude string extracted from the payload, or null when absent.
@@ -244,9 +244,9 @@ class ClusterData extends Model
     {
         if (preg_match('/LNG:(-?\d+(?:\.\d+)?)/', $this->payload ?? '', $m)) {
             return $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Battery percentage reported by the device (BATT:<n> field), or null when absent.
@@ -255,9 +255,9 @@ class ClusterData extends Model
     {
         if (preg_match('/BATT:(\d+)/i', $this->payload ?? '', $m)) {
             return (int) $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Altitude in metres (ALT:<n> field), or null when absent.
@@ -266,9 +266,9 @@ class ClusterData extends Model
     {
         if (preg_match('/ALT:(-?\d+(?:\.\d+)?)/i', $this->payload ?? '', $m)) {
             return (float) $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Speed in km/h (SPD:<n> field), or null when absent.
@@ -277,9 +277,9 @@ class ClusterData extends Model
     {
         if (preg_match('/SPD:(-?\d+(?:\.\d+)?)/i', $this->payload ?? '', $m)) {
             return (float) $m[1];
-    
+        }
         return null;
-
+    }
 
     /**
      * Course heading in degrees (HDG:<n> field), or null when absent.
@@ -288,24 +288,23 @@ class ClusterData extends Model
     {
         if (preg_match('/HDG:(-?\d+(?:\.\d+)?)/i', $this->payload ?? '', $m)) {
             return (float) $m[1];
-    
+        }
         return null;
-
-}
+    }
 
     public function getGpsRssiAttribute(): ?int
     {
         if (preg_match('/RSSI:(-?\d+)/i', $this->payload ?? '', $m)) {
             return (int) $m[1];
-    
+        }
         return null;
-
+    }
 
     public function getGpsSnrAttribute(): ?float
     {
         if (preg_match('/SNR:(-?\d+(?:\.\d+)?)/i', $this->payload ?? '', $m)) {
             return (float) $m[1];
-    
+        }
         return null;
-
+    }
 }

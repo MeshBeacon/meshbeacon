@@ -7,9 +7,7 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN --mount=type=secret,id=composer_auth,required=false \
-    if [ -f /run/secrets/composer_auth ]; then export COMPOSER_AUTH="$(cat /run/secrets/composer_auth)"; fi; \
-    composer install \
+RUN composer install \
         --no-dev \
         --no-interaction \
         --no-progress \
