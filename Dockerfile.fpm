@@ -1,6 +1,8 @@
 FROM jkaninda/laravel-php-fpm:8.4
 # Modify file before COPY
-RUN sed -i 's/memory_limit = 256M/memory_limit = 4096M/g' /usr/local/etc/php/conf.d/php.ini
+RUN sed -i 's/memory_limit = 256M/memory_limit = 4096M/g' /usr/local/etc/php/conf.d/php.ini \
+    && echo "upload_max_filesize = 500M" >> /usr/local/etc/php/conf.d/php.ini \
+    && echo "post_max_size = 500M" >> /usr/local/etc/php/conf.d/php.ini
 # Copy Laravel project files
 COPY . /var/www/html
 COPY ./supervisor/* /etc/supervisor/conf.d/

@@ -34,5 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     \Livewire\Volt\Volt::route('settings/rules', 'settings.rules')
         ->middleware('can:admin')
         ->name('settings.rules');
+        
+    \Livewire\Volt\Volt::route('settings/map', 'settings.map')
+        ->middleware('can:admin')
+        ->name('settings.map');
 });
 
