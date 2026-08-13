@@ -72,6 +72,17 @@ class MqttSubscribe extends Command
 
             $mqtt->subscribe('hub/event', function (string $topic, string $message) use ($status): void {
                 $status->markMessage();
+
+                $data = json_decode($message, true);
+                if (($data['eventType'] ?? null) === 'unknown') {
+                    Log::debug('mqtt.message_ignored', [
+                        'topic' => $topic,
+                        'reason' => 'eventType_unknown',
+                    ]);
+
+                    return;
+                }
+
                 ProcessMqttMessage::dispatch($message);
 
                 Log::debug('mqtt.message_received', [
