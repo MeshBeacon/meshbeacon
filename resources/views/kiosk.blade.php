@@ -119,14 +119,17 @@
 
         var localUrl = '/tiles/{z}/{x}/{y}.png';
         var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) ? 'true' : 'false' }};
         
-        var tileLayer = L.tileLayer(navigator.onLine ? osmUrl : localUrl, {
+        var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
           maxZoom: 19,
           attribution: '&copy; MeshBeacon / OpenStreetMap'
         }).addTo(map);
 
-        window.addEventListener('offline', function() { tileLayer.setUrl(localUrl); });
-        window.addEventListener('online', function() { tileLayer.setUrl(osmUrl); });
+        if (!hasOfflineMap) {
+            window.addEventListener('offline', function() { tileLayer.setUrl(localUrl); });
+            window.addEventListener('online', function() { tileLayer.setUrl(osmUrl); });
+        }
 
         var clusterGroup = L.markerClusterGroup();
         map.addLayer(clusterGroup);
