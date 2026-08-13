@@ -75,7 +75,7 @@ The FreeBSD path installs PHP, Composer, Node, Mosquitto, and the required PHP e
 
 ### First login
 
-By default, the installer creates an administrator account using `admin@example.com` and the password `9m2pju@123`. A fresh install uses these credentials automatically unless overridden in your `.env` file before running the installer. Open the printed URL, log in, and then immediately change the password from account settings.
+The installer uses `MESHBEACON_ADMIN_EMAIL` for the first account and prints the generated password. A fresh install has no shared default password. Open the printed URL, then change the password from account settings.
 
 ## How it works
 
@@ -116,8 +116,7 @@ The field node keeps the local record when the central server is unavailable. Re
 
 | Service | Role |
 | --- | --- |
-| `waf` | BunkerWeb ModSecurity WAF reverse proxy on the configured host port |
-| `webserver` | Internal Nginx webserver |
+| `webserver` | Nginx on the configured host port |
 | `app` | PHP-FPM Laravel application |
 | `migrate` | Runs migrations and creates the first administrator |
 | `permissions` | Sets volume ownership, then exits |
@@ -199,7 +198,6 @@ The deployment method you choose determines which files you need to edit to cust
 
 ## Configuration
 
-- [Custom Domains & BunkerWeb WAF](docs/CUSTOM_DOMAINS.md)
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
 - [OpenTAKServer Integration](docs/TAK_BRIDGE.md)
 
@@ -215,7 +213,7 @@ The full template lives in [.env.example](.env.example).
 | `MESHBEACON_HC_INTERVAL` | `app` container healthcheck poll interval | `10s` |
 | `MESHBEACON_WORKER_HC_INTERVAL` | `mqtt-worker`/`queue-worker`/`scheduler` healthcheck poll interval | `15s` |
 | `MESHBEACON_ADMIN_EMAIL` | First administrator email | `admin@example.com` |
-| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | `9m2pju@123` |
+| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | A strong unique value |
 | `DB_CONNECTION` | Database driver | `sqlite`, `mysql`, or `pgsql` |
 | `DB_DATABASE` | SQLite path or database name | `/var/www/database/database.sqlite` |
 | `QUEUE_CONNECTION` | Queue backend | `database` |
@@ -277,7 +275,6 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 
 ## Security checklist
 
-- The Docker Compose stack includes BunkerWeb WAF by default to protect against SQLi, XSS, and brute force attacks.
 - Keep `APP_DEBUG=false` outside development.
 - Protect `APP_KEY`, database credentials, MQTT credentials, and hybrid tokens.
 - Change the first administrator password after the first login.
@@ -285,14 +282,6 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 - Put the web interface behind HTTPS and a reverse proxy on public networks.
 - Keep `.env`, `auth.json`, Composer credentials, database files, and native Mosquitto data out of Git.
 - Review the Livewire Flux license before redistributing an image that includes it.
-
-## Web Application Firewall (WAF)
-
-MeshBeacon deployments utilize a **Defense in Depth** approach. The `docker-compose.yml` is configured out-of-the-box with [BunkerWeb](https://www.bunkerweb.io/), an enterprise-grade Nginx WAF. 
-
-- **WAF Layer (`waf`)**: Takes over the public port (e.g., `8080`) and reverse-proxies clean traffic to the webserver.
-- **Protection**: Utilizes the OWASP Core Rule Set to drop SQL Injection (SQLi), Cross-Site Scripting (XSS), zero-day vulnerability exploits, and brute force login attempts.
-- **Internal Routing**: The primary Nginx container (`webserver`) and Laravel application (`app`) are kept safely behind the Docker internal network to prevent bypasses and false-positives.
 
 ## MeshBeacon to TAK CoT Bridge
 
