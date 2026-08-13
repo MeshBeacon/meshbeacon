@@ -243,7 +243,12 @@
   </main>
   
   <footer class="py-6 text-center text-sm text-gray-500">
-    &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">MeshBeacon</a>
+    <div class="mb-2">
+      &copy; {{ date('Y') }} <a href="https://meshbeacon.org" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors font-medium">MeshBeacon</a>.
+    </div>
+    <div class="text-xs text-gray-400 dark:text-gray-500">
+      Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener" class="hover:text-gray-600 dark:hover:text-gray-300 transition-colors underline">Apache License, Version 2.0</a>.
+    </div>
   </footer>
 </div>
 @fluxScripts
