@@ -12,6 +12,24 @@ new class extends Component {
     public $mapFile;
     public $successMessage = '';
     public $errorMessage = '';
+    public $useOfflineMap = true;
+
+    public function mount()
+    {
+        $this->useOfflineMap = !File::exists(storage_path('app/use_osm_map.flag'));
+    }
+
+    public function updatedUseOfflineMap($value)
+    {
+        if ($value) {
+            File::delete(storage_path('app/use_osm_map.flag'));
+            $this->successMessage = __('Map preference updated to Offline Map (if installed).');
+        } else {
+            File::put(storage_path('app/use_osm_map.flag'), '1');
+            $this->successMessage = __('Map preference updated to OpenStreetMap (Online).');
+        }
+        $this->errorMessage = '';
+    }
 
     public function uploadMap()
     {
@@ -54,9 +72,22 @@ new class extends Component {
     }
 }; ?>
 
-<x-settings.layout :heading="__('Offline Map')" :subheading="__('Upload a local .mbtiles file to serve offline map tiles.')">
+<x-settings.layout :heading="__('Offline Map')" :subheading="__('Configure map rendering options and upload local tile data.')">
     <div class="mt-6">
-        <form wire:submit="uploadMap" class="space-y-6 max-w-xl">
+        <div class="mb-8">
+            <flux:switch wire:model.live="useOfflineMap" :label="__('Prefer Offline Map')" :description="__('When enabled, the system will always use the installed offline map (if available). When disabled, it will default to OpenStreetMap online tiles.')" />
+        </div>
+
+        <div class="relative py-4">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-gray-200 dark:border-white/10"></div>
+            </div>
+            <div class="relative flex justify-center">
+                <span class="bg-white dark:bg-gray-900 px-3 text-sm font-medium text-gray-900 dark:text-white">{{ __('Upload Map Data') }}</span>
+            </div>
+        </div>
+
+        <form wire:submit="uploadMap" class="space-y-6 max-w-xl mt-6">
             @if ($successMessage)
                 <div class="rounded-md bg-green-500/10 p-4 ring-1 ring-inset ring-green-500/30">
                     <div class="flex">

@@ -794,7 +794,7 @@
       historyMap = L.map('gps-history-map');
       var localUrl = '/tiles/{z}/{x}/{y}.png';
       var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) ? 'true' : 'false' }};
+      var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
       
       var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
         attribution: '&copy; MeshBeacon / OpenStreetMap',
