@@ -34,8 +34,21 @@ class ProcessMqttMessage implements ShouldQueue
      */
     public function handle(): void
     {
-	    Log::info("Processing ClusterDuck Data...");
 	    $data = json_decode($this->payload, true);
+
+        // Safety net: MqttSubscribe already filters "unknown" eventType
+        // messages before dispatch, but this guards against jobs that were
+        // already queued before that filter was deployed (or any future
+        // caller that dispatches this job directly).
+        if (strtolower((string) ($data['eventType'] ?? '')) === 'unknown') {
+            Log::debug('ProcessMqttMessage: skipping unknown eventType', [
+                'message_id' => $data['MessageID'] ?? null,
+            ]);
+
+            return;
+        }
+
+	    Log::info("Processing ClusterDuck Data...");
 
         // Robust path extraction.
         // Guards against: missing key, explicit null, empty array,

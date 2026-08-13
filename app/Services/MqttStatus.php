@@ -59,7 +59,7 @@ class MqttStatus
     public function needsWorkerHeartbeat(): bool
     {
         $state = $this->snapshot();
-        $ttl = (int) config('observability.mqtt_heartbeat_ttl', 45);
+        $ttl = (int) config('observability.mqtt_heartbeat_ttl', 90);
         $refreshAfter = max(5, intdiv($ttl, 2));
 
         return ! $this->isRecent($state['last_heartbeat_at'], $refreshAfter);
@@ -135,7 +135,7 @@ class MqttStatus
         $state = $this->snapshot();
 
         return $state['status'] === 'connected'
-            && $this->isRecent($state['last_heartbeat_at'], (int) config('observability.mqtt_heartbeat_ttl', 45));
+            && $this->isRecent($state['last_heartbeat_at'], (int) config('observability.mqtt_heartbeat_ttl', 90));
     }
 
     /**
@@ -149,7 +149,7 @@ class MqttStatus
         $state = $this->snapshot();
 
         if ($state['status'] === 'connected'
-            && ! $this->isRecent($state['last_heartbeat_at'], (int) config('observability.mqtt_heartbeat_ttl', 45))) {
+            && ! $this->isRecent($state['last_heartbeat_at'], (int) config('observability.mqtt_heartbeat_ttl', 90))) {
             return 'disconnected';
         }
 
