@@ -4,6 +4,7 @@ use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
     use WithFileUploads;
@@ -31,10 +32,13 @@ new class extends Component {
             $path = $this->mapFile->storeAs('/', 'map.mbtiles', 'local');
 
             if ($path) {
-                // If it was stored in standard storage disk, ensure it's precisely at the destinationPath
-                $storedFilePath = storage_path('app/' . $path);
+                // Get the absolute path from the Storage facade (this handles Laravel 11's 'private' default correctly)
+                $storedFilePath = Storage::disk('local')->path($path);
                 
                 if ($storedFilePath !== $destinationPath) {
+                    if (File::exists($destinationPath)) {
+                        File::delete($destinationPath);
+                    }
                     File::move($storedFilePath, $destinationPath);
                 }
                 
