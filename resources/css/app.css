@@ -15,3 +15,15 @@ td.dt-empty {
   text-align: center;
   padding: 10px;
 }
+
+.dark .apexcharts-tooltip {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .apexcharts-tooltip-title {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+}

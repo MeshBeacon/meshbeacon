@@ -1,6 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "meshbeacon/meshbeacon",
+    "version": "1.0.0",
     "type": "project",
     "description": "MeshBeacon — mesh-network disaster response and incident management platform.",
     "keywords": [

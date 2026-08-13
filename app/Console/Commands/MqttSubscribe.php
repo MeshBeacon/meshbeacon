@@ -38,7 +38,7 @@ class MqttSubscribe extends Command
         Log::info('mqtt.worker_starting', [
             'host' => $host,
             'port' => $port,
-            'topic' => 'hub/event',
+            'topics' => ['hub/event', 'hub/tak/log'],
         ]);
 
         try {
@@ -91,11 +91,21 @@ class MqttSubscribe extends Command
                 ]);
             }, 0);
 
+            $mqtt->subscribe('hub/tak/log', function (string $topic, string $message) use ($status): void {
+                $status->markMessage();
+                \App\Jobs\ProcessTakLog::dispatch($message);
+
+                Log::debug('mqtt.message_received', [
+                    'topic' => $topic,
+                    'payload_bytes' => strlen($message),
+                ]);
+            }, 0);
+
             $status->markConnected();
             Log::info('mqtt.connected', [
                 'host' => $host,
                 'port' => $port,
-                'topic' => 'hub/event',
+                'topics' => ['hub/event', 'hub/tak/log'],
             ]);
 
             $mqtt->loop(true);

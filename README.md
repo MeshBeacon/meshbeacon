@@ -41,7 +41,7 @@
 
 ### Linux with Docker
 
-If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, builds the image locally, and starts the stack.
+If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, pulls the pre-built Docker image from GHCR, and starts the stack.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
@@ -75,7 +75,7 @@ The FreeBSD path installs PHP, Composer, Node, Mosquitto, and the required PHP e
 
 ### First login
 
-The installer uses `MESHBEACON_ADMIN_EMAIL` for the first account and prints the generated password. A fresh install has no shared default password. Open the printed URL, then change the password from account settings.
+By default, the installer creates an administrator account using `admin@example.com` and the password `9m2pju@123`. A fresh install uses these credentials automatically unless overridden in your `.env` file before running the installer. Open the printed URL, log in, and then immediately change the password from account settings.
 
 ## How it works
 
@@ -116,7 +116,8 @@ The field node keeps the local record when the central server is unavailable. Re
 
 | Service | Role |
 | --- | --- |
-| `webserver` | Nginx on the configured host port |
+| `waf` | BunkerWeb ModSecurity WAF reverse proxy on the configured host port |
+| `webserver` | Internal Nginx webserver |
 | `app` | PHP-FPM Laravel application |
 | `migrate` | Runs migrations and creates the first administrator |
 | `permissions` | Sets volume ownership, then exits |
@@ -127,24 +128,20 @@ The field node keeps the local record when the central server is unavailable. Re
 
 Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
 
-### Tuning healthcheck cadence for constrained field hardware
+## Docker images
 
-Each `app`, `mqtt-worker`, `queue-worker`, and `scheduler` healthcheck runs `php artisan observability:check`, which boots a short-lived PHP CLI process on every poll. The defaults (`MESHBEACON_HC_INTERVAL=10s`, `MESHBEACON_WORKER_HC_INTERVAL=15s`) suit an always-on server, but on constrained field hardware (a Raspberry Pi, for example) polling that often across several containers adds up in CPU and memory churn for little practical benefit. Set both variables in `.env` to a larger interval, such as `30s`-`60s`, to reduce that overhead - the underlying heartbeat TTLs (`OBSERVABILITY_MQTT_HEARTBEAT_TTL`, `OBSERVABILITY_WORKER_HEARTBEAT_TTL`, both 45s by default) already tolerate slower detection than the default poll cadence provides.
+The Linux installer automatically downloads pre-built multi-architecture images from the GitHub Container Registry (GHCR) by default. 
 
-## Pre-built Docker images
-
-Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
-
-To use the pre-built image with the automated installer, pass the `MESHBEACON_IMAGE_SOURCE=ghcr` environment variable:
+If you want to build the Docker image locally from source (e.g., you are making code modifications), you must provide your own `auth.json` file containing your Livewire Flux Pro license key, and pass the `MESHBEACON_IMAGE_SOURCE=local` environment variable:
 
 ```sh
-MESHBEACON_IMAGE_SOURCE=ghcr ./install.sh
+MESHBEACON_IMAGE_SOURCE=local ./install.sh
 ```
 
-If you are setting up Docker Compose manually, set the image in your `.env` file before pulling and starting the stack:
+If you are setting up Docker Compose manually and want to use the pre-built image, set the image in your `.env` file before pulling and starting the stack:
 
 ```sh
-echo "MESHBEACON_IMAGE=ghcr.io/MeshBeacon/meshbeacon:latest" >> .env
+echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/MeshBeacon:latest" >> .env
 docker compose pull
 docker compose up -d
 ```
@@ -202,6 +199,10 @@ The deployment method you choose determines which files you need to edit to cust
 
 ## Configuration
 
+- [Custom Domains & BunkerWeb WAF](docs/CUSTOM_DOMAINS.md)
+- [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
+- [OpenTAKServer Integration](docs/TAK_BRIDGE.md)
+
 The full template lives in [.env.example](.env.example).
 
 | Variable | Purpose | Example |
@@ -214,7 +215,7 @@ The full template lives in [.env.example](.env.example).
 | `MESHBEACON_HC_INTERVAL` | `app` container healthcheck poll interval | `10s` |
 | `MESHBEACON_WORKER_HC_INTERVAL` | `mqtt-worker`/`queue-worker`/`scheduler` healthcheck poll interval | `15s` |
 | `MESHBEACON_ADMIN_EMAIL` | First administrator email | `admin@example.com` |
-| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | A strong unique value |
+| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | `9m2pju@123` |
 | `DB_CONNECTION` | Database driver | `sqlite`, `mysql`, or `pgsql` |
 | `DB_DATABASE` | SQLite path or database name | `/var/www/database/database.sqlite` |
 | `QUEUE_CONNECTION` | Queue backend | `database` |
@@ -276,6 +277,7 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 
 ## Security checklist
 
+- The Docker Compose stack includes BunkerWeb WAF by default to protect against SQLi, XSS, and brute force attacks.
 - Keep `APP_DEBUG=false` outside development.
 - Protect `APP_KEY`, database credentials, MQTT credentials, and hybrid tokens.
 - Change the first administrator password after the first login.
@@ -283,6 +285,34 @@ Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
 - Put the web interface behind HTTPS and a reverse proxy on public networks.
 - Keep `.env`, `auth.json`, Composer credentials, database files, and native Mosquitto data out of Git.
 - Review the Livewire Flux license before redistributing an image that includes it.
+
+## Web Application Firewall (WAF)
+
+MeshBeacon deployments utilize a **Defense in Depth** approach. The `docker-compose.yml` is configured out-of-the-box with [BunkerWeb](https://www.bunkerweb.io/), an enterprise-grade Nginx WAF. 
+
+- **WAF Layer (`waf`)**: Takes over the public port (e.g., `8080`) and reverse-proxies clean traffic to the webserver.
+- **Protection**: Utilizes the OWASP Core Rule Set to drop SQL Injection (SQLi), Cross-Site Scripting (XSS), zero-day vulnerability exploits, and brute force login attempts.
+- **Internal Routing**: The primary Nginx container (`webserver`) and Laravel application (`app`) are kept safely behind the Docker internal network to prevent bypasses and false-positives.
+
+## MeshBeacon to TAK CoT Bridge
+
+MeshBeacon integrates seamlessly with TAK (Team Awareness Kit) via the **MeshBeacon TAK CoT Bridge**. 
+This standalone service acts as an instant translator bridging the physical mesh network hardware with your tactical awareness software.
+
+### How it Works
+1. Listens to the MeshBeacon MQTT broker (`hub/event` topic) for live GPS updates from devices on the field.
+2. Automatically translates the GPS locations and IDs into the standard **Cursor on Target (CoT)** XML format.
+3. Broadcasts these XML events directly to the TAK Multicast group (e.g., `239.2.3.1:4242`) or a direct UDP port, instantly appearing as live pins on maps.
+
+### Using with OpenTAKServer (OTS) and TAK Clients
+To integrate MeshBeacon with a broader TAK ecosystem including **OpenTAKServer (OTS)** and end-user clients like **ATAK** (Android), **iTAK** (iOS), and **WinTAK** (Windows):
+
+1. **Configure the Bridge**: In the bridge's `docker-compose.yml`, set the `TAK_IP` and `TAK_PORT` environment variables to the IP address and UDP port of your OpenTAKServer instance (or leave it as the multicast default if running a local subnet without a dedicated server).
+2. **Connect Clients**: Ensure your ATAK/iTAK/WinTAK devices are properly authenticated and connected to your OpenTAKServer.
+3. **Observe**: As soon as a MeshBeacon node (like a PapaDuck or MamaDuck) reports a location, the bridge will translate and forward it. The node will instantly populate as a live CoT marker on all connected clients.
+
+A log of all outgoing CoT events is synchronized and can be monitored live directly from the **TAK Logs** page in the MeshBeacon dashboard.
+Read the full setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
 
 ## Development
 

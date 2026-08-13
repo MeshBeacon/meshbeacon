@@ -1,7 +1,7 @@
 <x-layouts::app :title="__('Tracking')">
 @section('page-actions')
   <div class="flex items-center gap-2">
-    <span class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-gray-400">
+    <span class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
       <span class="relative flex size-2">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
         <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
@@ -9,7 +9,7 @@
       {{ __('Live') }}
     </span>
     <button command="show-modal" commandfor="gps-request-dialog"
-      class="inline-flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
       </svg>
@@ -22,20 +22,20 @@
 
   <!-- Header row with search + source filter -->
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-base font-semibold text-white">{{ __('Duck GPS Locations') }}</h1>
+    <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Duck GPS Locations') }}</h1>
     <div class="flex items-center gap-2">
       <el-select id="source-filter" name="source-filter" value="" class="block w-36">
-        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-white/5 py-1.5 pl-3 pr-2 text-left text-white outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500 sm:text-sm/6">
+        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500 sm:text-sm/6">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Sources') }}</el-selectedcontent>
-          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-400 sm:size-4">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-5 self-center justify-self-end text-gray-500 dark:text-gray-400 sm:size-4">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
           </svg>
         </button>
-        <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
+        <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
           @foreach ([['', __('All Sources')], ['Satellite', __('Satellite')], ['Phone', __('Phone')], ['No Fix', __('No Fix')]] as [$val, $label])
-          <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ $label }}</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
@@ -45,14 +45,14 @@
         </el-options>
       </el-select>
 
-      <div class="relative rounded-md outline outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-yellow-500">
+      <div class="relative rounded-md outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-yellow-500">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-gray-500 dark:text-gray-400">
             <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
           </svg>
         </div>
         <input id="gps-search" type="text" placeholder="{{ __('Search duck ID…') }}"
-          class="w-44 rounded-md bg-white/5 py-1.5 pl-8 pr-3 text-sm text-white placeholder:text-gray-500 focus:outline-none">
+          class="w-44 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-8 pr-3 text-sm text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none">
       </div>
     </div>
   </div>
@@ -68,10 +68,10 @@
     'Satellite' => 'rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-400 ring-1 ring-inset ring-green-500/30',
     'Phone'     => 'rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400 ring-1 ring-inset ring-blue-500/30',
     'No Phone'  => 'rounded-full bg-slate-500/20 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-inset ring-slate-500/30',
-    default     => 'rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-400 ring-1 ring-inset ring-yellow-500/30',
+    default     => 'rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-inset ring-orange-500/30',
   };
 @endphp
-<div class="flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10"
+<div class="flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10"
      data-duck-id="{{ $record->duck_id }}"
      data-gps-src="{{ $srcLabel }}"
      data-gps-record-id="{{ $record->id }}">
@@ -80,12 +80,12 @@
   @php $poll = $pollStates[$record->duck_id] ?? null; @endphp
   <div class="px-4 py-4 sm:px-6 flex flex-col gap-2">
     <div class="flex items-center justify-between">
-      <span class="text-sm font-semibold text-white">{{ $record->duck_id }}</span>
+      <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record->duck_id }}</span>
       <span class="{{ $badgeClass }}" data-gps-badge="{{ $record->duck_id }}">{{ $badgeLabel }}</span>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <button type="button"
-        class="poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors {{ $poll?->enabled ? 'bg-cyan-500/20 text-cyan-400 ring-cyan-500/30' : 'bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10' }}"
+        class="poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors {{ $poll?->enabled ? 'bg-cyan-500/20 text-cyan-400 ring-cyan-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-500 ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10' }}"
         data-duck-id="{{ $record->duck_id }}"
         data-poll-enabled="{{ $poll?->enabled ? '1' : '0' }}"
         data-poll-interval="{{ $poll?->interval_minutes ?? 1 }}">
@@ -96,17 +96,17 @@
       </button>
       <el-select name="poll-interval-{{ $record->duck_id }}" value="{{ $poll?->interval_minutes ?? 1 }}"
         class="poll-interval-select block w-16 shrink-0" data-duck-id="{{ $record->duck_id }}">
-        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-400 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">
+        <button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-gray-100 dark:bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-500 dark:text-gray-400 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">{{ $poll?->interval_minutes ?? 1 }}min</el-selectedcontent>
-          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-500 dark:text-gray-400">
             <path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
           </svg>
         </button>
-        <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
+        <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
           @foreach ([1, 5, 15, 30, 60] as $mins)
-          <el-option value="{{ $mins }}" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+          <el-option value="{{ $mins }}" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">{{ $mins }}min</span>
-            <span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-1 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
               <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">
                 <path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />
               </svg>
@@ -124,13 +124,13 @@
   <div class="px-4 py-3 sm:px-6 flex flex-col gap-1.5 grow" data-gps-body="{{ $record->duck_id }}">
     @if ($record->gps_fix_zero)
         @php
-          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix — device active, no phone connected')
-                    : ($record->gps_from_phone ? __('No GPS fix — phone GPS unavailable')
-                    : __('No GPS fix — no satellite signal'));
+          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix - device active, no phone connected')
+                    : ($record->gps_from_phone ? __('No GPS fix - phone GPS unavailable')
+                    : __('No GPS fix - no satellite signal'));
           $lastCoord = $lastKnownCoords[$record->duck_id] ?? null;
         @endphp
         <div class="grow flex flex-col gap-1.5">
-          <p class="inline-flex items-center gap-1.5 rounded bg-yellow-400/10 px-2 py-1.5 text-xs text-yellow-400">
+          <p class="inline-flex items-center gap-1.5 rounded bg-orange-400/10 px-2 py-1.5 text-xs text-orange-600 dark:text-orange-400">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
               <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
             </svg>
@@ -139,7 +139,7 @@
           @if ($lastCoord)
             <div class="mt-0.5">
               <p class="text-xs text-gray-500">{{ __('Last known coordinates') }}</p>
-              <p class="font-mono text-xs text-gray-400 mt-0.5">{{ $lastCoord->gps_lat }}, {{ $lastCoord->gps_lng }}</p>
+              <p class="font-mono text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $lastCoord->gps_lat }}, {{ $lastCoord->gps_lng }}</p>
               @if ($lastCoord->gps_alt !== null || $lastCoord->gps_spd !== null || $lastCoord->gps_hdg !== null)
                 <div class="flex flex-wrap gap-1 mt-1">
                   @if ($lastCoord->gps_alt !== null)
@@ -161,7 +161,7 @@
           <div class="flex items-start gap-1.5">
             <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
             <div class="flex flex-wrap gap-1.5 flex-1">
-              <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+              <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                 {{ $record->gps_batt }}%
               </span>
@@ -170,8 +170,8 @@
         @endif
     @elseif ($record->map_url)
       <div class="grow flex flex-col gap-1.5">
-        <p class="text-xs text-gray-400">{{ __('Coordinates') }}</p>
-        <p class="font-mono text-sm text-white">{{ $record->gps_lat }}, {{ $record->gps_lng }}</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Coordinates') }}</p>
+        <p class="font-mono text-sm text-gray-900 dark:text-white">{{ $record->gps_lat }}, {{ $record->gps_lng }}</p>
         @if ($record->gps_sats !== null)
           <p class="text-xs text-gray-500">{{ __(':count satellites in view', ['count' => $record->gps_sats]) }}</p>
         @else
@@ -184,7 +184,7 @@
             <div class="flex items-start gap-1.5">
               <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
               <div class="flex flex-wrap gap-1.5 flex-1">
-                <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-yellow-800/60 text-yellow-300' : 'bg-green-800/60 text-green-300') }}">
+                <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                   {{ $record->gps_batt }}%
                 </span>
@@ -221,7 +221,7 @@
 
       @php $mapDialogId = 'gps-map-dialog-' . $record->id; @endphp
       <button command="show-modal" commandfor="{{ $mapDialogId }}"
-         class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
+         class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
@@ -230,13 +230,13 @@
 
       <el-dialog>
         <dialog id="{{ $mapDialogId }}" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
-          <el-dialog-backdrop class="fixed inset-0 bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+          <el-dialog-backdrop class="fixed inset-0 bg-gray-50 dark:bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
           <div tabindex="0" class="flex min-h-full items-center justify-center p-4 focus:outline focus:outline-0">
-            <el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">
-              <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">
+              <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
                 <div>
-                  <h3 class="text-sm font-semibold text-white">{{ $record->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
-                  <p class="text-xs text-gray-400 mt-0.5">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                     {{ __('Source:') }} <span class="{{ $record->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $srcLabel }}</span>
                     @if ($record->gps_sats !== null)
                       &bull; {{ $record->gps_sats }} {{ __('satellites') }}
@@ -246,7 +246,7 @@
                     @endif
                   </p>
                 </div>
-                <button command="close" commandfor="{{ $mapDialogId }}" class="text-gray-400 hover:text-white text-lg leading-none">&times;</button>
+                <button command="close" commandfor="{{ $mapDialogId }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>
               </div>
               <div class="w-full h-96">
                 <iframe
@@ -257,11 +257,11 @@
                   referrerpolicy="no-referrer-when-downgrade">
                 </iframe>
               </div>
-              <div class="flex justify-end gap-3 px-4 py-3 border-t border-white/10">
+              <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
                 <a href="{{ $record->map_url }}" target="_blank" rel="noopener noreferrer"
-                   class="text-xs text-yellow-400 hover:text-yellow-300">{{ __('Open in Google Maps') }} &rarr;</a>
+                   class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in Google Maps') }} &rarr;</a>
                 <button command="close" commandfor="{{ $mapDialogId }}"
-                   class="rounded-md bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20">{{ __('Close') }}</button>
+                   class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">{{ __('Close') }}</button>
               </div>
             </el-dialog-panel>
           </div>
@@ -275,12 +275,12 @@
   <!-- Card footer: timestamp + request GPS button -->
   <div class="px-4 py-3 sm:px-6 flex flex-col gap-2">
     <div class="flex flex-col gap-0.5">
-      <span class="text-sm text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
+      <span class="text-sm text-gray-900 dark:text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
       <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->format('j M Y, H:i') }}</span>
     </div>
     <div class="flex items-center gap-1.5">
       <button type="button"
-        class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"
+        class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"
         data-duck-id="{{ $record->duck_id }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="M8 1a7 7 0 1 0 4.95 11.95.75.75 0 0 0-1.06-1.06A5.5 5.5 0 1 1 13.5 8a.75.75 0 0 0 1.5 0A7 7 0 0 0 8 1Zm0 3a.75.75 0 0 1 .75.75v3.5l2.22 1.28a.75.75 0 0 1-.75 1.3l-2.6-1.5A.75.75 0 0 1 7.25 9V4.75A.75.75 0 0 1 8 4Z" clip-rule="evenodd" />
@@ -288,7 +288,7 @@
         {{ __('History') }}
       </button>
       <button type="button"
-        class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"
+        class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"
         data-duck-id="{{ $record->duck_id }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
@@ -307,7 +307,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto mb-3 size-10 text-gray-600">
         <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
       </svg>
-      <p id="gps-empty-title" class="text-sm font-semibold text-gray-400">{{ __('No GPS records found') }}</p>
+      <p id="gps-empty-title" class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ __('No GPS records found') }}</p>
       <p id="gps-empty-sub" class="mt-1 text-xs text-gray-600">{{ __('GPS data appears here once ducks report their location on LoRa topic 0xEA.') }}</p>
     </div>
   </div>
@@ -316,31 +316,31 @@
 <!-- Request GPS from Duck Modal -->
 <el-dialog>
   <dialog id="gps-request-dialog" aria-labelledby="gps-request-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
-    <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-50 dark:bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
     <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
-      <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+      <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-sm sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
         <form id="gps-request-form">
           @csrf
           <div class="space-y-12">
-            <div class="border-b border-white/10 pb-3">
-              <h2 id="gps-request-title" class="text-base/7 font-semibold text-white">{{ __('Request GPS Location') }}</h2>
-              <p class="mt-1 text-sm/6 text-gray-400">{{ __('Sends a GPS request (topic 234) to the specified duck.') }}</p>
+            <div class="border-b border-gray-200 dark:border-white/10 pb-3">
+              <h2 id="gps-request-title" class="text-base/7 font-semibold text-gray-900 dark:text-white">{{ __('Request GPS Location') }}</h2>
+              <p class="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">{{ __('Sends a GPS request (topic 234) to the specified duck.') }}</p>
               <div class="col-span-full mt-4">
-                <label for="gps-request-duck-id" class="block text-sm/6 font-medium text-white">{{ __('Duck ID') }}</label>
+                <label for="gps-request-duck-id" class="block text-sm/6 font-medium text-gray-900 dark:text-white">{{ __('Duck ID') }}</label>
                 <div class="mt-2">
                   <input id="gps-request-duck-id" type="text" name="duck_id" maxlength="50" placeholder="e.g. MAMAMUHAMMAD"
-                    class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-sm text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-yellow-500">
+                    class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
                 </div>
               </div>
             </div>
           </div>
           <div class="mt-2 flex items-center gap-3">
             <button type="submit" id="gps-request-send-btn"
-              class="w-full flex justify-center rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ __('Send Request') }}
             </button>
             <button type="button" command="close" commandfor="gps-request-dialog"
-              class="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20">
+              class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-white/20">
               Cancel
             </button>
             <span id="gps-request-status" class="ml-auto text-xs"></span>
@@ -354,21 +354,21 @@
 <!-- GPS History / Replay Modal (shared across all cards) -->
 <el-dialog>
   <dialog id="gps-history-dialog" aria-labelledby="gps-history-title" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
-    <el-dialog-backdrop class="fixed inset-0 bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-50 dark:bg-gray-900/50 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
     <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline focus:outline-0 sm:items-center sm:p-0">
-      <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
-        <h2 id="gps-history-title" class="text-base/7 font-semibold text-white">{{ __('Location History') }} &mdash; <span id="gps-history-duck-id"></span></h2>
-        <p class="mt-1 text-sm/6 text-gray-400">{{ __('Last 50 recorded fixes.') }}</p>
-        <div id="gps-history-map" class="mt-4 h-72 w-full rounded-md bg-gray-900"></div>
+      <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:translate-y-4 data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in sm:my-8 sm:w-full sm:max-w-2xl sm:p-6 data-[closed]:sm:translate-y-0 data-[closed]:sm:scale-95">
+        <h2 id="gps-history-title" class="text-base/7 font-semibold text-gray-900 dark:text-white">{{ __('Location History') }} &mdash; <span id="gps-history-duck-id"></span></h2>
+        <p class="mt-1 text-sm/6 text-gray-500 dark:text-gray-400">{{ __('Last 50 recorded fixes.') }}</p>
+        <div id="gps-history-map" class="mt-4 h-72 w-full rounded-md bg-gray-50 dark:bg-gray-900"></div>
         <div class="mt-3">
           <div class="flex items-center justify-between">
-            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-400">{{ __('Battery trend') }}</h3>
+            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Battery trend') }}</h3>
             <span id="gps-history-battery-caption" class="text-[11px] text-gray-500"></span>
           </div>
           <div id="gps-history-battery" class="mt-1 flex items-end gap-0.5 h-12"></div>
           <div class="mt-1 flex items-center gap-3 text-[11px] text-gray-500">
             <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-green-500"></span>&ge;50%</span>
-            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-yellow-500"></span>20&ndash;49%</span>
+            <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-orange-500"></span>20&ndash;49%</span>
             <span class="flex items-center gap-1"><span class="size-2 rounded-sm bg-red-500"></span>&lt;20%</span>
             <span class="ml-auto italic">{{ __('Oldest → newest, hover a bar for details') }}</span>
           </div>
@@ -376,7 +376,7 @@
         <div id="gps-history-status" class="mt-2 text-xs text-gray-500"></div>
         <div class="mt-4 flex justify-end">
           <button type="button" command="close" commandfor="gps-history-dialog"
-            class="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20">
+            class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-white/20">
             {{ __('Close') }}
           </button>
         </div>
@@ -397,7 +397,7 @@
     if (label === 'Satellite') return 'rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-400 ring-1 ring-inset ring-green-500/30';
     if (label === 'Phone')     return 'rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400 ring-1 ring-inset ring-blue-500/30';
     if (label === 'No Phone')  return 'rounded-full bg-slate-500/20 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-inset ring-slate-500/30';
-    return 'rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-400 ring-1 ring-inset ring-yellow-500/30';
+    return 'rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-inset ring-orange-500/30';
   }
 
   // SVG icon paths (Heroicons mini 16-solid)
@@ -415,26 +415,26 @@
     var interval = intervalMinutes || 1;
     var cls = enabled
       ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-      : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+      : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-gray-100 dark:bg-white/5 text-gray-500 ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10';
     var label = enabled ? 'Polling \u00b7 ' + interval + 'min' : 'Auto-poll';
     var nextHtml = enabled && nextAt
       ? '<span class="basis-full text-xs text-gray-500 sm:basis-auto" data-poll-next="' + escHtml(duckId) + '">' + secsLabel(nextAt) + '</span>'
       : '<span class="basis-full text-xs text-gray-500 sm:basis-auto hidden" data-poll-next="' + escHtml(duckId) + '"></span>';
     var options = [1, 5, 15, 30, 60].map(function (mins) {
-      return '<el-option value="' + mins + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
+      return '<el-option value="' + mins + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
         '<span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">' + mins + 'min</span>' +
-        '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
+        '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
           '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4"><path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
         '</span>' +
       '</el-option>';
     }).join('');
     var intervalSelectHtml =
       '<el-select name="poll-interval-' + escHtml(duckId) + '" value="' + interval + '" class="poll-interval-select block w-16 shrink-0" data-duck-id="' + escHtml(duckId) + '">' +
-        '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-400 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">' +
+        '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-gray-100 dark:bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-500 dark:text-gray-400 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500">' +
           '<el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">' + interval + 'min</el-selectedcontent>' +
-          '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
+          '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-500 dark:text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
         '</button>' +
-        '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
+        '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
           options +
         '</el-options>' +
       '</el-select>';
@@ -464,7 +464,7 @@
           lkPills += '<span style="display:inline-flex;align-items:center;border-radius:3px;padding:1px 6px;font-size:0.7rem;font-weight:500;background:rgba(12,74,110,0.7);color:#7dd3fc">' + Number(rec.last_known_hdg).toFixed(1) + '\u00b0</span>';
         lastKnown = '<div class="mt-0.5">' +
           '<p class="text-xs text-gray-500">Last known coordinates</p>' +
-          '<p class="font-mono text-xs text-gray-400 mt-0.5">' + escHtml(rec.last_known_lat) + ', ' + escHtml(rec.last_known_lng) + '</p>' +
+          '<p class="font-mono text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + escHtml(rec.last_known_lat) + ', ' + escHtml(rec.last_known_lng) + '</p>' +
           (lkPills ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:3px">' + lkPills + '</div>' : '') +
           (rec.last_known_at ? '<p class="text-xs text-gray-600 mt-0.5">' + escHtml(rec.last_known_at) + '</p>' : '') +
         '</div>';
@@ -482,7 +482,7 @@
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:10px;height:10px;flex-shrink:0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>' +
           b0 + '%</span></div></div>';
       }
-      return '<div class="grow flex flex-col gap-1.5"><p class="inline-flex items-center gap-1.5 rounded bg-yellow-400/10 px-2 py-1.5 text-xs text-yellow-400">' +
+      return '<div class="grow flex flex-col gap-1.5"><p class="inline-flex items-center gap-1.5 rounded bg-orange-400/10 px-2 py-1.5 text-xs text-orange-600 dark:text-orange-400">' +
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">' +
           ICON_GPS_SLASH +
         '</svg>' +
@@ -526,30 +526,30 @@
         }
         telHtml += '</div>';
       }
-      return '<div class="grow flex flex-col gap-1.5"><p class="text-xs text-gray-400">Coordinates</p>' +
-        '<p class="font-mono text-sm text-white">' + escHtml(rec.gps_lat) + ', ' + escHtml(rec.gps_lng) + '</p>' +
+      return '<div class="grow flex flex-col gap-1.5"><p class="text-xs text-gray-500 dark:text-gray-400">Coordinates</p>' +
+        '<p class="font-mono text-sm text-gray-900 dark:text-white">' + escHtml(rec.gps_lat) + ', ' + escHtml(rec.gps_lng) + '</p>' +
         sats + '</div>' + telHtml +
         '<button command="show-modal" commandfor="' + dlgId + '"' +
-          ' class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">' +
+          ' class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-500">' +
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">' +
             '<path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />' +
           '</svg>View on Map</button>' +
         '<el-dialog><dialog id="' + dlgId + '" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">' +
-          '<el-dialog-backdrop class="fixed inset-0 bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>' +
+          '<el-dialog-backdrop class="fixed inset-0 bg-gray-50 dark:bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>' +
           '<div tabindex="0" class="flex min-h-full items-center justify-center p-4 focus:outline focus:outline-0">' +
-            '<el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">' +
-              '<div class="flex items-center justify-between px-4 py-3 border-b border-white/10">' +
-                '<div><h3 class="text-sm font-semibold text-white">' + escHtml(rec.duck_id) + ' \u2014 GPS Location</h3>' +
-                '<p class="text-xs text-gray-400 mt-0.5">Source: <span class="' + srcCls + '">' + escHtml(rec.gps_source_label) + '</span>' +
+            '<el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">' +
+              '<div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">' +
+                '<div><h3 class="text-sm font-semibold text-gray-900 dark:text-white">' + escHtml(rec.duck_id) + ' \u2014 GPS Location</h3>' +
+                '<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Source: <span class="' + srcCls + '">' + escHtml(rec.gps_source_label) + '</span>' +
                   (rec.gps_sats !== null ? ' &bull; ' + escHtml(rec.gps_sats) + ' satellites' : '') +
                   (rec.gps_alt  !== null && rec.gps_alt !== undefined ? ' &bull; ' + Number(rec.gps_alt).toFixed(1) + ' m &bull; ' + Number(rec.gps_spd || 0).toFixed(1) + ' km/h &bull; ' + Number(rec.gps_hdg || 0).toFixed(1) + '&deg;' : '') +
                 '</p></div>' +
-                '<button command="close" commandfor="' + dlgId + '" class="text-gray-400 hover:text-white text-lg leading-none">&times;</button>' +
+                '<button command="close" commandfor="' + dlgId + '" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>' +
               '</div>' +
               '<div class="w-full h-96"><iframe src="' + escHtml(rec.map_embed_url) + '" class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>' +
-              '<div class="flex justify-end gap-3 px-4 py-3 border-t border-white/10">' +
-                '<a href="' + escHtml(rec.map_url) + '" target="_blank" rel="noopener noreferrer" class="text-xs text-yellow-400 hover:text-yellow-300">Open in Google Maps &rarr;</a>' +
-                '<button command="close" commandfor="' + dlgId + '" class="rounded-md bg-white/10 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/20">Close</button>' +
+              '<div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">' +
+                '<a href="' + escHtml(rec.map_url) + '" target="_blank" rel="noopener noreferrer" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Open in Google Maps &rarr;</a>' +
+                '<button command="close" commandfor="' + dlgId + '" class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">Close</button>' +
               '</div>' +
             '</el-dialog-panel></div>' +
         '</dialog></el-dialog>';
@@ -659,7 +659,7 @@
     });
   })();
 
-  // ── Poll toggle (per-card) — delegated ──────────────────────────────────
+  // ── Poll toggle (per-card) - delegated ──────────────────────────────────
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('.poll-toggle-btn');
     if (!btn) return;
@@ -690,7 +690,7 @@
       btn.setAttribute('data-poll-interval', interval);
       btn.className = enabled
         ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-        : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+        : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-gray-100 dark:bg-white/5 text-gray-500 ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10';
       btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
         (enabled ? 'Polling \u00b7 ' + interval + 'min' : 'Auto-poll');
 
@@ -710,7 +710,7 @@
     .catch(function () { btn.disabled = false; });
   });
 
-  // ── Poll interval selector (per-card) — delegated ───────────────────────
+  // ── Poll interval selector (per-card) - delegated ───────────────────────
   document.addEventListener('change', function (e) {
     var sel = e.target.closest('.poll-interval-select');
     if (!sel) return;
@@ -773,7 +773,7 @@
       var pct = Math.max(0, Math.min(100, p.batt));
       var bar = document.createElement('div');
       bar.title = pct + '% \u00b7 ' + p.label;
-      bar.className = 'flex-1 rounded-sm ' + (pct < 20 ? 'bg-red-500' : pct < 50 ? 'bg-yellow-500' : 'bg-green-500');
+      bar.className = 'flex-1 rounded-sm ' + (pct < 20 ? 'bg-red-500' : pct < 50 ? 'bg-orange-500' : 'bg-green-500');
       bar.style.height = Math.max(4, (pct / 100) * 48) + 'px';
       container.appendChild(bar);
     });
@@ -836,7 +836,7 @@
       });
   });
 
-  // ── Request GPS (per-card buttons) — delegated so new cards work ────────
+  // ── Request GPS (per-card buttons) - delegated so new cards work ────────
   var GPS_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" /></svg> Request';
 
   document.addEventListener('click', function (e) {
@@ -871,13 +871,13 @@
     var duckId    = rec.duck_id;
     var srcLabel  = rec.gps_source_label;
     var badgeLbl  = rec.gps_badge_label || srcLabel;
-    return '<div class="flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10"' +
+    return '<div class="flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10"' +
       ' data-duck-id="'       + escHtml(duckId)          + '"' +
       ' data-gps-src="'       + escHtml(srcLabel)         + '"' +
       ' data-gps-record-id="' + escHtml(String(rec.id))   + '">' +
       '<div class="px-4 py-4 sm:px-6 flex flex-col gap-2">' +
         '<div class="flex items-center justify-between">' +
-          '<span class="text-sm font-semibold text-white">' + escHtml(duckId) + '</span>' +
+          '<span class="text-sm font-semibold text-gray-900 dark:text-white">' + escHtml(duckId) + '</span>' +
           '<span class="' + badgeClass(badgeLbl) + '" data-gps-badge="' + escHtml(duckId) + '">' + escHtml(badgeLbl) + '</span>' +
         '</div>' +
         pollToggleBtnHtml(duckId, false, null, rec.poll_interval_minutes || 1) +
@@ -887,17 +887,17 @@
       '</div>' +
       '<div class="px-4 py-3 sm:px-6 flex flex-col gap-2">' +
         '<div class="flex flex-col gap-0.5">' +
-          '<span class="text-sm text-white" data-gps-ts="' + escHtml(duckId) + '">' + escHtml(rec.created_at_for_humans) + '</span>' +
+          '<span class="text-sm text-gray-900 dark:text-white" data-gps-ts="' + escHtml(duckId) + '">' + escHtml(rec.created_at_for_humans) + '</span>' +
           '<span class="text-xs text-gray-500" data-gps-ts-abs="' + escHtml(duckId) + '">' + escHtml(rec.created_at_formatted) + '</span>' +
         '</div>' +
         '<div class="flex items-center gap-1.5">' +
           '<button type="button"' +
-            ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+            ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
             ' data-duck-id="' + escHtml(duckId) + '">' +
             HISTORY_ICON_SVG +
           '</button>' +
           '<button type="button"' +
-            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
             ' data-duck-id="' + escHtml(duckId) + '">' +
             GPS_ICON_SVG +
           '</button>' +
@@ -963,7 +963,7 @@
                 pollBtn.setAttribute('data-poll-interval', pollInterval);
                 pollBtn.className = pollEnabled
                   ? 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-cyan-500/20 text-cyan-400 ring-cyan-500/30'
-                  : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-white/5 text-gray-500 ring-white/10 hover:bg-white/10';
+                  : 'poll-toggle-btn inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ring-1 ring-inset transition-colors bg-gray-100 dark:bg-white/5 text-gray-500 ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10';
                 pollBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 shrink-0">' + ICON_CLOCK + '</svg>' +
                   (pollEnabled ? 'Polling \u00b7 ' + pollInterval + 'min' : 'Auto-poll');
                 var intervalSelect = card.querySelector('.poll-interval-select[data-duck-id="' + CSS.escape(duckId) + '"]');
