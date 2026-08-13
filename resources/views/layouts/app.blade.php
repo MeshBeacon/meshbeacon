@@ -204,6 +204,8 @@
         @if(request()->is('analytics'))
         <div class="flex items-center justify-between">
           <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Analytics & Node Health') }}</h1>
+        </div>
+        @endif
         @if(request()->is('operations'))
         <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Operations') }}</h1>
