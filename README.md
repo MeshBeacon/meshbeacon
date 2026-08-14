@@ -1,4 +1,4 @@
-# MeshBeacon
+# MeshBeacon Ops
 
 <p align="center">
   <img src="public/images/logo.png" alt="MeshBeacon logo" width="180">
