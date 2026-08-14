@@ -21,6 +21,8 @@ class SendSosAck implements ShouldQueue
 
     private const BACKOFF_SECONDS = [10, 20];
 
+    private const ACK_MESSAGE = 'SOS DITERIMA';
+
     public function __construct(
         protected string $duckId,
         protected int $attempt = 1,
@@ -29,7 +31,11 @@ class SendSosAck implements ShouldQueue
     public function handle(): void
     {
         try {
-            app(MqttService::class)->sendCommand('SOS DITERIMA', $this->duckId, 22);
+            // Encrypted via reservedTopic::encrypted_cmd (0x08) when the
+            // Duck's public key is already known and OpenDMS's static
+            // keypair is configured; otherwise falls back to plaintext
+            // dcmd (0x16) -- see MqttService::sendEncryptedCommand().
+            app(MqttService::class)->sendEncryptedCommand(self::ACK_MESSAGE, $this->duckId);
             Log::info("SendSosAck: attempt {$this->attempt} sent to {$this->duckId}");
 
             return;
@@ -42,6 +48,7 @@ class SendSosAck implements ShouldQueue
 
             return;
         }
+
 
         self::dispatch($this->duckId, $this->attempt + 1)
             ->delay(now()->addSeconds(self::BACKOFF_SECONDS[$this->attempt - 1]));

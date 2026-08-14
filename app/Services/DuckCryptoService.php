@@ -1,0 +1,195 @@
+<?php
+
+namespace App\Services;
+
+/**
+ * Mirrors meshbeacon-firmware's src/security/DuckCrypto.{h,cpp} symmetric
+ * session construction (encryptWithPeer/decryptFromPeer), bit-for-bit:
+ * X25519 ECDH (raw sodium_crypto_scalarmult, NOT sodium_crypto_box_seal --
+ * that uses XSalsa20-Poly1305 and is wire-incompatible) -> HKDF-SHA256 ->
+ * ChaCha20-Poly1305 IETF AEAD with a 96-bit random nonce.
+ *
+ * Wire format for the encrypted blob: nonce(12) || ciphertext(N) || tag(16).
+ * sodium's *_ietf_encrypt() already appends the 16-byte Poly1305 tag to the
+ * end of its ciphertext output, so `$nonce . $ciphertext` is exactly this
+ * layout with no further packing needed.
+ *
+ * See docs/crypto-design.tex (meshbeacon-firmware repo), section
+ * "OpenDMS -> Duck (operator-initiated downlink)".
+ */
+class DuckCryptoService
+{
+    private const NONCE_LENGTH = 12;
+    private const TAG_LENGTH = 16;
+    private const EPHEMERAL_PUBLIC_KEY_LENGTH = 32;
+
+    // Must match DuckCrypto.cpp's HKDF_INFO constant exactly.
+    private const HKDF_INFO = 'meshbeacon-firmware DuckCrypto';
+
+    // Must match CdpPacket.h's reservedTopic values exactly -- these are
+    // the on-air (cleartext header) topic bytes used in buildHeaderAad().
+    public const TOPIC_ENCRYPTED_CMD = 0x08;
+    public const TOPIC_SEALED_UPLINK = 0x09;
+    public const TOPIC_ENCRYPTED_DATA = 0x0B;
+
+    /**
+     * PAPADUCK_DUID (src/CdpPacket.h): the fixed all-zero DUID used as a
+     * stand-in for "OpenDMS" in AAD construction, on both sides of the
+     * link -- OpenDMS has no DUID of its own (it's identified only by its
+     * static X25519 keypair, not a mesh identity), so this fixed 8-byte
+     * placeholder is used wherever OpenDMS is conceptually the sender or
+     * recipient of a header-bound AEAD payload: sendSealedData()'s default
+     * target (uplink, OpenDMS as recipient) and encrypted_cmd's AAD
+     * (downlink, OpenDMS as sender -- see MamaDuck.h's encrypted_cmd case,
+     * which uses this same fixed value rather than whichever physical hub
+     * happened to relay the packet on-air).
+     */
+    public const PAPADUCK_DUID = "\x00\x00\x00\x00\x00\x00\x00\x00";
+
+    /**
+     * True only when this OpenDMS instance's static X25519 keypair is
+     * configured. Callers should treat a false return as "encryption
+     * unavailable" and fall back to their existing unencrypted behavior.
+     */
+    public function isConfigured(): bool
+    {
+        return filled(config('services.duck_crypto.private_key'))
+            && filled(config('services.duck_crypto.public_key'));
+    }
+
+    private function staticPrivateKey(): string
+    {
+        return base64_decode((string) config('services.duck_crypto.private_key'));
+    }
+
+    private function deriveSharedKey(string $peerPublicKey): string
+    {
+        $shared = sodium_crypto_scalarmult($this->staticPrivateKey(), $peerPublicKey);
+        $key = hash_hkdf('sha256', $shared, 32, self::HKDF_INFO);
+        sodium_memzero($shared);
+
+        return $key;
+    }
+
+    /**
+     * Build the additional-authenticated-data bytes that bind an
+     * encrypted/sealed payload to its cleartext CDP header, so a relay
+     * can't splice a captured ciphertext onto a different sender,
+     * recipient, or topic and still have it authenticate. Must match
+     * Duck::buildHeaderAad() (meshbeacon-firmware's src/Ducks/Duck.h)
+     * exactly, byte for byte, or decryption will fail auth.
+     *
+     * Deliberately excludes muid, hopCount, and dcrc: muid is assigned by
+     * the firmware router *after* the ciphertext is built, and
+     * hopCount/dcrc mutate on every relay hop -- binding either would
+     * make a legitimately multi-hop-relayed packet fail to decrypt at its
+     * final destination. sduid/dduid/topic are fixed by the original
+     * sender and never rewritten in transit.
+     *
+     * @param  string  $sduid  raw 8-byte sender DUID
+     * @param  string  $dduid  raw 8-byte destination DUID
+     * @param  int  $topic  the on-air CDP topic byte, e.g. self::TOPIC_SEALED_UPLINK
+     */
+    public function buildHeaderAad(string $sduid, string $dduid, int $topic): string
+    {
+        return $sduid.$dduid.chr($topic);
+    }
+
+    /**
+     * Encrypt a plaintext command to a specific Duck, using this OpenDMS
+     * instance's static private key + the Duck's known static public key
+     * (ECDH) -- mirrors DuckCrypto::encryptWithPeer() on the firmware side.
+     *
+     * @param  string  $duckPublicKeyB64  base64-encoded 32-byte X25519 public key
+     * @return string|null base64(nonce || ciphertext || tag), or null if
+     *                      OpenDMS's static keypair isn't configured.
+     */
+    public function encryptToDuck(string $duckPublicKeyB64, string $plaintext, string $aad = ''): ?string
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        $duckPublicKey = base64_decode($duckPublicKeyB64);
+        $key = $this->deriveSharedKey($duckPublicKey);
+
+        $nonce = random_bytes(self::NONCE_LENGTH);
+        $ciphertext = sodium_crypto_aead_chacha20poly1305_ietf_encrypt($plaintext, $aad, $nonce, $key);
+        sodium_memzero($key);
+
+        return base64_encode($nonce.$ciphertext);
+    }
+
+    /**
+     * Decrypt a payload received from a specific Duck, using the same
+     * ECDH-symmetric construction -- mirrors DuckCrypto::decryptFromPeer()
+     * on the firmware side.
+     *
+     * @param  string  $duckPublicKeyB64  base64-encoded 32-byte X25519 public key
+     * @param  string  $payloadB64        base64(nonce || ciphertext || tag)
+     * @return string|null decrypted plaintext, or null on auth failure,
+     *                      malformed input, or missing configuration.
+     */
+    public function decryptFromDuck(string $duckPublicKeyB64, string $payloadB64, string $aad = ''): ?string
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        $payload = base64_decode($payloadB64, true);
+        if ($payload === false || strlen($payload) < self::NONCE_LENGTH + self::TAG_LENGTH) {
+            return null;
+        }
+
+        $nonce = substr($payload, 0, self::NONCE_LENGTH);
+        $ciphertextAndTag = substr($payload, self::NONCE_LENGTH);
+
+        $duckPublicKey = base64_decode($duckPublicKeyB64);
+        $key = $this->deriveSharedKey($duckPublicKey);
+
+        $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt($ciphertextAndTag, $aad, $nonce, $key);
+        sodium_memzero($key);
+
+        return $plaintext === false ? null : $plaintext;
+    }
+
+    /**
+     * Decrypt a one-way sealed uplink message from a Duck, mirroring
+     * DuckCrypto::sealToStatic() / Duck::sendSealedData() on the firmware
+     * side (see reservedTopic::sealed_uplink in CdpPacket.h). Unlike
+     * decryptFromDuck(), this does NOT need a stored Duck public key --
+     * the sender's one-time ephemeral public key travels with the message
+     * itself, so any Duck can seal to us anonymously without a prior
+     * identity exchange.
+     *
+     * @param  string  $payloadB64  base64(ephemeralPublicKey(32) || nonce(12) || ciphertext(N) || tag(16))
+     * @return string|null decrypted plaintext -- first byte is the
+     *                      original app-level topic, remainder is the
+     *                      payload (see Duck::sendSealedData()) -- or null
+     *                      on auth failure, malformed input, or missing
+     *                      configuration.
+     */
+    public function unsealFromDuck(string $payloadB64, string $aad = ''): ?string
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        $payload = base64_decode($payloadB64, true);
+        $minLength = self::EPHEMERAL_PUBLIC_KEY_LENGTH + self::NONCE_LENGTH + self::TAG_LENGTH;
+        if ($payload === false || strlen($payload) < $minLength) {
+            return null;
+        }
+
+        $ephemeralPublicKey = substr($payload, 0, self::EPHEMERAL_PUBLIC_KEY_LENGTH);
+        $nonce = substr($payload, self::EPHEMERAL_PUBLIC_KEY_LENGTH, self::NONCE_LENGTH);
+        $ciphertextAndTag = substr($payload, self::EPHEMERAL_PUBLIC_KEY_LENGTH + self::NONCE_LENGTH);
+
+        $key = $this->deriveSharedKey($ephemeralPublicKey);
+
+        $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt($ciphertextAndTag, $aad, $nonce, $key);
+        sodium_memzero($key);
+
+        return $plaintext === false ? null : $plaintext;
+    }
+}

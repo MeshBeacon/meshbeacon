@@ -77,4 +77,32 @@ return [
         'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET', ''),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Duck Crypto (mesh end-to-end encryption)
+    |--------------------------------------------------------------------------
+    |
+    | This OpenDMS instance's fixed, static X25519 keypair (see
+    | docs/crypto-design.tex in meshbeacon-firmware), base64-encoded 32-byte
+    | raw keys. Its public half is pinned into every Duck's firmware at
+    | flash time; its private half must be backed up normally (this is the
+    | one deliberate exception to the field-device "no key backup" rule) --
+    | losing it without a backup means every already-fielded Duck must be
+    | re-flashed with a new public key (see crypto-design.tex,
+    | "OpenDMS key loss / rotation requirement").
+    |
+    | Leave both empty to disable encryption entirely: App\Services\
+    | DuckCryptoService::isConfigured() will return false, and callers
+    | (e.g. SendSosAck) fall back to their existing unencrypted behavior.
+    | This keeps the feature inert until meshbeacon-firmware's own send/
+    | receive paths are wired to actually encrypt/decrypt (still pending;
+    | DuckCrypto module itself is implemented but not yet called from
+    | Duck::sendData()/handleReceivedPacket()).
+    |
+    */
+    'duck_crypto' => [
+        'private_key' => env('DUCK_CRYPTO_PRIVATE_KEY', ''),
+        'public_key'  => env('DUCK_CRYPTO_PUBLIC_KEY', ''),
+    ],
+
 ];
