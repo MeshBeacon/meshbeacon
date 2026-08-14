@@ -83,13 +83,18 @@ return [
     |--------------------------------------------------------------------------
     |
     | This OpenDMS instance's fixed, static X25519 keypair (see
-    | docs/crypto-design.tex in meshbeacon-firmware), base64-encoded 32-byte
-    | raw keys. Its public half is pinned into every Duck's firmware at
-    | flash time; its private half must be backed up normally (this is the
-    | one deliberate exception to the field-device "no key backup" rule) --
-    | losing it without a backup means every already-fielded Duck must be
-    | re-flashed with a new public key (see crypto-design.tex,
-    | "OpenDMS key loss / rotation requirement").
+    | docs/crypto-design.tex in meshbeacon-firmware), raw 32-byte keys.
+    | public_key is hex (64 chars) -- matches meshbeacon-firmware's
+    | OPENDMS_STATIC_PUBLIC_KEY_HEX build flag exactly, so this value can
+    | be pasted straight into both places with no re-encoding. private_key
+    | stays base64 -- it's only ever consumed by DuckCryptoService's own
+    | PHP code (never sent to a Duck or compiled into firmware), so there's
+    | no interop reason to change it. Its public half is pinned into every
+    | Duck's firmware at flash time; its private half must be backed up
+    | normally (this is the one deliberate exception to the field-device
+    | "no key backup" rule) -- losing it without a backup means every
+    | already-fielded Duck must be re-flashed with a new public key (see
+    | crypto-design.tex, "OpenDMS key loss / rotation requirement").
     |
     | Leave both empty to disable encryption entirely: App\Services\
     | DuckCryptoService::isConfigured() will return false, and callers

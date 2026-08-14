@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DuckIdentity;
+use Illuminate\Support\Facades\Log;
 use PhpMqtt\Client\Facades\MQTT;
 
 class MqttService
@@ -12,24 +13,31 @@ class MqttService
     /**
      * Publish a command message to the hub via MQTT.
      *
-     * $target is a raw 8-byte DUID (arbitrary binary -- see
-     * App\Jobs\ProcessMqttMessage's duck_id storage), which json_encode()
-     * cannot represent directly (fails outright on non-UTF-8 bytes).
-     * Base64-encode it for safe JSON transport, same fix already applied
-     * to the uplink DeviceID field in the gateway's Init.cpp --
-     * PapaDuck.ino's handleIncomingMqttMessages() decodes it back before
-     * use. "BROADCAST" is a literal sentinel (see PapaDuck.ino), left
+     * $target is the operator-assigned, human-readable duck name (DUID),
+     * sent as plain text for every topic, including encrypted_cmd --
+     * clusterduckd.c's mqtt_message_arrived() treats it as literal text,
+     * padded/truncated to 8 bytes. "BROADCAST" is a literal sentinel, left
      * as-is.
      */
-    public function sendCommand(string $message, string $target, int $topic = 22): void
+    public function sendCommand(string $message, string $target, int $topic = 22, ?string $encoding = null): void
     {
-        $payload = json_encode([
-            'target'  => $target === 'BROADCAST' ? 'BROADCAST' : base64_encode($target),
+        $data = [
+            'target'  => $target,
             'topic'   => $topic,
             'message' => $message,
-        ]);
+        ];
 
-        MQTT::publish('hub/command', $payload);
+        // Tell clusterduckd.c's mqtt_message_arrived() to base64-decode
+        // $message before sending it on-air -- required whenever $message
+        // is already base64 text (e.g. DuckCryptoService::encryptToDuck()'s
+        // output), otherwise the gateway forwards the literal base64
+        // characters as the "ciphertext" instead of the real binary
+        // nonce||ciphertext||tag, and the Duck can never decrypt it.
+        if ($encoding !== null) {
+            $data['encoding'] = $encoding;
+        }
+
+        MQTT::publish('hub/command', json_encode($data));
     }
 
     /**
@@ -57,10 +65,17 @@ class MqttService
             $encrypted = $this->duckCrypto->encryptToDuck($identity->public_key, $plaintext, $aad);
 
             if ($encrypted !== null) {
-                $this->sendCommand($encrypted, $duckId, DuckCryptoService::TOPIC_ENCRYPTED_CMD);
+                Log::info("MqttService: sendEncryptedCommand encrypted successfully for {$duckId}");
+                $this->sendCommand($encrypted, $duckId, DuckCryptoService::TOPIC_ENCRYPTED_CMD, 'base64');
 
                 return;
             }
+
+            Log::warning("MqttService: sendEncryptedCommand encryption failed for {$duckId}, falling back to plaintext dcmd");
+        } elseif (!$identity) {
+            Log::info("MqttService: sendEncryptedCommand no known identity for {$duckId} yet (no identity_announce seen), sending plaintext dcmd");
+        } elseif (!$this->duckCrypto->isConfigured()) {
+            Log::info("MqttService: sendEncryptedCommand OpenDMS duck_crypto keypair not configured, sending plaintext dcmd");
         }
 
         $this->sendCommand($plaintext, $duckId, 22);

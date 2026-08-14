@@ -50,11 +50,20 @@ class DuckCryptoService
      * True only when this OpenDMS instance's static X25519 keypair is
      * configured. Callers should treat a false return as "encryption
      * unavailable" and fall back to their existing unencrypted behavior.
+     *
+     * public_key is also format-checked (64 hex chars) since it's meant to
+     * be pasted verbatim into meshbeacon-firmware's
+     * OPENDMS_STATIC_PUBLIC_KEY_HEX build flag -- catching a stray
+     * base64 value here (from before this was switched to hex) is cheaper
+     * than debugging a firmware that silently fails to decrypt.
      */
     public function isConfigured(): bool
     {
+        $publicKey = (string) config('services.duck_crypto.public_key');
+
         return filled(config('services.duck_crypto.private_key'))
-            && filled(config('services.duck_crypto.public_key'));
+            && strlen($publicKey) === 64
+            && ctype_xdigit($publicKey);
     }
 
     private function staticPrivateKey(): string
@@ -163,10 +172,14 @@ class DuckCryptoService
      * identity exchange.
      *
      * @param  string  $payloadB64  base64(ephemeralPublicKey(32) || nonce(12) || ciphertext(N) || tag(16))
-     * @return string|null decrypted plaintext -- first byte is the
-     *                      original app-level topic, remainder is the
-     *                      payload (see Duck::sendSealedData()) -- or null
-     *                      on auth failure, malformed input, or missing
+     * @return string|null decrypted plaintext payload only -- the
+     *                      app-level topic is NOT folded into this
+     *                      ciphertext, it arrives separately as a
+     *                      cleartext (AAD-authenticated) prefix byte on
+     *                      the wire (see Duck::sendSealedData()), and
+     *                      must be passed in as $aad's topic component
+     *                      via buildHeaderAad() -- or null on auth
+     *                      failure, malformed input, or missing
      *                      configuration.
      */
     public function unsealFromDuck(string $payloadB64, string $aad = ''): ?string

@@ -49,7 +49,7 @@ class DuckCryptoServiceTest extends TestCase
 
         config([
             'services.duck_crypto.private_key' => base64_encode($opendms['private']),
-            'services.duck_crypto.public_key' => base64_encode($opendms['public']),
+            'services.duck_crypto.public_key' => bin2hex($opendms['public']),
         ]);
 
         $plaintext = 'SOS DITERIMA';
@@ -77,7 +77,7 @@ class DuckCryptoServiceTest extends TestCase
 
         config([
             'services.duck_crypto.private_key' => base64_encode($opendms['private']),
-            'services.duck_crypto.public_key' => base64_encode($opendms['public']),
+            'services.duck_crypto.public_key' => bin2hex($opendms['public']),
         ]);
 
         // Simulate the Duck side encrypting with its own private key +
@@ -114,7 +114,7 @@ class DuckCryptoServiceTest extends TestCase
 
         config([
             'services.duck_crypto.private_key' => base64_encode($opendms['private']),
-            'services.duck_crypto.public_key' => base64_encode($opendms['public']),
+            'services.duck_crypto.public_key' => bin2hex($opendms['public']),
         ]);
 
         // Simulate Duck::sendSealedData()/duckcrypto::sealToStatic(): a
@@ -154,7 +154,7 @@ class DuckCryptoServiceTest extends TestCase
 
         config([
             'services.duck_crypto.private_key' => base64_encode($opendms['private']),
-            'services.duck_crypto.public_key' => base64_encode($opendms['public']),
+            'services.duck_crypto.public_key' => bin2hex($opendms['public']),
         ]);
 
         $service = app(DuckCryptoService::class);

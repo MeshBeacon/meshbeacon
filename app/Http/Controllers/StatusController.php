@@ -216,10 +216,11 @@ class StatusController extends Controller
         $message = $request->input('message');
         $duckId  = $request->input('duck_id');
 
-        $this->mqttService->sendCommand(
-            message: $message,
-            target:  $duckId,
-        );
+        // Encrypted via reservedTopic::encrypted_cmd when the Duck's public
+        // key is already known and OpenDMS's static keypair is configured;
+        // otherwise falls back to plaintext dcmd -- see
+        // MqttService::sendEncryptedCommand().
+        $this->mqttService->sendEncryptedCommand($message, $duckId);
 
         // Persist the operator-sent message so it appears in history
         // and can be matched against MSG_READ receipts from the duck.

@@ -10,11 +10,12 @@ use PhpMqtt\Client\Facades\MQTT;
 use Tests\TestCase;
 
 /**
- * Verifies MqttService's downlink command transport, including the
- * base64 target-DUID encoding fix and the new sendEncryptedCommand()
- * switch from plaintext dcmd (0x16) to reservedTopic::encrypted_cmd
- * (0x08) -- see docs/crypto-design.tex (meshbeacon-firmware repo),
- * "OpenDMS -> Duck (operator-initiated downlink)".
+ * Verifies MqttService's downlink command transport: the target DUID is
+ * always sent as plain, human-readable text (never base64/hex -- DUIDs are
+ * operator-assigned ASCII names, not binary), and sendEncryptedCommand()
+ * switches from plaintext dcmd (0x16) to reservedTopic::encrypted_cmd
+ * (0x08) when possible -- see docs/crypto-design.tex (meshbeacon-firmware
+ * repo), "OpenDMS -> Duck (operator-initiated downlink)".
  */
 class MqttServiceTest extends TestCase
 {
@@ -30,22 +31,22 @@ class MqttServiceTest extends TestCase
         ];
     }
 
-    public function test_send_command_base64_encodes_a_raw_binary_target(): void
+    public function test_send_command_sends_target_as_plain_text(): void
     {
-        $rawDuid = "\xAA\xBB\x00\xCC\xDD\xEE\xFF\x11"; // embedded 0x00, not valid UTF-8
+        $duckId = 'MYDUCK01';
 
         MQTT::shouldReceive('publish')
             ->once()
-            ->with('hub/command', \Mockery::on(function (string $payload) use ($rawDuid) {
+            ->with('hub/command', \Mockery::on(function (string $payload) use ($duckId) {
                 $decoded = json_decode($payload, true);
 
                 return $decoded !== null
-                    && $decoded['target'] === base64_encode($rawDuid)
+                    && $decoded['target'] === $duckId
                     && $decoded['topic'] === 22
                     && $decoded['message'] === 'hello';
             }));
 
-        app(MqttService::class)->sendCommand('hello', $rawDuid, 22);
+        app(MqttService::class)->sendCommand('hello', $duckId, 22);
     }
 
     public function test_send_command_leaves_the_broadcast_sentinel_untouched(): void
@@ -65,11 +66,11 @@ class MqttServiceTest extends TestCase
     {
         $opendms = $this->rawX25519KeyPair();
         $duck = $this->rawX25519KeyPair();
-        $duckId = "\xAA\xBB\x00\xCC\xDD\xEE\xFF\x11";
+        $duckId = 'MYDUCK01';
 
         config([
             'services.duck_crypto.private_key' => base64_encode($opendms['private']),
-            'services.duck_crypto.public_key' => base64_encode($opendms['public']),
+            'services.duck_crypto.public_key' => bin2hex($opendms['public']),
         ]);
 
         DuckIdentity::create([
@@ -98,7 +99,7 @@ class MqttServiceTest extends TestCase
                 $plaintext = sodium_crypto_aead_chacha20poly1305_ietf_decrypt($ciphertextAndTag, $aad, $nonce, $key);
 
                 return $plaintext === 'SOS DITERIMA'
-                    && $decoded['target'] === base64_encode($duckId);
+                    && $decoded['target'] === $duckId;
             }));
 
         app(MqttService::class)->sendEncryptedCommand('SOS DITERIMA', $duckId);
@@ -106,11 +107,11 @@ class MqttServiceTest extends TestCase
 
     public function test_send_encrypted_command_falls_back_to_plaintext_dcmd_when_identity_unknown(): void
     {
-        $duckId = "\xAA\xBB\x00\xCC\xDD\xEE\xFF\x11";
+        $duckId = 'MYDUCK01';
 
         config([
             'services.duck_crypto.private_key' => base64_encode(random_bytes(32)),
-            'services.duck_crypto.public_key' => base64_encode(random_bytes(32)),
+            'services.duck_crypto.public_key' => bin2hex(random_bytes(32)),
         ]);
 
         MQTT::shouldReceive('publish')
