@@ -10,7 +10,7 @@
 
 <h3 align="center">Offline-first incident operations for mesh-connected response teams.</h3>
 
-<p align="center">Receive telemetry, track incidents, send mesh commands, and keep working when the uplink disappears.</p>
+<p align="center">Receive telemetry, track incidents, send mesh commands, display EOC kiosk wallboards, and keep working when the uplink disappears.</p>
 
 <p align="center">
   <a href="https://github.com/MeshBeacon/meshbeacon/actions/workflows/tests.yml"><img src="https://github.com/MeshBeacon/meshbeacon/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests"></a>
@@ -20,40 +20,42 @@
 </p>
 
 <p align="center">
+  <a href="#choose-a-deployment">Deployments</a> |
   <a href="#quick-install">Install</a> |
   <a href="#how-it-works">How it works</a> |
-  <a href="#operator-workflows">Operator workflows</a> |
+  <a href="#features">Features</a> |
+  <a href="#operator-workflows">Workflows</a> |
+  <a href="#offline-maps">Offline Maps</a> |
+  <a href="#tak-cot-bridge">TAK Bridge</a> |
   <a href="#configuration">Configuration</a> |
   <a href="#licensing">License</a>
 </p>
 
-> MeshBeacon connects ClusterDuck or MamaDuck LoRa deployments to a Laravel operations console. It stores events locally, turns SOS messages into incidents, and forwards records to a central server when the network returns.
+> MeshBeacon connects ClusterDuck Protocol (MamaDuck, PapaDuck) LoRa deployments to a high-performance Laravel operations console. It stores events locally, turns SOS alerts into actionable incidents, renders tactical maps offline, and synchronizes upstream to central servers when connectivity is restored.
+
+---
 
 ## Choose a deployment
 
 | Deployment | Storage | Network model | Best for |
 | --- | --- | --- | --- |
-| Central server | MySQL or PostgreSQL | Always reachable | The main monitoring and ingestion site |
-| Offline field node | SQLite | No upstream dependency | A response team working without Internet |
-| Hybrid field node | SQLite plus a central API | Store locally, sync when online | Field teams that need local continuity and central reporting |
+| **Central server** | MySQL or PostgreSQL | Always reachable | Main regional headquarters, central ingestion, and multi-agency coordination |
+| **Offline field node** | SQLite | 100% offline / local mesh | Tactical response teams, mobile command posts, and disaster zones with zero internet |
+| **Hybrid field node** | SQLite + Central API sync | Store locally, sync when online | Field units requiring immediate offline continuity with automatic upstream reporting |
+
+---
 
 ## Quick install
 
 ### Linux with Docker
 
-If you want the default installation, you can just run the script as-is. The installer clones the project, creates `.env`, generates `APP_KEY`, creates the first administrator, pulls the pre-built Docker image from GHCR, and starts the stack.
+The automated installer configures your environment, creates `.env`, generates `APP_KEY`, creates the initial administrator, pulls the pre-built multi-arch Docker image from GHCR, and launches the entire stack.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sh
 ```
 
-If you want to configure it beforehand, you can simply pass the environment variables inline with the install command. For example, if you already downloaded `install.sh`:
-
-```sh
-MESHBEACON_PORT=9000 MESHBEACON_ADMIN_EMAIL="admin@mydomain.com" ./install.sh
-```
-
-Or, when using the one-liner directly from the web:
+To supply configuration inline:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | \
@@ -63,7 +65,7 @@ curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.
   sh
 ```
 
-The default directory is `$HOME/meshbeacon`. The installer prints the generated password once. Set `MESHBEACON_UPDATE=1` when an existing checkout should pull the selected branch first.
+The default installation path is `$HOME/meshbeacon`. The installer generates and prints a secure administrator password upon initial run. To update an existing deployment, set `MESHBEACON_UPDATE=1`.
 
 ### FreeBSD without Docker
 
@@ -71,28 +73,30 @@ The default directory is `$HOME/meshbeacon`. The installer prints the generated 
 curl -fsSL https://raw.githubusercontent.com/MeshBeacon/meshbeacon/main/install.sh | sudo sh
 ```
 
-The FreeBSD path installs PHP, Composer, Node, Mosquitto, and the required PHP extensions with `pkg`. It starts the web server and workers with FreeBSD `daemon`. Put the PHP development server behind a production web server and process supervisor before exposing it to the Internet.
+The FreeBSD path installs PHP, Composer, Node, Mosquitto, and necessary extensions natively using `pkg`, managing processes via FreeBSD `daemon`. Place the service behind a production reverse proxy for public network exposure.
 
 ### First login
 
-The installer uses `MESHBEACON_ADMIN_EMAIL` for the first account and prints the generated password. A fresh install has no shared default password. Open the printed URL, then change the password from account settings.
+The installer provisions the initial account using `MESHBEACON_ADMIN_EMAIL` and prints the generated password. Open the URL shown in your terminal, sign in, and configure your profile from **Account Settings**.
+
+---
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    D[LoRa devices] --> G[ClusterDuck or MamaDuck gateway]
+    D[LoRa devices] --> G[ClusterDuck / MamaDuck gateway]
     G -->|MQTT hub/event| B[Mosquitto broker]
     B --> W[mqtt-worker]
     W --> P[ProcessMqttMessage]
     P --> DB[(cluster_data)]
     P --> Q[Database queue]
     Q --> J[Commands, alerts, and sync]
-    DB --> A[Laravel dashboard]
+    DB --> A[MeshBeacon web dashboard]
     A -->|MQTT hub/command| B
 ```
 
-The `mqtt-worker` subscribes to `hub/event` and dispatches `ProcessMqttMessage`. The job validates the payload, normalizes the mesh path, writes `cluster_data`, and queues follow-up work. Dashboard actions publish commands on `hub/command`.
+The `mqtt-worker` subscribes to `hub/event` and dispatches `ProcessMqttMessage`. Payloads are validated, mesh paths normalized, and written to `cluster_data`. Incidents and alerts trigger follow-up jobs, and dashboard operators publish command packets back through `hub/command`.
 
 ### Hybrid store-and-forward
 
@@ -103,131 +107,118 @@ sequenceDiagram
     participant Queue as Sync queue
     participant Central as Central API
     Duck->>Field: MQTT event
-    Field->>Field: Save event to SQLite
-    Field->>Queue: Queue SyncRecordToCloud
-    Queue->>Central: POST /api/ingest when online
-    Central-->>Queue: Accepted or duplicate
-    Queue->>Field: Mark synced and record synced_at
+    Field->>Field: Save event locally in SQLite
+    Field->>Queue: Queue SyncRecordToCloud job
+    Queue->>Central: POST /api/ingest (when link available)
+    Central-->>Queue: Accepted or duplicate acknowledged
+    Queue->>Field: Mark synced and timestamp synced_at
 ```
 
-The field node keeps the local record when the central server is unavailable. Retries use the `sync` queue, and `(duck_id, message_id)` makes ingestion idempotent.
+Field nodes preserve all incident and telemetry data locally. When upstream connectivity resumes, background queue workers dispatch idempotent synchronization requests to the central cluster.
+
+---
+
+## Features
+
+- **Offline-First Telemetry Ingestion**: Ingests real-time binary and text packets across LoRa mesh networks via MQTT (`hub/event` and `hub/command`).
+- **Tactical Incident Management**: SOS auto-triage, responder assignment, triage notes, lifecycle status tracking, and mesh retransmissions.
+- **High-Performance Offline MBTiles Map Engine**: Upload regional raster `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
+- **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
+- **Deep Incident & Telemetry Analytics (`/analytics`)**: Historical charts for packet volume, hop distributions, battery drain trajectories, RSSI/SNR signal degradation, and responder resolution velocity.
+- **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
+- **TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK, iTAK, WinTAK, and OpenTAKServer with dedicated live audit logs (`/tak/logs`).
+- **Automated Telegram Dispatch**: Instant SOS dispatch to Telegram responder channels with one-click responder account linking and live webhook logs (`/telegram/logs`).
+- **System Health & Observability**: Production-grade liveness/readiness probes (`/health/live`, `/health/ready`), Prometheus metric endpoints (`/metrics`), and an interactive System Health dashboard (`/system-health`).
+- **Comprehensive Reporting**: Export period-based and incident-specific audit reports in CSV and print-optimized PDF formats.
+- **Security & Access Control**: Two-Factor Authentication (2FA via Fortify), Role-Based Access Control (`admin`, `responder`, `viewer`), and read-only instance locks.
+
+---
+
+## Operator workflows
+
+| Workflow | Key Capabilities & Actions |
+| --- | --- |
+| **Incident Response** | Acknowledge SOS signals, assign field responders, add timestamped operational notes, change status, resolve, and retransmit mesh packets. |
+| **Tactical & EOC Kiosk** | Launch fullscreen `/kiosk` wallboard for command post monitoring with live maps, alert feeds, and responder queues. |
+| **Spatial & Offline Maps** | Upload `.mbtiles` packages in Settings, toggle between OpenStreetMap and offline raster layers, and track device GPS history. |
+| **Analytics & Telemetry** | Inspect packet traffic, hop distribution, battery curves, and response metrics from `/analytics`. |
+| **Mesh Operations** | View device health metrics, dispatch remote GPS polls, adjust polling intervals, and broadcast text messages across the mesh. |
+| **Reporting & Export** | Generate CSV archives and print-ready incident dossiers for after-action reviews (AAR) and agency compliance. |
+| **Log Auditing** | Live monitoring of TAK CoT multicasts (`/tak/logs`) and Telegram alert dispatches (`/telegram/logs`). |
+| **Responder Administration**| Manage users, configure roles (Admin/Responder/Viewer), enforce 2FA, and link Telegram alert accounts. |
+
+---
+
+## Offline maps
+
+MeshBeacon enables zero-connectivity mapping using standard raster MBTiles:
+
+1. **Generate MBTiles**: Create regional raster map tiles using QGIS, TileMill, or MOBAC (see [docs/OFFLINE_MAPS.md](docs/OFFLINE_MAPS.md)).
+2. **Upload**: Navigate to **Settings > Offline Map** in the MeshBeacon web dashboard and upload your `.mbtiles` file (supports uploads up to 500MB).
+3. **Seamless Rendering**: The system automatically serves tiles via the high-speed `/tiles/{z}/{x}/{y}.png` endpoint.
+4. **Smart Zoom**: If operators zoom beyond the pre-rendered zoom level of the MBTiles file, MeshBeacon natively upscales existing tiles to avoid gray placeholder tiles.
+
+---
+
+## TAK CoT bridge
+
+MeshBeacon integrates directly with tactical situational awareness software (ATAK, iTAK, WinTAK, OpenTAKServer) via Cursor-on-Target (CoT):
+
+1. **Ingest**: GPS coordinates and emergency beacons received from mesh nodes (PapaDuck/MamaDuck) are captured over MQTT.
+2. **Translate**: The standalone bridge converts node telemetry into standard CoT XML payloads.
+3. **Broadcast**: Payloads are transmitted via TAK Multicast (`239.2.3.1:4242`) or direct UDP to OpenTAKServer.
+4. **Live Logs**: Monitor outgoing CoT transmissions directly from the **TAK Logs** dashboard (`/tak/logs`).
+
+Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
+
+---
 
 ## Docker services
 
 | Service | Role |
 | --- | --- |
-| `webserver` | Nginx on the configured host port |
-| `app` | PHP-FPM Laravel application |
-| `migrate` | Runs migrations and creates the first administrator |
-| `permissions` | Sets volume ownership, then exits |
-| `mqtt-server` | Mosquitto broker |
-| `mqtt-worker` | Reads mesh events and dispatches jobs |
-| `queue-worker` | Processes `sync` and `default` queues |
-| `scheduler` | Runs scheduled commands every 60 seconds |
+| `webserver` | Nginx web server handling HTTP requests and static asset routing |
+| `app` | PHP-FPM Laravel 12 application core |
+| `migrate` | Executes database migrations and provisions the initial admin account |
+| `permissions` | Fixes storage and database file permissions on startup |
+| `mqtt-server` | Eclipse Mosquitto MQTT broker |
+| `mqtt-worker` | Subscribes to `hub/event` and dispatches processing jobs |
+| `queue-worker` | Handles `sync` and `default` job queues |
+| `scheduler` | Executes scheduled maintenance, GPS polling, and health checks |
 
-Compose uses named volumes for the SQLite database, Laravel storage, public assets, and Mosquitto data/logs. The image contains the source and dependencies, so Compose does not mount the checkout over the container.
-
-## Docker images
-
-The Linux installer automatically downloads pre-built multi-architecture images from the GitHub Container Registry (GHCR) by default. 
-
-If you want to build the Docker image locally from source (e.g., you are making code modifications), you must provide your own `auth.json` file containing your Livewire Flux Pro license key, and pass the `MESHBEACON_IMAGE_SOURCE=local` environment variable:
-
-```sh
-MESHBEACON_IMAGE_SOURCE=local ./install.sh
-```
-
-If you are setting up Docker Compose manually and want to use the pre-built image, set the image in your `.env` file before pulling and starting the stack:
-
-```sh
-echo "MESHBEACON_IMAGE=ghcr.io/9M2PJU/MeshBeacon:latest" >> .env
-docker compose pull
-docker compose up -d
-```
-
-## Manual Docker setup
-
-```sh
-git clone https://github.com/MeshBeacon/meshbeacon.git
-cd meshbeacon
-cp .env.example .env
-```
-
-Set `APP_KEY`, `MESHBEACON_ADMIN_PASSWORD`, and the host ports in `.env`, then build and start the image:
-
-```sh
-docker buildx build \
-  --load \
-  --provenance=false \
-  --file Dockerfile.compose \
-  --tag meshbeacon:local \
-  .
-docker compose up -d --no-build
-docker compose ps
-```
-
-Open `http://localhost:8080`, unless `MESHBEACON_PORT` or `APP_URL` has changed. Follow logs with `docker compose logs -f app mqtt-worker queue-worker`.
-
-Update a deployment with:
-
-```sh
-git pull --ff-only
-docker buildx build --load --provenance=false --file Dockerfile.compose --tag meshbeacon:local .
-docker compose up -d --no-build
-```
-
-Back up the `app-database` and `app-storage` volumes before upgrades that contain incident data.
-
-### Pulling vs. Building: What to configure?
-
-The deployment method you choose determines which files you need to edit to customize MeshBeacon:
-
-- **Using a pre-built image (`docker compose pull`)**: You are running the official, unmodified application code. The **only** file you need to edit is your `.env` file (to configure settings like `MESHBEACON_PORT`, database connections, or admin credentials). Any local changes you make to the PHP source code or `Dockerfile` will be ignored.
-- **Building locally (`docker build ...`)**: You are compiling the application from the source directory. Use this approach if you are actively modifying the source code (such as editing PHP files in `app/`, modifying routes in `routes/`, or updating UI assets in `resources/`), altering `Dockerfile.compose`, or changing dependencies in `composer.json`. Because the source code is copied into the image during the build process, you must rebuild the image for your code changes to take effect. Environment variables are still managed at runtime via the `.env` file.
-
-## Features
-
-- MQTT ingestion from `hub/event` and commands on `hub/command`.
-- Durable queues for events, commands, GPS polls, alerts, and hybrid synchronization.
-- SOS acknowledgement, assignment, notes, status changes, resolution, and retransmission.
-- GPS history, map links, device health, mesh topology, telemetry history, and reports.
-- Optional Telegram SOS alerts and responder account linking.
-- Read-only central dashboards for hybrid deployments.
-- Linux `amd64` and `arm64` image builds through Docker Buildx.
-- Native FreeBSD installation without a Linux container.
+---
 
 ## Configuration
 
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
-- [OpenTAKServer Integration](docs/TAK_BRIDGE.md)
+- [OpenTAKServer & TAK Bridge Integration](docs/TAK_BRIDGE.md)
 - [Offline Maps & QGIS Guide](docs/OFFLINE_MAPS.md)
 
-The full template lives in [.env.example](.env.example).
+Key settings from [.env.example](.env.example):
 
 | Variable | Purpose | Example |
 | --- | --- | --- |
-| `APP_URL` | Public links and Telegram webhooks | `https://mesh.example.org` |
-| `APP_KEY` | Laravel encryption key | `base64:...` |
-| `APP_DEBUG` | Debug mode | `false` |
-| `MESHBEACON_IMAGE` | Compose image | `meshbeacon:local` |
-| `MESHBEACON_PORT` | Web host port | `8080` |
-| `MESHBEACON_HC_INTERVAL` | `app` container healthcheck poll interval | `10s` |
-| `MESHBEACON_WORKER_HC_INTERVAL` | `mqtt-worker`/`queue-worker`/`scheduler` healthcheck poll interval | `15s` |
-| `MESHBEACON_ADMIN_EMAIL` | First administrator email | `admin@example.com` |
-| `MESHBEACON_ADMIN_PASSWORD` | First administrator password | A strong unique value |
-| `DB_CONNECTION` | Database driver | `sqlite`, `mysql`, or `pgsql` |
-| `DB_DATABASE` | SQLite path or database name | `/var/www/database/database.sqlite` |
-| `QUEUE_CONNECTION` | Queue backend | `database` |
-| `MQTT_HOST` / `MQTT_PORT` | Broker address | `mqtt-server` / `1883` |
-| `MQTT_BIND_ADDRESS` / `MQTT_BIND_PORT` | Compose broker bind | `0.0.0.0` / `1883` |
+| `APP_URL` | Public base URL and Telegram webhook origin | `https://mesh.example.org` |
+| `APP_KEY` | Laravel application encryption key | `base64:...` |
+| `APP_DEBUG` | Enable debug mode (disable in production) | `false` |
+| `MESHBEACON_IMAGE` | Docker container image repository | `ghcr.io/9m2pju/meshbeacon:latest` |
+| `MESHBEACON_PORT` | Exposed HTTP port | `8080` |
+| `MESHBEACON_ADMIN_EMAIL` | Initial administrator email | `admin@example.com` |
+| `MESHBEACON_ADMIN_PASSWORD` | Initial administrator password | Strong random string |
+| `DB_CONNECTION` | Database engine (`sqlite`, `mysql`, or `pgsql`) | `sqlite` |
+| `DB_DATABASE` | SQLite path or remote database name | `/var/www/database/database.sqlite` |
+| `QUEUE_CONNECTION` | Queue driver | `database` |
+| `MQTT_HOST` / `MQTT_PORT` | Mosquitto broker host and port | `mqtt-server` / `1883` |
 | `MQTT_AUTH_USERNAME` / `MQTT_AUTH_PASSWORD` | Optional broker credentials | Empty by default |
-| `MQTT_TLS_ENABLED` | Enable MQTT TLS | `false` |
-| `CENTRAL_DMS_URL` | Central API base URL | `https://central.example.org` |
-| `CENTRAL_DMS_TOKEN` | Shared hybrid-sync token | A long random token |
-| `DASHBOARD_READONLY` | Reject central dashboard writes | `true` |
-| `TELEGRAM_BOT_TOKEN` | Enable Telegram alerts | Empty by default |
+| `CENTRAL_DMS_URL` | Central aggregation server URL | `https://central.example.org` |
+| `CENTRAL_DMS_TOKEN` | Shared hybrid synchronization token | Random 64-char token |
+| `DASHBOARD_READONLY` | Lock UI to read-only on central aggregators | `false` |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API token | `123456:ABC-DEF...` |
+| `TELEGRAM_BOT_USERNAME` | Telegram Bot username | `MeshBeaconAlertBot` |
+| `TELEGRAM_WEBHOOK_SECRET` | Secret token validating incoming webhooks | Random 32-char hex |
+| `MAP_OFFLINE_ENABLED` | Toggle offline MBTiles map engine | `true` |
 
-For MySQL or PostgreSQL, set `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` in addition to `DB_CONNECTION`.
+---
 
 ## MQTT message shape
 
@@ -247,66 +238,26 @@ For MySQL or PostgreSQL, set `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`,
 }
 ```
 
-## Operator workflows
-
-| Workflow | Available actions |
-| --- | --- |
-| Incident response | Acknowledge SOS, assign responders, add notes, change status, resolve, retransmit |
-| Device operations | View health, request GPS, set polling intervals, inspect telemetry |
-| Mesh communications | Send status messages and broadcasts |
-| Reporting | Export incident and period data as CSV or print views |
-| Responder management | Manage users, roles, passwords, and two-factor authentication |
-| Alerting | Link Telegram responders and send SOS notifications |
-| Central monitoring | Keep dashboards read-only while field nodes send data upstream |
+---
 
 ## Telegram alerts
 
-1. Create a bot with `@BotFather` and copy its token and username.
-2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, and `TELEGRAM_WEBHOOK_SECRET`.
-3. Set `APP_URL` to a public HTTPS URL.
+1. Create a bot with [@BotFather](https://t.me/BotFather) and obtain the API token.
+2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, and `TELEGRAM_WEBHOOK_SECRET` in `.env`.
+3. Set `APP_URL` to your public HTTPS address.
 4. Register the webhook:
 
    ```sh
    docker compose exec app php artisan telegram:set-webhook
    ```
 
-5. Each responder can generate a link token from profile settings and send it to the bot.
+5. Responders link their personal Telegram accounts by generating an authorization token in **Profile Settings** and sending it to the bot.
 
-Leave `TELEGRAM_BOT_TOKEN` empty to disable Telegram processing.
-
-## Security checklist
-
-- Keep `APP_DEBUG=false` outside development.
-- Protect `APP_KEY`, database credentials, MQTT credentials, and hybrid tokens.
-- Change the first administrator password after the first login.
-- Restrict Mosquitto to the gateway network, or replace the anonymous listener with authentication and TLS.
-- Put the web interface behind HTTPS and a reverse proxy on public networks.
-- Keep `.env`, `auth.json`, Composer credentials, database files, and native Mosquitto data out of Git.
-- Review the Livewire Flux license before redistributing an image that includes it.
-
-## MeshBeacon to TAK CoT Bridge
-
-MeshBeacon integrates seamlessly with TAK (Team Awareness Kit) via the **MeshBeacon TAK CoT Bridge**. 
-This standalone service acts as an instant translator bridging the physical mesh network hardware with your tactical awareness software.
-
-### How it Works
-1. Listens to the MeshBeacon MQTT broker (`hub/event` topic) for live GPS updates from devices on the field.
-2. Automatically translates the GPS locations and IDs into the standard **Cursor on Target (CoT)** XML format.
-3. Broadcasts these XML events directly to the TAK Multicast group (e.g., `239.2.3.1:4242`) or a direct UDP port, instantly appearing as live pins on maps.
-
-### Using with OpenTAKServer (OTS) and TAK Clients
-To integrate MeshBeacon with a broader TAK ecosystem including **OpenTAKServer (OTS)** and end-user clients like **ATAK** (Android), **iTAK** (iOS), and **WinTAK** (Windows):
-
-1. **Configure the Bridge**: In the bridge's `docker-compose.yml`, set the `TAK_IP` and `TAK_PORT` environment variables to the IP address and UDP port of your OpenTAKServer instance (or leave it as the multicast default if running a local subnet without a dedicated server).
-2. **Connect Clients**: Ensure your ATAK/iTAK/WinTAK devices are properly authenticated and connected to your OpenTAKServer.
-3. **Observe**: As soon as a MeshBeacon node (like a PapaDuck or MamaDuck) reports a location, the bridge will translate and forward it. The node will instantly populate as a live CoT marker on all connected clients.
-
-A log of all outgoing CoT events is synchronized and can be monitored live directly from the **TAK Logs** page in the MeshBeacon dashboard.
-Read the full setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
+---
 
 ## Development
 
-Requirements: PHP 8.2+, Composer, Node.js 22, npm, SQLite, and an MQTT broker.
+Requirements: PHP 8.2+, Composer, Node.js 22, npm, SQLite, and Mosquitto.
 
 ```sh
 composer install
@@ -318,9 +269,9 @@ npm ci
 npm run build
 ```
 
-Set `MESHBEACON_ADMIN_PASSWORD` in `.env` before `php artisan migrate --seed`.
+Set `MESHBEACON_ADMIN_PASSWORD` in `.env` before running `php artisan migrate --seed`.
 
-Start the development processes in separate terminals:
+Start local development processes:
 
 ```sh
 composer run dev
@@ -329,7 +280,7 @@ php artisan queue:work --queue=sync,default --tries=5 --timeout=0
 php artisan schedule:work
 ```
 
-Run the checks with:
+Run test suite and style linters:
 
 ```sh
 composer run test
@@ -337,61 +288,51 @@ php artisan test --filter=HybridSyncTest
 php artisan test --filter=DashboardReadonlyTest
 ```
 
+---
+
 ## Project map
 
-| Path | Purpose |
+| Path | Description |
 | --- | --- |
-| `app/Console` | MQTT, GPS, Telegram, and Artisan commands |
-| `app/Jobs` | Event processing, alerts, commands, and sync jobs |
-| `app/Http` | Controllers, API ingestion, and security middleware |
-| `app/Livewire` | Dashboard, settings, authentication, and user workflows |
-| `app/Models` | Telemetry, incidents, users, and GPS models |
-| `database/migrations` | Schema and indexes |
-| `resources/views` and `resources/js` | UI templates and frontend assets |
-| `services/mosquitto` | Broker configuration and native-install directories |
-| `services/nginx` | Nginx configuration |
-| `Dockerfile.compose` | Multi-stage production image |
-| `docker-compose.yml` | Web, workers, scheduler, migration, and broker |
-| `install.sh` | Linux Docker and native FreeBSD installer |
-| `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward deployment notes |
-| `docs/OFFLINE_MAPS.md` | Guide to downloading offline maps via QGIS |
+| `app/Console` | Artisan CLI commands (MQTT worker, GPS polling, health heartbeats) |
+| `app/Jobs` | Background queue jobs (MQTT processing, hybrid sync, alerts) |
+| `app/Http/Controllers` | Web, API, healthcheck, and tile server controllers |
+| `app/Livewire` | Reactive Livewire Flux components and interactive log viewers |
+| `app/Models` | Eloquent models (telemetry, incidents, GPS, rules, logs) |
+| `database/migrations` | Relational database schema definitions |
+| `lang/` | Bilingual translation catalogs (`en`, `ms`) |
+| `resources/views` | Blade templates (Dashboard, Kiosk, Analytics, GPS, Status) |
+| `routes/` | Web routes (`web.php`), hybrid sync (`api.php`), and settings (`settings.php`) |
+| `services/mosquitto` | Mosquitto broker configuration and access control |
+| `services/nginx` | Nginx web server configuration templates |
+| `Dockerfile.compose` | Multi-stage production container definition |
+| `docker-compose.yml` | Multi-container stack orchestration |
+| `install.sh` | Automated Linux (Docker) and FreeBSD deployment installer |
+| `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward architecture and configuration |
+| `docs/OFFLINE_MAPS.md` | Guide to creating and loading raster MBTiles |
+| `docs/TAK_BRIDGE.md` | TAK Cursor-on-Target (CoT) integration guide |
 
-## Container builds
+---
 
-Build a local image for the current host:
+## Security checklist
 
-```sh
-docker buildx build \
-  --load \
-  --provenance=false \
-  --file Dockerfile.compose \
-  --tag meshbeacon:local \
-  .
-```
+- Maintain `APP_DEBUG=false` on all production and field nodes.
+- Protect `APP_KEY`, database secrets, MQTT credentials, and hybrid sync tokens.
+- Update the default administrator password immediately after installation.
+- Restrict Mosquitto network listeners or enable TLS and authentication on exposed networks.
+- Enforce HTTPS and secure reverse proxy termination on public endpoints.
+- Keep `.env`, `auth.json`, and database binaries out of revision control.
 
-Build an OCI artifact for Linux `amd64` and `arm64`:
-
-```sh
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --file Dockerfile.compose \
-  --tag meshbeacon:latest \
-  --output type=oci,dest=meshbeacon.oci \
-  .
-```
-
-FreeBSD uses the native installer. The Docker image contains a Linux userland and needs a Linux kernel.
-
-The Dockerfile accepts an optional BuildKit secret named `composer_auth` for authenticated Composer installs. Keep Composer credentials out of image layers and the repository.
+---
 
 ## Licensing
 
-MeshBeacon first-party source and documentation use the Apache License 2.0. See [LICENSE](LICENSE).
+MeshBeacon first-party code and documentation are released under the [Apache License 2.0](LICENSE).
 
-The application includes third-party packages. Each dependency keeps its own license and attribution terms. The locked `livewire/flux` package declares a proprietary license, so redistribution requires the appropriate Flux license and Composer access. Review `composer.lock` and upstream terms before distributing a build.
+Third-party dependencies retain their respective licenses. Livewire Flux Pro components included in compiled assets require appropriate licensing for redistribution.
 
-The Apache License applies to MeshBeacon first-party work. It does not relicense third-party dependencies, trademarks, or service names.
+---
 
 ## Contributing
 
-Open an issue for a reproducible bug or focused feature request. Keep pull requests small enough to review, include tests for behavior changes, and update the relevant deployment or operator documentation.
+Pull requests and issues are welcome! Please open an issue to discuss proposed features or bug fixes. Follow existing code conventions, keep PRs focused, include relevant tests, and branch from `Staging`.

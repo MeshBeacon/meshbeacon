@@ -796,8 +796,20 @@
       var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
       var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
       
+      <?php
+      $maxNativeZoom = 19;
+      if (file_exists(config('services.map.mbtiles_path'))) {
+          try {
+              $pdo = new PDO('sqlite:' . config('services.map.mbtiles_path'));
+              $res = $pdo->query("SELECT value FROM metadata WHERE name = 'maxzoom'")->fetchColumn();
+              if (is_numeric($res)) $maxNativeZoom = (int) $res;
+          } catch (\Exception $e) {}
+      }
+      ?>
       var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
         attribution: '&copy; MeshBeacon / OpenStreetMap',
+        maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
+        maxZoom: 19
       }).addTo(historyMap);
 
       if (!hasOfflineMap) {
