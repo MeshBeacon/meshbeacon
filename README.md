@@ -200,6 +200,7 @@ The deployment method you choose determines which files you need to edit to cust
 
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
 - [OpenTAKServer Integration](docs/TAK_BRIDGE.md)
+- [Offline Maps & QGIS Guide](docs/OFFLINE_MAPS.md)
 
 The full template lives in [.env.example](.env.example).
 
@@ -353,6 +354,7 @@ php artisan test --filter=DashboardReadonlyTest
 | `docker-compose.yml` | Web, workers, scheduler, migration, and broker |
 | `install.sh` | Linux Docker and native FreeBSD installer |
 | `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward deployment notes |
+| `docs/OFFLINE_MAPS.md` | Guide to downloading offline maps via QGIS |
 
 ## Container builds
 
