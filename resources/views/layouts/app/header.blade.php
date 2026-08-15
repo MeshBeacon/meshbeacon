@@ -13,9 +13,7 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
-                <flux:navbar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
-                    {{ __('TAK Logs') }}
-                </flux:navbar.item>
+
                 <flux:navbar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
                     {{ __('Telegram Logs') }}
                 </flux:navbar.item>
@@ -67,9 +65,7 @@
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
-                        {{ __('TAK Logs') }}
-                    </flux:sidebar.item>
+
                     <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
                         {{ __('Telegram Logs') }}
                     </flux:sidebar.item>
