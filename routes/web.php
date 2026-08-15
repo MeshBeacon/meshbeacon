@@ -60,7 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/analytics', [DashboardController::class, 'analytics']);
     Route::get('/analytics/data', [DashboardController::class, 'analyticsData']);
-    Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
+    
     // Offline map tiles
     Route::get('/tiles/{z}/{x}/{y}.png', [\App\Http\Controllers\TileController::class, 'serveTile'])
         ->where(['z' => '[0-9]+', 'x' => '[0-9]+', 'y' => '[0-9]+'])
@@ -96,6 +96,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
+    
+    Route::get('/tak/logs', \App\Livewire\TakLogViewer::class)->name('tak.logs');
+    Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
 
     Route::get('/about', function () {
         return view('about');

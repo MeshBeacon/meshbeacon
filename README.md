@@ -26,7 +26,7 @@
   <a href="#features">Features</a> |
   <a href="#operator-workflows">Workflows</a> |
   <a href="#offline-maps">Offline Maps</a> |
-
+  <a href="#tak-cot-bridge">TAK Bridge</a> |
   <a href="#configuration">Configuration</a> |
   <a href="#licensing">License</a>
 </p>
@@ -126,7 +126,7 @@ Field nodes preserve all incident and telemetry data locally. When upstream conn
 - **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
 - **Deep Incident & Telemetry Analytics (`/analytics`)**: Historical charts for packet volume, hop distributions, battery drain trajectories, RSSI/SNR signal degradation, and responder resolution velocity.
 - **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
-
+- **TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK, iTAK, WinTAK, and OpenTAKServer with dedicated live audit logs (`/tak/logs`).
 - **Automated Telegram Dispatch**: Instant SOS dispatch to Telegram responder channels with one-click responder account linking and live webhook logs (`/telegram/logs`).
 - **System Health & Observability**: Production-grade liveness/readiness probes (`/health/live`, `/health/ready`), Prometheus metric endpoints (`/metrics`), and an interactive System Health dashboard (`/system-health`).
 - **Comprehensive Reporting**: Export period-based and incident-specific audit reports in CSV and print-optimized PDF formats.
@@ -144,7 +144,7 @@ Field nodes preserve all incident and telemetry data locally. When upstream conn
 | **Analytics & Telemetry** | Inspect packet traffic, hop distribution, battery curves, and response metrics from `/analytics`. |
 | **Mesh Operations** | View device health metrics, dispatch remote GPS polls, adjust polling intervals, and broadcast text messages across the mesh. |
 | **Reporting & Export** | Generate CSV archives and print-ready incident dossiers for after-action reviews (AAR) and agency compliance. |
-| **Log Auditing** | Live monitoring of Telegram alert dispatches (`/telegram/logs`). |
+| **Log Auditing** | Live monitoring of TAK CoT multicasts (`/tak/logs`) and Telegram alert dispatches (`/telegram/logs`). |
 | **Responder Administration**| Manage users, configure roles (Admin/Responder/Viewer), enforce 2FA, and link Telegram alert accounts. |
 
 ---
@@ -160,7 +160,18 @@ MeshBeacon enables zero-connectivity mapping using standard raster MBTiles:
 
 ---
 
+## TAK CoT bridge
 
+MeshBeacon integrates directly with tactical situational awareness software (ATAK, iTAK, WinTAK, OpenTAKServer) via Cursor-on-Target (CoT):
+
+1. **Ingest**: GPS coordinates and emergency beacons received from mesh nodes (PapaDuck/MamaDuck) are captured over MQTT.
+2. **Translate**: The standalone bridge converts node telemetry into standard CoT XML payloads.
+3. **Broadcast**: Payloads are transmitted via TAK Multicast (`239.2.3.1:4242`) or direct UDP to OpenTAKServer.
+4. **Live Logs**: Monitor outgoing CoT transmissions directly from the **TAK Logs** dashboard (`/tak/logs`).
+
+Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
+
+---
 
 ## Docker services
 
@@ -180,7 +191,7 @@ MeshBeacon enables zero-connectivity mapping using standard raster MBTiles:
 ## Configuration
 
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
-
+- [OpenTAKServer & TAK Bridge Integration](docs/TAK_BRIDGE.md)
 - [Offline Maps & QGIS Guide](docs/OFFLINE_MAPS.md)
 
 Key settings from [.env.example](.env.example):
@@ -299,7 +310,7 @@ php artisan test --filter=DashboardReadonlyTest
 | `install.sh` | Automated Linux (Docker) and FreeBSD deployment installer |
 | `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward architecture and configuration |
 | `docs/OFFLINE_MAPS.md` | Guide to creating and loading raster MBTiles |
-
+| `docs/TAK_BRIDGE.md` | TAK Cursor-on-Target (CoT) integration guide |
 
 ---
 
