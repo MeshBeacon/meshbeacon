@@ -108,6 +108,21 @@ return [
     'duck_crypto' => [
         'private_key' => env('DUCK_CRYPTO_PRIVATE_KEY', ''),
         'public_key'  => env('DUCK_CRYPTO_PUBLIC_KEY', ''),
+
+        // This deployment's pre-shared mesh group symmetric key (see
+        // meshbeacon-firmware's src/security/MeshGroupConfig.h), hex (64
+        // chars) -- matches the MESH_GROUP_KEY_HEX build flag exactly, so
+        // this value can be pasted straight into both places with no
+        // re-encoding. Unlike the OpenDMS keypair above, this key IS
+        // secret: anyone holding it can both encrypt and decrypt group
+        // broadcast traffic, so treat it the same as any other pre-shared
+        // symmetric secret. Used by DuckCryptoService::encryptGroupBroadcast()
+        // to authenticate StatusController::broadcast() ("Emergency
+        // broadcast"), since encrypted_cmd can't address a broadcast (it's
+        // a point-to-point channel, a different shared secret per Duck).
+        // Leave empty to disable: broadcasts are then sent in the clear,
+        // same as before this key existed.
+        'mesh_group_key' => env('DUCK_MESH_GROUP_KEY', ''),
     ],
 
 ];

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\ClusterData;
 use App\Models\DuckIdentity;
+use App\Jobs\SendSosAck;
 use App\Jobs\SendTelegramAlert;
 use App\Jobs\SyncRecordToCloud;
 use App\Services\DuckCryptoService;
@@ -168,11 +169,22 @@ class ProcessMqttMessage implements ShouldQueue
 
         // Send SOS acknowledgment back to the originating duck so the device
         // can confirm the operator has received the distress signal.
+        // Dispatched immediately/automatically here (not just from the
+        // dashboard's manual sos-ack/bulk-acknowledge endpoints, see
+        // DashboardController) so the device gets its "SOS DITERIMA" relief
+        // cue right away rather than waiting on a human operator to click
+        // Acknowledge. SendSosAck itself resends 3x at 10 s intervals
+        // regardless (LoRa has no delivery confirmation) -- an operator
+        // manually acknowledging afterwards simply queues another round,
+        // which is harmless.
         $isSosAlert  = $record->topic === 'alert';
         $isSosStatus = $record->topic === 'status'
             && str_contains($record->payload ?? '', 'SOS');
 
         if (($isSosAlert || $isSosStatus) && $record->duck_id) {
+            SendSosAck::dispatch($record->duck_id, 1);
+            Log::info("ProcessMqttMessage: SOS ack queued for {$record->duck_id}");
+
             SendTelegramAlert::dispatch($record->duck_id, $record->display_text ?? '', $record->map_url);
             Log::info("ProcessMqttMessage: Telegram alert queued for {$record->duck_id}");
         }

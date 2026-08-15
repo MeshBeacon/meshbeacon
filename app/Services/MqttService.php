@@ -51,8 +51,19 @@ class MqttService
      * static keypair to be configured (services.duck_crypto). If either
      * is missing, or encryption otherwise fails, falls back to a plaintext
      * dcmd send -- same best-effort pattern SendSosAck used previously.
+     *
+     * Returns true if the command was sent via the authenticated
+     * reservedTopic::encrypted_cmd channel, false if it was sent as a
+     * plaintext dcmd fallback. The firmware (see meshbeacon-firmware's
+     * MamaDuck.h / example sketches) only treats a small set of privileged
+     * directives (e.g. "SOS DITERIMA", "CMD:GPS_REQUEST") as authoritative
+     * when they arrive via encrypted_cmd -- a plaintext dcmd fallback is
+     * displayed as an ordinary message and does NOT trigger those
+     * privileged actions. Callers sending a privileged directive should
+     * check this return value and treat `false` as "not delivered" rather
+     * than assuming the plaintext fallback still works.
      */
-    public function sendEncryptedCommand(string $plaintext, string $duckId): void
+    public function sendEncryptedCommand(string $plaintext, string $duckId): bool
     {
         $identity = DuckIdentity::query()->where('duck_id', $duckId)->first();
 
@@ -68,7 +79,7 @@ class MqttService
                 Log::info("MqttService: sendEncryptedCommand encrypted successfully for {$duckId}");
                 $this->sendCommand($encrypted, $duckId, DuckCryptoService::TOPIC_ENCRYPTED_CMD, 'base64');
 
-                return;
+                return true;
             }
 
             Log::warning("MqttService: sendEncryptedCommand encryption failed for {$duckId}, falling back to plaintext dcmd");
@@ -79,5 +90,47 @@ class MqttService
         }
 
         $this->sendCommand($plaintext, $duckId, 22);
+
+        return false;
+    }
+
+    /**
+     * Send an Emergency Broadcast, authenticated (not encrypted) with the
+     * deployment's mesh group key when configured (DuckCryptoService::
+     * authenticateGroupBroadcast()). The message text is deliberately
+     * sent as cleartext -- a life-safety alert should be readable by
+     * anyone in range, including devices without the group key -- only
+     * forgery is prevented. Unlike sendEncryptedCommand()'s encrypted_cmd
+     * (point-to-point, a different shared secret per Duck), the mesh
+     * group key is a single pre-shared secret every Duck in the
+     * deployment can hold, making it the only channel that fits a
+     * "verifiable by every Duck" broadcast.
+     *
+     * Falls back to a plain unauthenticated topic-24 send if the group
+     * key isn't configured -- same best-effort pattern as
+     * sendEncryptedCommand().
+     *
+     * Returns true if the broadcast was sent authenticated, false if it
+     * was sent as an unauthenticated fallback. meshbeacon-firmware's
+     * MamaDuck.ino rejects the unauthenticated fallback outright once a
+     * Duck has its own mesh group key configured, so callers should treat
+     * `false` as "delivered only to un-provisioned Ducks", not "delivered
+     * to everyone".
+     */
+    public function sendGroupBroadcast(string $message, string $target = 'BROADCAST'): bool
+    {
+        $authenticated = $this->duckCrypto->authenticateGroupBroadcast($message);
+
+        if ($authenticated !== null) {
+            Log::info('MqttService: sendGroupBroadcast authenticated successfully');
+            $this->sendCommand($authenticated, $target, DuckCryptoService::TOPIC_BROADCAST, 'base64');
+
+            return true;
+        }
+
+        Log::info('MqttService: sendGroupBroadcast mesh group key not configured, sending unauthenticated broadcast');
+        $this->sendCommand($message, $target, DuckCryptoService::TOPIC_BROADCAST);
+
+        return false;
     }
 }

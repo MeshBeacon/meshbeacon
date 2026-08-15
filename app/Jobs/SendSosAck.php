@@ -41,9 +41,14 @@ class SendSosAck implements ShouldQueue
             // Encrypted via reservedTopic::encrypted_cmd (0x08) when the
             // Duck's public key is already known and OpenDMS's static
             // keypair is configured; otherwise falls back to plaintext
-            // dcmd (0x16) -- see MqttService::sendEncryptedCommand().
-            app(MqttService::class)->sendEncryptedCommand(self::ACK_MESSAGE, $this->duckId);
-            Log::info("SendSosAck: attempt {$this->attempt}/".self::MAX_ATTEMPTS." sent to {$this->duckId}");
+            // dcmd (0x16) -- see MqttService::sendEncryptedCommand(). Note
+            // that the firmware only shows the "SOS acknowledged" relief
+            // cue (beep + CDK:SOS_ACK) when this arrives via authenticated
+            // encrypted_cmd; a plaintext dcmd fallback is just displayed as
+            // an ordinary message, so a stranded duck may not get the
+            // relief cue until a real identity/keypair is provisioned.
+            $encrypted = app(MqttService::class)->sendEncryptedCommand(self::ACK_MESSAGE, $this->duckId);
+            Log::info("SendSosAck: attempt {$this->attempt}/".self::MAX_ATTEMPTS." sent to {$this->duckId} (".($encrypted ? 'encrypted' : 'plaintext fallback -- no relief cue on device').')');
         } catch (\Throwable $e) {
             Log::error("SendSosAck: attempt {$this->attempt} failed for {$this->duckId}: {$e->getMessage()}");
         }

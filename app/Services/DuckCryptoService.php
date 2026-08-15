@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
+
 /**
  * Mirrors meshbeacon-firmware's src/security/DuckCrypto.{h,cpp} symmetric
  * session construction (encryptWithPeer/decryptFromPeer), bit-for-bit:
@@ -31,6 +33,25 @@ class DuckCryptoService
     public const TOPIC_ENCRYPTED_CMD = 0x08;
     public const TOPIC_SEALED_UPLINK = 0x09;
     public const TOPIC_ENCRYPTED_DATA = 0x0B;
+
+    // Sketch-level (not CDP-reserved) app topic used by
+    // examples/Basic-Ducks/Seeed/WioTrackerL1/MamaDuck.ino's "Emergency
+    // broadcast" handler (case 24). Unlike the reservedTopic values above,
+    // this is an app-specific convention, not part of the CDP framework.
+    public const TOPIC_BROADCAST = 24;
+
+    // Marker byte prefixed to a group-key-authenticated broadcast payload,
+    // must match MamaDuck.ino's BROADCAST_AUTH_MARKER exactly.
+    private const BROADCAST_AUTH_MARKER = "\xE8";
+
+    // 4-byte big-endian monotonic counter length, must match
+    // MamaDuck.ino's BROADCAST_COUNTER_LENGTH exactly.
+    private const BROADCAST_COUNTER_LENGTH = 4;
+
+    // Persisted (never expires) replay-protection counter for Emergency
+    // Broadcasts. OpenDMS is the sole sender, so a single global counter
+    // (not per-DUID) is sufficient -- see authenticateGroupBroadcast().
+    private const BROADCAST_COUNTER_CACHE_KEY = 'meshbeacon:duckcrypto:broadcast_counter';
 
     /**
      * PAPADUCK_DUID (src/CdpPacket.h): the fixed all-zero DUID used as a
@@ -204,5 +225,91 @@ class DuckCryptoService
         sodium_memzero($key);
 
         return $plaintext === false ? null : $plaintext;
+    }
+
+    /**
+     * True only when this deployment's pre-shared mesh group symmetric key
+     * (services.duck_crypto.mesh_group_key) is configured -- callers
+     * should treat a false return as "group encryption unavailable" and
+     * fall back to their existing unencrypted behavior, same as
+     * isConfigured() above.
+     *
+     * Format-checked (64 hex chars) for the same reason as the OpenDMS
+     * public_key check: it's meant to be pasted verbatim into
+     * meshbeacon-firmware's MESH_GROUP_KEY_HEX build flag.
+     */
+    public function isGroupConfigured(): bool
+    {
+        $key = (string) config('services.duck_crypto.mesh_group_key');
+
+        return strlen($key) === 64 && ctype_xdigit($key);
+    }
+
+    private function groupKey(): string
+    {
+        return hex2bin((string) config('services.duck_crypto.mesh_group_key'));
+    }
+
+    /**
+     * Authenticate (but do NOT encrypt) an Emergency Broadcast payload
+     * with the deployment's mesh group key -- the message stays as
+     * legible cleartext on the wire (deliberately: a life-safety alert
+     * should be readable by anyone in range, including devices without
+     * the group key), but only someone holding the group key can produce
+     * a tag that verifies, so forged broadcasts are still rejected by any
+     * Duck that has the key configured.
+     *
+     * Implemented by calling the AEAD cipher with the message passed as
+     * additional authenticated data (authenticated, not encrypted) and an
+     * empty plaintext -- a standard, secure way to get a MAC (not
+     * confidentiality) out of an AEAD primitive. No X25519 ECDH either:
+     * the group key is used directly, mirroring
+     * duckcrypto::encryptWithGroupKey() on the firmware side. This can't
+     * reuse encrypted_cmd's point-to-point channel at all: that's a
+     * different shared secret per Duck (static-static ECDH between
+     * OpenDMS and ONE Duck's identity), so it can never produce a single
+     * tag every Duck in a deployment can verify -- the group key is the
+     * only broadcast-capable authenticated channel this firmware has.
+     *
+     * Mirrors MamaDuck.ino's verifyBroadcastMac()/BROADCAST_AUTH_MARKER
+     * exactly, bit for bit -- including binding the AAD to the fixed
+     * PAPADUCK_DUID placeholder rather than any physical gateway's
+     * transient DUID, which OpenDMS cannot predict (same convention
+     * already established for encrypted_cmd's AAD).
+     *
+     * Wire format: marker(1) || nonce(12) || counter(4, big-endian) ||
+     * message(N, cleartext) || tag(16).
+     *
+     * Replay protection: a monotonic counter (persisted in cache under
+     * self::BROADCAST_COUNTER_CACHE_KEY, since OpenDMS is the sole sender
+     * of Emergency Broadcasts) is incremented on every call and bound
+     * into the AAD alongside the message. MamaDuck.ino's
+     * verifyBroadcastMac() rejects any broadcast whose counter is not
+     * strictly greater than the last one it accepted, so a captured
+     * broadcast (e.g. a stale "all clear") cannot be replayed verbatim.
+     *
+     * @return string|null base64(marker || nonce || counter || message ||
+     *                      tag), or null if the mesh group key isn't
+     *                      configured.
+     */
+    public function authenticateGroupBroadcast(string $message): ?string
+    {
+        if (!$this->isGroupConfigured()) {
+            return null;
+        }
+
+        if (!Cache::has(self::BROADCAST_COUNTER_CACHE_KEY)) {
+            Cache::forever(self::BROADCAST_COUNTER_CACHE_KEY, 0);
+        }
+        $counter = Cache::increment(self::BROADCAST_COUNTER_CACHE_KEY);
+        $counterBytes = pack('N', $counter);
+
+        $aad = chr(self::TOPIC_BROADCAST).self::PAPADUCK_DUID.$counterBytes.$message;
+        $nonce = random_bytes(self::NONCE_LENGTH);
+        $key = $this->groupKey();
+        $tag = sodium_crypto_aead_chacha20poly1305_ietf_encrypt('', $aad, $nonce, $key);
+        sodium_memzero($key);
+
+        return base64_encode(self::BROADCAST_AUTH_MARKER.$nonce.$counterBytes.$message.$tag);
     }
 }
