@@ -38,7 +38,7 @@ class SendSosAck implements ShouldQueue
     public function handle(): void
     {
         try {
-            // Encrypted via reservedTopic::encrypted_cmd (0x08) when the
+            // Encrypted via topics::encrypted_cmd (0x1B) when the
             // Duck's public key is already known and OpenDMS's static
             // keypair is configured; otherwise falls back to plaintext
             // dcmd (0x16) -- see MqttService::sendEncryptedCommand(). Note

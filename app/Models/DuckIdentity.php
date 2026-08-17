@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class DuckIdentity extends Model
 {
-    protected $fillable = ['duck_id', 'public_key', 'first_seen_at'];
+    protected $fillable = ['duck_id', 'public_key', 'first_seen_at', 'last_uplink_counter'];
 
     protected $casts = [
         'first_seen_at' => 'datetime',

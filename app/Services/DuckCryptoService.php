@@ -28,11 +28,14 @@ class DuckCryptoService
     // Must match DuckCrypto.cpp's HKDF_INFO constant exactly.
     private const HKDF_INFO = 'meshbeacon-firmware DuckCrypto';
 
-    // Must match CdpPacket.h's reservedTopic values exactly -- these are
+    // Must match CdpPacket.h's topics values exactly -- these are
     // the on-air (cleartext header) topic bytes used in buildHeaderAad().
-    public const TOPIC_ENCRYPTED_CMD = 0x08;
-    public const TOPIC_SEALED_UPLINK = 0x09;
-    public const TOPIC_ENCRYPTED_DATA = 0x0B;
+    // Moved out of reservedTopic into topics (2026-08) -- see
+    // meshbeacon-firmware's CdpPacket.h for the full topic-space
+    // reorganization rationale.
+    public const TOPIC_ENCRYPTED_CMD = 0x1B;
+    public const TOPIC_SEALED_UPLINK = 0x1C;
+    public const TOPIC_ENCRYPTED_DATA = 0x1E;
 
     // Sketch-level (not CDP-reserved) app topic used by
     // examples/Basic-Ducks/Seeed/WioTrackerL1/MamaDuck.ino's "Emergency
@@ -311,5 +314,24 @@ class DuckCryptoService
         sodium_memzero($key);
 
         return base64_encode(self::BROADCAST_AUTH_MARKER.$nonce.$counterBytes.$message.$tag);
+    }
+
+    /**
+     * Verify a received identity_announce payload: TOFU (trust-on-first-
+     * use) only -- accepts the plain 32-byte X25519 public key payload
+     * produced by Duck::announceIdentity() and rejects anything else.
+     *
+     * @param  string  $payloadRaw  raw (already base64-decoded)
+     *                              identity_announce payload bytes.
+     * @return string|null the X25519 identity public key (raw 32 bytes),
+     *                      or null if the payload is the wrong length.
+     */
+    public function verifyIdentityAnnounce(string $payloadRaw): ?string
+    {
+        if (strlen($payloadRaw) !== SODIUM_CRYPTO_BOX_PUBLICKEYBYTES) {
+            return null;
+        }
+
+        return $payloadRaw;
     }
 }

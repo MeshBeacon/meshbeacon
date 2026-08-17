@@ -96,7 +96,7 @@ class ProcessMqttMessage implements ShouldQueue
         // and stop, rather than creating a nonsensical ClusterData row for
         // it or running it through the SOS-ack check below.
         if ($eventType === 'identity_announce') {
-            $this->handleIdentityAnnounce($sduidRaw, $data['payload']['Message'] ?? null, $data);
+            $this->handleIdentityAnnounce($duckCrypto, $sduidRaw, $data['payload']['Message'] ?? null, $data);
 
             return;
         }
@@ -194,8 +194,8 @@ class ProcessMqttMessage implements ShouldQueue
      * Decrypt a sealed_uplink/encrypted_data payload and recover the
      * plaintext. Returns [topicName, message] -- falls back to
      * ['unknown', $messageB64] (leaving the ciphertext untouched, never
-     * guessed-at) on any failure: crypto not configured, missing DeviceID,
-     * unmappable topic, or auth failure.
+     * guessed-at) on any failure: crypto not configured, missing
+     * DeviceID, unmappable topic, or auth failure.
      *
      * @return array{0: string, 1: ?string}
      */
@@ -311,7 +311,7 @@ class ProcessMqttMessage implements ShouldQueue
      * already-trusted peer's key. Populating this table is what lets
      * SendSosAck send an encrypted reply instead of a plaintext one.
      */
-    private function handleIdentityAnnounce(?string $sduidRaw, ?string $pubkeyB64, array $data): void
+    private function handleIdentityAnnounce(DuckCryptoService $duckCrypto, ?string $sduidRaw, ?string $pubkeyB64, array $data): void
     {
         if ($sduidRaw === null || $sduidRaw === '' || $pubkeyB64 === null || $pubkeyB64 === '') {
             Log::warning('ProcessMqttMessage: identity_announce missing DeviceID or public key', [
@@ -321,10 +321,23 @@ class ProcessMqttMessage implements ShouldQueue
             return;
         }
 
-        $pubkeyRaw = base64_decode($pubkeyB64, true);
+        $payloadRaw = base64_decode($pubkeyB64, true);
 
-        if ($pubkeyRaw === false || strlen($pubkeyRaw) !== SODIUM_CRYPTO_BOX_PUBLICKEYBYTES) {
-            Log::warning('ProcessMqttMessage: identity_announce public key is not valid base64 or wrong length', [
+        if ($payloadRaw === false) {
+            Log::warning('ProcessMqttMessage: identity_announce payload is not valid base64', [
+                'message_id' => $data['MessageID'] ?? null,
+            ]);
+
+            return;
+        }
+
+        // Verifies the payload is a well-formed 32-byte X25519 public key,
+        // mirroring Duck::learnPeerIdentity()'s TOFU policy -- see
+        // DuckCryptoService::verifyIdentityAnnounce().
+        $pubkeyRaw = $duckCrypto->verifyIdentityAnnounce($payloadRaw);
+
+        if ($pubkeyRaw === null) {
+            Log::warning('ProcessMqttMessage: identity_announce rejected (wrong length)', [
                 'message_id' => $data['MessageID'] ?? null,
             ]);
 
@@ -333,7 +346,7 @@ class ProcessMqttMessage implements ShouldQueue
 
         $identity = DuckIdentity::firstOrCreate(
             ['duck_id' => $sduidRaw],
-            ['public_key' => $pubkeyB64, 'first_seen_at' => now()]
+            ['public_key' => base64_encode($pubkeyRaw), 'first_seen_at' => now()]
         );
 
         if ($identity->wasRecentlyCreated) {

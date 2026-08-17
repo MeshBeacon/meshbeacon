@@ -42,7 +42,7 @@ class MqttService
 
     /**
      * Send a downlink command encrypted to a specific Duck, using
-     * reservedTopic::encrypted_cmd (0x08) instead of the plaintext dcmd
+     * topics::encrypted_cmd (0x1B) instead of the plaintext dcmd
      * (0x16) topic -- see docs/crypto-design.tex (meshbeacon-firmware
      * repo), "OpenDMS -> Duck (operator-initiated downlink)".
      *
