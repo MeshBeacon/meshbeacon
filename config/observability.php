@@ -17,7 +17,7 @@ return [
 
     'workers_required' => env('OBSERVABILITY_WORKERS_REQUIRED', true),
 
-    'mqtt_heartbeat_ttl' => (int) env('OBSERVABILITY_MQTT_HEARTBEAT_TTL', 45),
+    'mqtt_heartbeat_ttl' => (int) env('OBSERVABILITY_MQTT_HEARTBEAT_TTL', 90),
 
     'worker_heartbeat_ttl' => (int) env('OBSERVABILITY_WORKER_HEARTBEAT_TTL', 45),
 

@@ -18,16 +18,18 @@ class PollGps extends Command
         $due = GpsPoll::due()->get();
 
         foreach ($due as $poll) {
-            $mqttService->sendCommand(
-                message: 'null',
-                target:  $poll->duck_id,
-                topic:   234,
-            );
+            // See StatusController::requestGps() -- the firmware only
+            // honors GPS requests sent via authenticated encrypted_cmd.
+            $encrypted = $mqttService->sendEncryptedCommand('CMD:GPS_REQUEST', $poll->duck_id);
 
             $poll->next_run_at = now()->addMinutes($poll->interval_minutes ?: self::INTERVAL_MINUTES);
             $poll->save();
 
-            $this->line("GPS poll dispatched to {$poll->duck_id}. Next run: {$poll->next_run_at}");
+            if ($encrypted) {
+                $this->line("GPS poll dispatched (encrypted) to {$poll->duck_id}. Next run: {$poll->next_run_at}");
+            } else {
+                $this->line("GPS poll SKIPPED for {$poll->duck_id}: no authenticated channel available (identity unknown or OpenDMS keypair not configured). Next run: {$poll->next_run_at}");
+            }
         }
 
         if ($due->isEmpty()) {

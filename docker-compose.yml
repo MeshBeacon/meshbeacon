@@ -2,7 +2,7 @@ x-app-common: &app-common
   build:
     context: .
     dockerfile: Dockerfile.compose
-  image: ${MESHBEACON_IMAGE:-meshbeacon:local}
+  image: ${MESHBEACON_IMAGE:-ghcr.io/MeshBeacon/meshbeacon:latest}
   env_file:
     - .env
   volumes:

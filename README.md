@@ -1,4 +1,4 @@
-# MeshBeacon
+# MeshBeacon Ops
 
 <p align="center">
   <img src="public/images/logo.png" alt="MeshBeacon logo" width="180">
@@ -118,7 +118,13 @@ Field nodes preserve all incident and telemetry data locally. When upstream conn
 
 ---
 
-## Features
+### Tuning healthcheck cadence for constrained field hardware
+
+Each `app`, `mqtt-worker`, `queue-worker`, and `scheduler` healthcheck runs `php artisan observability:check`, which boots a short-lived PHP CLI process on every poll. The defaults (`MESHBEACON_HC_INTERVAL=10s`, `MESHBEACON_WORKER_HC_INTERVAL=15s`) suit an always-on server, but on constrained field hardware (a Raspberry Pi, for example) polling that often across several containers adds up in CPU and memory churn for little practical benefit. Set both variables in `.env` to a larger interval, such as `30s`-`60s`, to reduce that overhead - the underlying heartbeat TTLs (`OBSERVABILITY_MQTT_HEARTBEAT_TTL` 90s, `OBSERVABILITY_WORKER_HEARTBEAT_TTL` 45s, by default) already tolerate slower detection than the default poll cadence provides.
+
+## Pre-built Docker images
+
+Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
 
 - **Offline-First Telemetry Ingestion**: Ingests real-time binary and text packets across LoRa mesh networks via MQTT (`hub/event` and `hub/command`).
 - **Tactical Incident Management**: SOS auto-triage, responder assignment, triage notes, lifecycle status tracking, and mesh retransmissions.

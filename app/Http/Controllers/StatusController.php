@@ -106,11 +106,14 @@ class StatusController extends Controller
     {
         $message = $request->validate(['message' => 'required|string|max:200'])['message'];
 
-        $this->mqttService->sendCommand(
-            message: $message,
-            target:  'BROADCAST',
-            topic:   24,
-        );
+        // Authenticated (message stays readable, not encrypted) with the
+        // mesh group key when configured (see
+        // MqttService::sendGroupBroadcast()) -- meshbeacon-firmware's
+        // MamaDuck.ino rejects an unauthenticated fallback outright once a
+        // Duck has its own mesh group key configured, so an unconfigured
+        // deployment here means the broadcast simply won't reach any
+        // already-provisioned Duck.
+        $authenticated = $this->mqttService->sendGroupBroadcast($message);
 
         ClusterData::create([
             'duck_id'    => 'BROADCAST',
@@ -121,18 +124,29 @@ class StatusController extends Controller
             'duck_type'  => 0,
         ]);
 
-        return response()->json(['message' => 'Emergency broadcast sent successfully!']);
+        return response()->json([
+            'message' => $authenticated
+                ? 'Emergency broadcast sent successfully!'
+                : 'Emergency broadcast sent unauthenticated (mesh group key not configured) -- provisioned Ducks will ignore it.',
+        ]);
     }
 
     public function requestGps(Request $request): JsonResponse
     {
         $duckId = $request->validate(['duck_id' => 'required|string'])['duck_id'];
 
-        $this->mqttService->sendCommand(
-            message: 'null',
-            target:  $duckId,
-            topic:   234,
-        );
+        // GPS requests are only honored by the firmware when they arrive via
+        // authenticated reservedTopic::encrypted_cmd ("CMD:GPS_REQUEST") --
+        // a bare plaintext topic-234 packet (the old behavior here) let
+        // anyone in LoRa range forge a remote GPS pull, so the firmware no
+        // longer acts on it. See MqttService::sendEncryptedCommand().
+        $encrypted = $this->mqttService->sendEncryptedCommand('CMD:GPS_REQUEST', $duckId);
+
+        if (!$encrypted) {
+            return response()->json([
+                'message' => "Could not send an authenticated GPS request to {$duckId}: duck identity unknown or OpenDMS keypair not configured. The firmware ignores unauthenticated GPS requests.",
+            ], 422);
+        }
 
         return response()->json(['message' => 'GPS request sent to ' . $duckId]);
     }
@@ -216,10 +230,11 @@ class StatusController extends Controller
         $message = $request->input('message');
         $duckId  = $request->input('duck_id');
 
-        $this->mqttService->sendCommand(
-            message: $message,
-            target:  $duckId,
-        );
+        // Encrypted via reservedTopic::encrypted_cmd when the Duck's public
+        // key is already known and OpenDMS's static keypair is configured;
+        // otherwise falls back to plaintext dcmd -- see
+        // MqttService::sendEncryptedCommand().
+        $this->mqttService->sendEncryptedCommand($message, $duckId);
 
         // Persist the operator-sent message so it appears in history
         // and can be matched against MSG_READ receipts from the duck.
