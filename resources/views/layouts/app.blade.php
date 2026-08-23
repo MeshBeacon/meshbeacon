@@ -37,9 +37,12 @@
                     'status' => ['/status', __('Status')],
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
-                    'tak/logs' => ['/tak/logs', __('TAK Logs')],
-                    'messages' => ['/messages', __('Messages')],
                   ];
+                  // TAK bridge is a separate opt-in service (TAK_BRIDGE_ENABLED); see docs/TAK_BRIDGE.md
+                  if (config('services.tak.enabled')) {
+                      $navLinks['tak/logs'] = ['/tak/logs', __('TAK Logs')];
+                  }
+                  $navLinks['messages'] = ['/messages', __('Messages')];
                 @endphp
                 <div class="ml-10 flex items-baseline space-x-4">
                   @foreach ($navLinks as $path => [$href, $label])
