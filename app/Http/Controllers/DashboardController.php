@@ -408,4 +408,14 @@ class DashboardController extends Controller
             'resolved_incidents'  => $recent->where('status', 'resolved')->count(),
         ]);
     }
+
+    public function analytics()
+    {
+        return view('analytics');
+    }
+
+    public function analyticsData(): JsonResponse
+    {
+        return response()->json($this->clusterDataService->getAnalyticsSeries(), 200);
+    }
 }

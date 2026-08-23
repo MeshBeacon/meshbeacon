@@ -142,7 +142,7 @@ prepare_environment() {
     [ -n "$mqtt_bind_port" ] || mqtt_bind_port=1883
 
     image_source=${MESHBEACON_IMAGE_SOURCE:-$(get_env_value MESHBEACON_IMAGE_SOURCE)}
-    [ -n "$image_source" ] || image_source=local
+    [ -n "$image_source" ] || image_source=ghcr
 
     image=${MESHBEACON_IMAGE:-$(get_env_value MESHBEACON_IMAGE)}
     [ -n "$image" ] || image=meshbeacon:local
@@ -267,6 +267,7 @@ start_native_process() {
     process_log=$2
     process_pidfile=$3
     process_command=$4
+    process_user=${5:-www}
 
     if [ -f "$process_pidfile" ]; then
         process_pid=$(cat "$process_pidfile")
@@ -278,7 +279,7 @@ start_native_process() {
     fi
 
     log "Starting $process_name"
-    run_root daemon -u www -o "$process_log" -p "$process_pidfile" sh -c "$process_command"
+    run_root daemon -u "$process_user" -o "$process_log" -p "$process_pidfile" sh -c "$process_command"
 }
 
 install_freebsd() {
@@ -289,7 +290,7 @@ install_freebsd() {
 
     log "Installing FreeBSD packages"
     run_root pkg install -y \
-        git \
+        curl \
         "$php_package" \
         "${php_package}-bcmath" \
         "${php_package}-curl" \
@@ -299,27 +300,20 @@ install_freebsd() {
         "${php_package}-pdo_sqlite" \
         "${php_package}-xml" \
         "${php_package}-zip" \
-        composer \
-        "$node_package" \
         mosquitto
 
     command_exists php || die "The selected PHP package did not provide the php command. Set MESHBEACON_PHP_PACKAGE to a supported package."
-    command_exists composer || die "Composer was not installed."
-    command_exists npm || die "The selected Node package did not provide npm. Set MESHBEACON_NODE_PACKAGE to a package that includes npm."
     command_exists daemon || die "The FreeBSD daemon utility is required."
 
+    log "Downloading the latest compiled MeshBeacon release"
+    run_root mkdir -p "$install_dir"
     cd "$install_dir"
+    curl -fsSL https://github.com/MeshBeacon/meshbeacon/releases/latest/download/meshbeacon.tar.gz | run_root tar -xz --strip-components=1 -C "$install_dir"
+
+    prepare_environment
+
     mkdir -p database services/mosquitto/data services/mosquitto/log storage/logs
     touch database/database.sqlite
-
-    log "Installing PHP and JavaScript dependencies"
-    COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-    npm install --no-audit --no-fund
-    npm run build
-    php artisan vendor:publish --tag=laravel-assets --ansi --force
-    mkdir -p public/flux
-    ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js
-    ln -sf ../../vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js
 
     php artisan migrate --no-interaction --force
     php artisan db:seed --no-interaction --force
@@ -327,6 +321,7 @@ install_freebsd() {
     run_root chown -R www:www "$install_dir/database" "$install_dir/storage" "$install_dir/bootstrap/cache"
     run_root chmod -R ug+rwX "$install_dir/database" "$install_dir/storage" "$install_dir/bootstrap/cache"
     run_root chmod -R a+rX "$install_dir"
+    run_root chown www:www "$install_dir/.env"
     run_root chmod 600 "$install_dir/.env"
 
     service_dir=/usr/local/etc/meshbeacon
@@ -358,7 +353,8 @@ EOF
         "MQTT broker" \
         "$project_path/storage/logs/mosquitto.log" \
         "$project_path/storage/mosquitto.pid" \
-        "exec /usr/local/sbin/mosquitto -c '$service_dir/mosquitto.conf'"
+        "exec /usr/local/sbin/mosquitto -c '$service_dir/mosquitto.conf'" \
+        "mosquitto"
     sleep 2
     start_native_process \
         "MQTT worker" \
@@ -388,11 +384,10 @@ EOF
     fi
 }
 
-clone_project
-prepare_environment
-
 case "$system_name" in
     Linux)
+        clone_project
+        prepare_environment
         install_linux
         ;;
     FreeBSD)

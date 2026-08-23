@@ -18,6 +18,7 @@
                     <flux:sidebar.item icon="chart-bar" :href="route('system-health')" :current="request()->routeIs('system-health')" wire:navigate>
                         {{ __('System Health') }}
                     </flux:sidebar.item>
+
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

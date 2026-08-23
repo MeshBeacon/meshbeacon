@@ -7,15 +7,14 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN --mount=type=secret,id=composer_auth,required=false \
-    if [ -f /run/secrets/composer_auth ]; then export COMPOSER_AUTH="$(cat /run/secrets/composer_auth)"; fi; \
+RUN --mount=type=secret,id=composer_auth,dst=/app/auth.json \
     composer install \
-        --no-dev \
-        --no-interaction \
-        --no-progress \
-        --no-scripts \
-        --prefer-dist \
-        --optimize-autoloader
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --prefer-dist \
+    --optimize-autoloader
 
 # Vite needs the Flux package's CSS during the Tailwind build, so copy the
 # completed vendor tree into the asset-builder stage.
@@ -58,9 +57,15 @@ RUN apk add --no-cache \
     && apk del .build-deps
 
 WORKDIR /var/www
+# cache-bust-2026-08-12-21-06
+RUN echo "cache-bust-2026-08-12-21-06" > /dev/null
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=assets /app/public/build ./public/build
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && echo "upload_max_filesize = 500M" >> "$PHP_INI_DIR/php.ini" \
+    && echo "post_max_size = 500M" >> "$PHP_INI_DIR/php.ini"
 
 # Recreate Laravel's package manifest and publish package assets after the
 # application source and vendor tree are both present. Runtime configuration

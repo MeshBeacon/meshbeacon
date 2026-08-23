@@ -188,6 +188,9 @@ class ProcessMqttMessage implements ShouldQueue
             SendTelegramAlert::dispatch($record->duck_id, $record->display_text ?? '', $record->map_url);
             Log::info("ProcessMqttMessage: Telegram alert queued for {$record->duck_id}");
         }
+
+        // Evaluate automated rules for this telemetry ping
+        EvaluateRules::dispatch($record);
     }
 
     /**

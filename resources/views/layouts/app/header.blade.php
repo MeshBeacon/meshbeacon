@@ -13,6 +13,10 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
+
+                <flux:navbar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
+                    {{ __('Telegram Logs') }}
+                </flux:navbar.item>
             </flux:navbar>
 
             <flux:spacer />
@@ -60,6 +64,10 @@
                 <flux:sidebar.group :heading="__('Platform')">
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
+                        {{ __('Telegram Logs') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="chart-bar" :href="route('system-health')" :current="request()->routeIs('system-health')" wire:navigate>
                         {{ __('System Health') }}

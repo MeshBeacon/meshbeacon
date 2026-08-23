@@ -1,0 +1,61 @@
+name: Build Release Artifact
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, readline, ldap, msgpack, igbinary, redis, swoole, memcached, pcov, xdebug
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Authenticate Composer
+        run: |
+          echo "{\"http-basic\":{\"composer.fluxui.dev\":{\"username\":\"${{ secrets.FLUX_USERNAME }}\",\"password\":\"${{ secrets.FLUX_LICENSE_KEY }}\"}}}" > auth.json
+
+      - name: Install PHP Dependencies
+        run: |
+          composer install -q --no-ansi --no-interaction --no-progress --prefer-dist --optimize-autoloader --no-dev
+          php artisan vendor:publish --tag=laravel-assets --force
+          mkdir -p public/flux
+          cp vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.js
+          cp vendor/livewire/flux/dist/flux-lite.min.js public/flux/flux.min.js
+
+      - name: Install Node Dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build Frontend Assets
+        run: npm run build
+
+      - name: Prepare Artifact
+        run: |
+          # Remove dev files
+          rm -rf node_modules
+          rm -rf tests
+          rm -rf .git
+          rm -rf .github
+          rm -f auth.json
+          
+          # Create archive
+          cd ..
+          tar -czf meshbeacon.tar.gz meshbeacon/
+          mv meshbeacon.tar.gz meshbeacon/
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: meshbeacon.tar.gz

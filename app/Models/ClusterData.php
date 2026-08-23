@@ -291,4 +291,20 @@ class ClusterData extends Model
         }
         return null;
     }
+
+    public function getGpsRssiAttribute(): ?int
+    {
+        if (preg_match('/RSSI:(-?\d+)/i', $this->payload ?? '', $m)) {
+            return (int) $m[1];
+        }
+        return null;
+    }
+
+    public function getGpsSnrAttribute(): ?float
+    {
+        if (preg_match('/SNR:(-?\d+(?:\.\d+)?)/i', $this->payload ?? '', $m)) {
+            return (float) $m[1];
+        }
+        return null;
+    }
 }

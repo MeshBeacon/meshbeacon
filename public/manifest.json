@@ -1,0 +1,17 @@
+{
+    "name": "MeshBeacon Dashboard",
+    "short_name": "MeshBeacon",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#111827",
+    "theme_color": "#1f2937",
+    "description": "Offline-first incident operations for mesh-connected response teams.",
+    "icons": [
+        {
+            "src": "/images/logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

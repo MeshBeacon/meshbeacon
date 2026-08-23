@@ -1,6 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "meshbeacon/meshbeacon",
+    "version": "1.0.0",
     "type": "project",
     "description": "MeshBeacon — mesh-network disaster response and incident management platform.",
     "keywords": [
@@ -15,6 +16,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.9.0",
         "livewire/livewire": "^4.0",
+        "livewire/volt": "^1.11",
         "php-mqtt/laravel-client": "^1.7"
     },
     "require-dev": {
