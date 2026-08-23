@@ -350,7 +350,10 @@
                 dropShadow: { enabled: false },
                 toolbar: { show: false },
                 animations: { enabled: true },
-                background: 'transparent'
+                background: 'transparent',
+                // Locks the Battery and RSSI charts together so zooming/panning
+                // the time axis on one applies the same range to the other.
+                group: 'trends-sync'
               },
               stroke: { width: 3, curve: 'smooth' },
               grid: {
@@ -402,6 +405,7 @@
 
           const batteryChart = new ApexCharts(batteryEl, {
             ...commonOptions,
+            chart: { ...commonOptions.chart, id: 'trends-battery-chart' },
             colors: [successColor, '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'],
             yaxis: { ...commonOptions.yaxis, min: 0, max: 100, tickAmount: 5 }
           });
@@ -409,6 +413,7 @@
 
           const rssiChart = new ApexCharts(rssiEl, {
             ...commonOptions,
+            chart: { ...commonOptions.chart, id: 'trends-rssi-chart' },
             colors: [brandColor, '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'],
             yaxis: { ...commonOptions.yaxis, min: -130, max: 0, tickAmount: 5, reversed: false }
           });
