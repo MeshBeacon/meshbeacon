@@ -401,37 +401,34 @@ class ClusterDataService
     }
 
     /**
-     * Data series for the Analytics/Node Health charts.
+     * Data series for the Dashboard's Trends section (battery + RSSI over time).
+     *
+     * @param  int  $hours  Time window: 24 (24h), 168 (7d), or 720 (30d).
+     * @param  string|null  $duckId  Restrict to a single duck, or null for all ducks.
      */
-    public function getAnalyticsSeries(): array
+    public function getTrendsSeries(int $hours = 24, ?string $duckId = null): array
     {
-        // For analytics, fetch the latest 500 records that likely have battery or RSSI data
-        $records = ClusterData::where('payload', 'like', '%BATT:%')
-            ->orWhere('payload', 'like', '%RSSI:%')
-            ->orderByDesc('id')
-            ->limit(500)
-            ->get()
-            ->reverse(); // oldest first
+        $records = $this->repository->getTrendsRecords($hours, $duckId);
 
         $batterySeries = [];
         $rssiSeries = [];
 
         foreach ($records as $r) {
-            $duckId = $r->duck_id;
+            $duck = $r->duck_id;
             $timestamp = $r->created_at->getTimestampMs();
 
             if ($r->gps_batt !== null) {
-                if (!isset($batterySeries[$duckId])) {
-                    $batterySeries[$duckId] = ['name' => $duckId, 'data' => []];
+                if (!isset($batterySeries[$duck])) {
+                    $batterySeries[$duck] = ['name' => $duck, 'data' => []];
                 }
-                $batterySeries[$duckId]['data'][] = [$timestamp, $r->gps_batt];
+                $batterySeries[$duck]['data'][] = [$timestamp, $r->gps_batt];
             }
 
             if ($r->gps_rssi !== null) {
-                if (!isset($rssiSeries[$duckId])) {
-                    $rssiSeries[$duckId] = ['name' => $duckId, 'data' => []];
+                if (!isset($rssiSeries[$duck])) {
+                    $rssiSeries[$duck] = ['name' => $duck, 'data' => []];
                 }
-                $rssiSeries[$duckId]['data'][] = [$timestamp, $r->gps_rssi];
+                $rssiSeries[$duck]['data'][] = [$timestamp, $r->gps_rssi];
             }
         }
 

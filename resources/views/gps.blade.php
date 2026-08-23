@@ -221,7 +221,7 @@
 
       @php $mapDialogId = 'gps-map-dialog-' . $record->id; @endphp
       <button command="show-modal" commandfor="{{ $mapDialogId }}"
-         class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-500">
+         class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
@@ -237,7 +237,7 @@
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {{ __('Source:') }} <span class="{{ $record->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $srcLabel }}</span>
+                    {{ __('Source:') }} <span class="{{ $record->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ $srcLabel }}</span>
                     @if ($record->gps_sats !== null)
                       &bull; {{ $record->gps_sats }} {{ __('satellites') }}
                     @endif
@@ -336,7 +336,7 @@
           </div>
           <div class="mt-2 flex items-center gap-3">
             <button type="submit" id="gps-request-send-btn"
-              class="w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              class="w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 disabled:opacity-50 disabled:cursor-not-allowed">
               {{ __('Send Request') }}
             </button>
             <button type="button" command="close" commandfor="gps-request-dialog"
@@ -490,7 +490,7 @@
     }
     if (rec.map_url) {
       var dlgId  = 'gps-map-dialog-' + rec.id;
-      var srcCls = rec.gps_from_phone ? 'text-blue-400' : 'text-green-400';
+      var srcCls = rec.gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400';
       var sats   = rec.gps_sats !== null
         ? '<p class="text-xs text-gray-500">' + escHtml(rec.gps_sats) + ' satellites in view</p>'
         : '<p class="text-xs text-gray-500">&nbsp;</p>';
@@ -530,7 +530,7 @@
         '<p class="font-mono text-sm text-gray-900 dark:text-white">' + escHtml(rec.gps_lat) + ', ' + escHtml(rec.gps_lng) + '</p>' +
         sats + '</div>' + telHtml +
         '<button command="show-modal" commandfor="' + dlgId + '"' +
-          ' class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-500">' +
+          ' class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">' +
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">' +
             '<path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />' +
           '</svg>View on Map</button>' +

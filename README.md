@@ -130,7 +130,7 @@ Instead of building the image locally, you can use the pre-built multi-architect
 - **Tactical Incident Management**: SOS auto-triage, responder assignment, triage notes, lifecycle status tracking, and mesh retransmissions.
 - **High-Performance Offline MBTiles Map Engine**: Upload regional raster `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
 - **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
-- **Deep Incident & Telemetry Analytics (`/analytics`)**: Historical charts for packet volume, hop distributions, battery drain trajectories, RSSI/SNR signal degradation, and responder resolution velocity.
+- **Dashboard Trends**: Battery and RSSI history charts built into `/dashboard`, filterable by duck and time range (24h / 7d / 30d).
 - **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
 
 - **Automated Telegram Dispatch**: Instant SOS dispatch to Telegram responder channels with one-click responder account linking and live webhook logs (`/telegram/logs`).
@@ -147,7 +147,7 @@ Instead of building the image locally, you can use the pre-built multi-architect
 | **Incident Response** | Acknowledge SOS signals, assign field responders, add timestamped operational notes, change status, resolve, and retransmit mesh packets. |
 | **Tactical & EOC Kiosk** | Launch fullscreen `/kiosk` wallboard for command post monitoring with live maps, alert feeds, and responder queues. |
 | **Spatial & Offline Maps** | Upload `.mbtiles` packages in Settings, toggle between OpenStreetMap and offline raster layers, and track device GPS history. |
-| **Analytics & Telemetry** | Inspect packet traffic, hop distribution, battery curves, and response metrics from `/analytics`. |
+| **Analytics & Telemetry** | Inspect battery and signal-strength trends per duck, filterable by time range, from the Dashboard's Trends section. |
 | **Mesh Operations** | View device health metrics, dispatch remote GPS polls, adjust polling intervals, and broadcast text messages across the mesh. |
 | **Reporting & Export** | Generate CSV archives and print-ready incident dossiers for after-action reviews (AAR) and agency compliance. |
 | **Log Auditing** | Live monitoring of Telegram alert dispatches (`/telegram/logs`). |

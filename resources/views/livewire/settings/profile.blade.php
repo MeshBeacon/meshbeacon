@@ -21,7 +21,7 @@
                                         class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                                 </div>
                                 @error('name')
-                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -32,7 +32,7 @@
                                         class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                                 </div>
                                 @error('email')
-                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                                 @enderror
 
                                 @if ($this->hasUnverifiedEmail)
@@ -45,7 +45,7 @@
                                     </p>
 
                                     @if (session('status') === 'verification-link-sent')
-                                        <p class="mt-2 text-sm/6 font-medium text-green-400">
+                                        <p class="mt-2 text-sm/6 font-medium text-green-700 dark:text-green-400">
                                             {{ __('A new verification link has been sent to your email address.') }}
                                         </p>
                                     @endif
@@ -59,7 +59,7 @@
                             {{ __('Saved.') }}
                         </x-action-message>
 
-                        <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                             {{ __('Save') }}
                         </button>
                     </div>

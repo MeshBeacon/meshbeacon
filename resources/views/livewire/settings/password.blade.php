@@ -20,7 +20,7 @@
                                     class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                             </div>
                             @error('current_password')
-                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -31,7 +31,7 @@
                                     class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                             </div>
                             @error('password')
-                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
@@ -42,7 +42,7 @@
                                     class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                             </div>
                             @error('password_confirmation')
-                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                         {{ __('Saved.') }}
                     </x-action-message>
 
-                    <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                    <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                         {{ __('Save') }}
                     </button>
                 </div>

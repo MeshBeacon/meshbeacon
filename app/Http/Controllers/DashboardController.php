@@ -409,13 +409,23 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function analytics()
+    /**
+     * Battery/RSSI trend series for the Dashboard's Trends section.
+     * hours must be one of 24 (24h), 168 (7d), 720 (30d) — falls back to 24
+     * for any other value. duck_id optionally restricts to a single duck.
+     */
+    public function trendsData(Request $request): JsonResponse
     {
-        return view('analytics');
-    }
+        $hours = (int) $request->integer('hours', 24);
+        if (!in_array($hours, [24, 168, 720], true)) {
+            $hours = 24;
+        }
 
-    public function analyticsData(): JsonResponse
-    {
-        return response()->json($this->clusterDataService->getAnalyticsSeries(), 200);
+        $duckId = $request->string('duck_id')->trim()->value() ?: null;
+
+        return response()->json(
+            $this->clusterDataService->getTrendsSeries($hours, $duckId),
+            200
+        );
     }
 }
