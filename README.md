@@ -28,7 +28,8 @@
   <a href="#offline-maps">Offline Maps</a> |
   <a href="#tak-cot-bridge">TAK Bridge</a> |
   <a href="#configuration">Configuration</a> |
-  <a href="#licensing">License</a>
+  <a href="#licensing">License</a> |
+  <a href="#contributing">Contributors</a>
 </p>
 
 > MeshBeacon connects ClusterDuck Protocol (MamaDuck, PapaDuck) LoRa deployments to a high-performance Laravel operations console. It stores events locally, turns SOS alerts into actionable incidents, renders tactical maps offline, and synchronizes upstream to central servers when connectivity is restored.
@@ -342,3 +343,9 @@ Third-party dependencies retain their respective licenses. Livewire Flux Pro com
 ## Contributing
 
 Pull requests and issues are welcome! Please open an issue to discuss proposed features or bug fixes. Follow existing code conventions, keep PRs focused, include relevant tests, and branch from `Staging`.
+
+### Contributors
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
