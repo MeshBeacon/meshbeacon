@@ -239,9 +239,13 @@ class ClusterDataRepository
             $query->where('duck_id', $duckId);
         }
 
+        // NOTE: gps_batt/gps_rssi are Eloquent accessors that parse BATT:/RSSI:
+        // out of the payload column at runtime — they aren't real DB columns,
+        // so payload (not the accessor names) must be selected here for them
+        // to have anything to parse.
         return $query->orderByDesc('id')
             ->limit($limit)
-            ->get(['duck_id', 'gps_batt', 'gps_rssi', 'created_at'])
+            ->get(['duck_id', 'payload', 'created_at'])
             ->reverse()
             ->values();
     }

@@ -290,8 +290,13 @@
                   <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
                 </svg>
                 <el-options id="trends-duck-options" anchor="bottom start" popover class="m-0 max-h-60 w-[var(--input-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-xs outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 empty:hidden [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete]">
-                  <el-option value="" class="group/option relative cursor-default select-none py-1.5 px-3 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
-                    <span class="block truncate">{{ __('All Ducks') }}</span>
+                  <el-option value="" class="group/option relative cursor-default select-none py-1.5 pl-3 pr-9 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+                    <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('All Ducks') }}</span>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden">
+                      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">
+                        <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
                   </el-option>
                 </el-options>
               </el-autocomplete>
@@ -300,15 +305,14 @@
                 <button type="button" data-hours="168" class="trends-range-btn px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5">{{ __('7d') }}</button>
                 <button type="button" data-hours="720" class="trends-range-btn px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5">{{ __('30d') }}</button>
               </div>
-              <span class="text-xs text-gray-400" id="trends-last-updated"></span>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-white/10 shadow-sm">
+            <div class="bg-transparent rounded-base p-5 border border-gray-200 dark:border-white/10 shadow-xs">
               <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">{{ __('Battery Levels Over Time') }}</h3>
               <div id="trends-battery-chart" class="w-full h-72"></div>
             </div>
-            <div class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-white/10 shadow-sm">
+            <div class="bg-transparent rounded-base p-5 border border-gray-200 dark:border-white/10 shadow-xs">
               <h3 class="text-base font-medium text-gray-900 dark:text-white mb-4">{{ __('Signal Strength (RSSI)') }}</h3>
               <div id="trends-rssi-chart" class="w-full h-72"></div>
             </div>
@@ -359,6 +363,10 @@
                 type: 'datetime',
                 labels: {
                   style: { colors: palette.label, fontSize: '11px' },
+                  // ApexCharts defaults to formatting datetime axes in UTC
+                  // regardless of the browser's timezone. Disable that so
+                  // labels/tooltips reflect local (Asia/Kuala_Lumpur) time.
+                  datetimeUTC: false,
                   datetimeFormatter: {
                     year: 'yyyy',
                     month: 'MMM \'yy',
@@ -451,8 +459,6 @@
                   rssiChart.updateSeries([]);
                   rssiChart.updateOptions({ noData: { text: '{{ __('No RSSI data available') }}' } });
                 }
-
-                document.getElementById('trends-last-updated').textContent = `{{ __('Updated') }}: ${new Date().toLocaleTimeString()}`;
               })
               .catch((e) => console.error('Failed to load trends data:', e));
           }
@@ -492,11 +498,15 @@
               const opt = document.createElement('el-option');
               opt.setAttribute('value', d.duck_id);
               opt.dataset.dynamic = '1';
-              opt.className = 'group/option relative cursor-default select-none py-1.5 px-3 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block';
+              opt.className = 'group/option relative cursor-default select-none py-1.5 pl-3 pr-9 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block';
               const label = document.createElement('span');
-              label.className = 'block truncate';
+              label.className = 'block truncate font-normal group-aria-selected/option:font-semibold';
               label.textContent = d.duck_id;
               opt.appendChild(label);
+              const check = document.createElement('span');
+              check.className = "absolute inset-y-0 right-0 flex items-center pr-3 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden";
+              check.innerHTML = '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>';
+              opt.appendChild(check);
               duckOptionsList.appendChild(opt);
             });
 
