@@ -614,9 +614,9 @@ $(document).ready(function () {
             '<path d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" fill-rule="evenodd" />' +
             '</svg>';
         function optionHtml(value, label) {
-            return '<el-option value="' + value + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
+            return '<el-option value="' + value + '" class="group/option relative cursor-default select-none py-1.5 pl-6 pr-3 text-gray-900 dark:text-white focus:bg-yellow-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">' +
                 '<span class="block truncate text-xs font-normal group-aria-selected/option:font-semibold">' + escapeHtml(label) + '</span>' +
-                '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
+                '<span class="absolute inset-y-0 left-0 flex items-center pl-1 text-yellow-600 dark:text-yellow-400 group-focus/option:text-gray-900 group-[:not([aria-selected=\'true\'])]/option:hidden [el-selectedcontent_&]:hidden">' +
                 checkIcon +
                 '</span>' +
                 '</el-option>';
@@ -632,11 +632,11 @@ $(document).ready(function () {
 
         return '<el-select name="assign-' + escapeHtml(inc.message_id) + '" value="' + currentId + '" ' +
             'class="inc-assign-select block w-28 shrink-0" data-msgid="' + escapeHtml(inc.message_id) + '">' +
-            '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-300 outline outline-1 -outline-offset-1 outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">' +
+            '<button type="button" class="grid w-full cursor-default grid-cols-1 rounded bg-gray-100 dark:bg-white/5 py-0.5 pl-2 pr-1 text-left text-xs text-gray-700 dark:text-gray-300 outline outline-1 -outline-offset-1 outline-gray-300 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-yellow-500">' +
                 '<el-selectedcontent class="col-start-1 row-start-1 truncate pr-4">' + escapeHtml(currentLabel) + '</el-selectedcontent>' +
-                '<svg viewBox="0 0 16 16" fill="currentColor" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
+                '<svg viewBox="0 0 16 16" fill="currentColor" class="col-start-1 row-start-1 size-3.5 self-center justify-self-end text-gray-500 dark:text-gray-400"><path d="M5.22 10.22a.75.75 0 0 1 1.06 0L8 11.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-2.25 2.25a.75.75 0 0 1-1.06 0l-2.25-2.25a.75.75 0 0 1 0-1.06ZM10.78 5.78a.75.75 0 0 1-1.06 0L8 4.06 6.28 5.78a.75.75 0 0 1-1.06-1.06l2.25-2.25a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" fill-rule="evenodd" /></svg>' +
             '</button>' +
-            '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
+            '<el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">' +
                 optionsHtml +
             '</el-options>' +
         '</el-select>';
@@ -725,14 +725,14 @@ $(document).ready(function () {
         var incidents = sortIncidents(filterIncidents(lastIncidentsRaw, query));
 
         if (lastIncidentsRaw.length === 0) {
-            $list.html('<p class="text-xs text-gray-500 italic">No active incidents in the past 24 hours.</p>');
+            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">No active incidents in the past 24 hours.</p>');
             $count.addClass("hidden").text("");
             $list.data("last-html", null);
             return;
         }
 
         if (incidents.length === 0) {
-            $list.html('<p class="text-xs text-gray-500 italic">No incidents match your search.</p>');
+            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">No incidents match your search.</p>');
             $count.text('0 of ' + lastIncidentsRaw.length).removeClass("hidden");
             $list.data("last-html", null);
             return;
@@ -763,24 +763,21 @@ $(document).ready(function () {
                     // Card accent colour
                     var cardCls, headerCls, badgeCls, icon;
                     if (isSosDev) {
-                        cardCls   = "rounded-lg overflow-hidden outline outline-2 -outline-offset-2 outline-red-500 bg-red-950/40";
-                        headerCls = "px-4 py-3 bg-red-900/60 flex items-center gap-2";
+                        cardCls   = "outline-red-400 dark:outline-red-500 bg-red-50 dark:bg-red-950/40";
+                        headerCls = "bg-red-100 dark:bg-red-900/60";
                         badgeCls  = "bg-red-600 text-white";
-                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-red-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-red-500 dark:text-red-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
                     } else if (isSosMob) {
-                        cardCls   = "rounded-lg overflow-hidden outline outline-2 -outline-offset-2 outline-orange-500 bg-orange-950/40";
-                        headerCls = "px-4 py-3 bg-orange-900/60 flex items-center gap-2";
+                        cardCls   = "outline-orange-400 dark:outline-orange-500 bg-orange-50 dark:bg-orange-950/40";
+                        headerCls = "bg-orange-100 dark:bg-orange-900/60";
                         badgeCls  = "bg-orange-500 text-white";
-                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-orange-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-orange-500 dark:text-orange-300"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
                     } else {
-                        var urgColors = { 2: ["red", "bg-red-950/40", "bg-red-900/60", "outline-red-500", "bg-red-600 text-white"],
-                                          1: ["yellow", "bg-yellow-950/40", "bg-yellow-900/60", "outline-yellow-500", "bg-yellow-600 text-black"],
-                                          0: ["gray",  "bg-gray-800/50",   "bg-gray-700/60",  "outline-white/10",  "bg-gray-600 text-white"] };
-                        var c = urgColors[urgVal] || urgColors[0];
-                        cardCls   = "rounded-lg overflow-hidden outline outline-1 -outline-offset-1 " + c[3] + " " + c[1];
-                        headerCls = "px-4 py-3 " + c[2] + " flex items-center gap-2";
-                        badgeCls  = c[4];
-                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-gray-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
+                        var urgColors = { 2: "bg-red-600 text-white", 1: "bg-yellow-500 text-black", 0: "bg-gray-600 text-white" };
+                        cardCls   = "outline-gray-200 dark:outline-white/10 bg-gray-50 dark:bg-gray-800/50";
+                        headerCls = "bg-gray-100 dark:bg-gray-700/60";
+                        badgeCls  = urgColors[urgVal] || urgColors[0];
+                        icon      = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 shrink-0 text-gray-500 dark:text-gray-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>';
                     }
 
                     var timeStr = new Date(inc.created_at).toLocaleString(navigator.language, {
@@ -798,13 +795,13 @@ $(document).ready(function () {
 
                     // Incident lifecycle status badge
                     var incStatus = inc.incident_status || 'open';
-                    var statusStyleMap = {
-                        'open':         'background:rgba(75,85,99,0.7);color:#d1d5db',
-                        'acknowledged': 'background:rgba(120,53,15,0.8);color:#fde68a',
-                        'responding':   'background:rgba(30,58,138,0.8);color:#93c5fd',
-                        'resolved':     'background:rgba(20,83,45,0.8);color:#86efac',
+                    var statusClassMap = {
+                        'open':         'bg-gray-200 text-gray-700 dark:bg-gray-600/70 dark:text-gray-300',
+                        'acknowledged': 'bg-amber-100 text-amber-800 dark:bg-amber-900/80 dark:text-amber-200',
+                        'responding':   'bg-blue-100 text-blue-800 dark:bg-blue-900/80 dark:text-blue-300',
+                        'resolved':     'bg-green-100 text-green-800 dark:bg-green-900/80 dark:text-green-300',
                     };
-                    var statusBadge = '<span style="font-size:0.65rem;padding:1px 7px;border-radius:3px;font-weight:600;' + (statusStyleMap[incStatus] || statusStyleMap['open']) + '">' + incStatus.toUpperCase() + '</span>';
+                    var statusBadge = '<span class="text-[0.65rem] px-1.5 py-px rounded-sm font-semibold ' + (statusClassMap[incStatus] || statusClassMap['open']) + '">' + incStatus.toUpperCase() + '</span>';
 
                     // Retransmission indicator — shown when the duck has re-sent
                     // its SOS more than once while this incident is still open
@@ -812,7 +809,7 @@ $(document).ready(function () {
                     var retransCount = inc.retransmission_count || 1;
                     var retransBadge = retransCount > 1
                         ? '<span title="' + retransCount + ' SOS transmissions received for this incident" ' +
-                          'style="font-size:0.65rem;padding:1px 7px;border-radius:3px;font-weight:600;background:rgba(255,255,255,0.1);color:#e5e7eb;">\u00d7' + retransCount + '</span>'
+                          'class="text-[0.65rem] px-1.5 py-px rounded-sm font-semibold bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200">\u00d7' + retransCount + '</span>'
                         : '';
 
                     // Actions row (ACK + lifecycle buttons)
@@ -820,7 +817,7 @@ $(document).ready(function () {
                     if (incStatus !== 'resolved') {
                         var btnBase = 'display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:4px;font-size:0.7rem;font-weight:600;cursor:pointer;border:none;transition:opacity 0.15s;';
                         var ackHtml = incStatus === 'open'
-                            ? '<button class="inc-ack-btn" data-duck="' + escapeHtml(inc.duck_id) + '" data-msgid="' + escapeHtml(inc.message_id) + '" style="' + btnBase + 'background:rgba(239,68,68,0.25);color:#fca5a5;">📡 Re-send ACK</button>'
+                            ? '<button class="inc-ack-btn bg-red-100 text-red-700 dark:bg-red-500/25 dark:text-red-300" data-duck="' + escapeHtml(inc.duck_id) + '" data-msgid="' + escapeHtml(inc.message_id) + '" style="' + btnBase + '">📡 Re-send ACK</button>'
                             : '';
                         var transMap = {
                             'open':         [['acknowledged','Acknowledge'],['responding','Responding']],
@@ -828,48 +825,48 @@ $(document).ready(function () {
                             'responding':   [['resolved','Resolved ✓']],
                         };
                         var statusBtns = (transMap[incStatus] || []).map(function(pair) {
-                            return '<button class="inc-status-btn" data-msgid="' + escapeHtml(inc.message_id) + '" data-status="' + pair[0] + '" style="' + btnBase + 'background:rgba(255,255,255,0.08);color:#d1d5db;">→ ' + pair[1] + '</button>';
+                            return '<button class="inc-status-btn bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-300" data-msgid="' + escapeHtml(inc.message_id) + '" data-status="' + pair[0] + '" style="' + btnBase + '">→ ' + pair[1] + '</button>';
                         }).join('');
-                        actionsHtml = '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0.5rem 1rem 0.625rem;border-top:1px solid rgba(255,255,255,0.08);">' + ackHtml + statusBtns + '</div>';
+                        actionsHtml = '<div class="border-gray-200 dark:border-white/10" style="display:flex;flex-wrap:wrap;gap:6px;padding:0.5rem 1rem 0.625rem;border-top-width:1px;border-top-style:solid;">' + ackHtml + statusBtns + '</div>';
                     }
 
                     // Relay row
                     var relayRow = "";
                     if (inc.nearest_relay) {
                         var gpsBtn =
-                            '<button class="inc-gps-btn inline-flex items-center gap-1 rounded bg-white/10 px-2 py-1 text-xs font-medium text-white hover:bg-white/20 transition-colors shrink-0" ' +
+                            '<button class="inc-gps-btn inline-flex items-center gap-1 rounded bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/20 px-2 py-1 text-xs font-medium text-gray-900 dark:text-white transition-colors shrink-0" ' +
                             'data-duck="' + escapeHtml(inc.nearest_relay) + '">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 pointer-events-none"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
                             'Request GPS</button>';
                         relayRow =
-                            '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
-                            '<span style="font-size:0.7rem;color:#6b7280;white-space:nowrap;">Nearest relay</span>' +
-                            '<span style="font-family:monospace;font-size:0.7rem;color:#e5e7eb;background:rgba(255,255,255,0.1);border-radius:4px;padding:1px 6px;word-break:break-all;">' + escapeHtml(inc.nearest_relay) + '</span>' +
+                            '<div class="border-gray-200 dark:border-white/10" style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
+                            '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.7rem;white-space:nowrap;">Nearest relay</span>' +
+                            '<span class="font-mono text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/10" style="font-size:0.7rem;border-radius:4px;padding:1px 6px;word-break:break-all;">' + escapeHtml(inc.nearest_relay) + '</span>' +
                             '<span style="flex:1;"></span>' +
                             gpsBtn +
                             '</div>';
                     } else if (inc.hops === 0 || inc.hops === "0") {
                         relayRow =
-                            '<div style="display:flex;align-items:center;gap:0.375rem;padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;color:#4ade80;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                            '<span style="font-size:0.7rem;color:#4ade80;">Direct to concentrator</span>' +
+                            '<div class="border-gray-200 dark:border-white/10" style="display:flex;align-items:center;gap:0.375rem;padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="text-green-600 dark:text-green-400" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
+                            '<span class="text-green-600 dark:text-green-400" style="font-size:0.7rem;">Direct to concentrator</span>' +
                             '</div>';
                     } else {
                         relayRow =
-                            '<div style="padding:0.625rem 1rem;border-top:1px solid rgba(255,255,255,0.1);">' +
-                            '<span style="font-size:0.7rem;color:#4b5563;font-style:italic;">No relay path recorded</span>' +
+                            '<div class="border-gray-200 dark:border-white/10" style="padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
+                            '<span class="text-gray-500 dark:text-gray-500" style="font-size:0.7rem;font-style:italic;">No relay path recorded</span>' +
                             '</div>';
                     }
 
                     var msgText = inc.display_text
                         ? '<span style="word-break:break-word;overflow-wrap:break-word;">' + escapeHtml(inc.display_text) + '</span>'
-                        : '<span style="font-style:italic;color:#6b7280;">No message</span>';
+                        : '<span class="text-gray-500 dark:text-gray-400" style="font-style:italic;">No message</span>';
                     var mapBtn = "";
                     if (inc.map_url) {
                         mapBtn =
                             '<a href="' + escapeHtml(inc.map_url) + '" target="_blank" rel="noopener noreferrer" ' +
-                            'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;background:rgba(255,255,255,0.08);font-size:0.75rem;font-weight:500;color:#a5b4fc;text-decoration:none;" ' +
-                            'onmouseover="this.style.background=\'rgba(255,255,255,0.15)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.08)\'">' +
+                            'class="bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-indigo-600 dark:text-indigo-300 transition-colors" ' +
+                            'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;font-size:0.75rem;font-weight:500;text-decoration:none;">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
                             'View on Map</a>';
                     }
@@ -877,16 +874,16 @@ $(document).ready(function () {
                     // Assignment + notes row (available regardless of status
                     // so the incident stays auditable after resolution).
                     var assignNotesHtml =
-                        '<div style="display:flex;flex-direction:column;gap:6px;padding:0.5rem 1rem 0.625rem;border-top:1px solid rgba(255,255,255,0.08);">' +
+                        '<div class="border-gray-200 dark:border-white/10" style="display:flex;flex-direction:column;gap:6px;padding:0.5rem 1rem 0.625rem;border-top-width:1px;border-top-style:solid;">' +
                         '<div style="display:flex;align-items:center;gap:6px;">' +
-                        '<span style="font-size:0.65rem;color:#6b7280;white-space:nowrap;">Assigned to</span>' +
+                        '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.65rem;white-space:nowrap;">Assigned to</span>' +
                         buildAssignSelect(inc) +
                         '</div>' +
                         '<div style="display:flex;gap:6px;">' +
-                        '<input type="text" class="inc-notes-input" data-msgid="' + escapeHtml(inc.message_id) + '" value="' + escapeHtml(inc.incident_notes || '') + '" placeholder="Add a note\u2026" ' +
-                        'style="flex:1;min-width:0;font-size:0.7rem;background:rgba(255,255,255,0.06);color:#e5e7eb;border:none;border-radius:4px;padding:4px 8px;" />' +
-                        '<button class="inc-notes-save" data-msgid="' + escapeHtml(inc.message_id) + '" ' +
-                        'style="font-size:0.7rem;padding:4px 10px;border-radius:4px;background:rgba(255,255,255,0.1);color:#d1d5db;border:none;cursor:pointer;">Save</button>' +
+                        '<input type="text" class="inc-notes-input bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" data-msgid="' + escapeHtml(inc.message_id) + '" value="' + escapeHtml(inc.incident_notes || '') + '" placeholder="Add a note\u2026" ' +
+                        'style="flex:1;min-width:0;font-size:0.7rem;border:none;border-radius:4px;padding:4px 8px;" />' +
+                        '<button class="inc-notes-save bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300" data-msgid="' + escapeHtml(inc.message_id) + '" ' +
+                        'style="font-size:0.7rem;padding:4px 10px;border-radius:4px;border:none;cursor:pointer;">Save</button>' +
                         '</div>' +
                         '</div>';
 
@@ -900,29 +897,29 @@ $(document).ready(function () {
                         // omitted entirely when unassigned) so it doesn't
                         // compete with the SOS/status badges.
                         var assigneeLine = inc.assigned_to_name
-                            ? '<div style="font-size:0.68rem;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&rarr; ' + escapeHtml(inc.assigned_to_name) + '</div>'
+                            ? '<div class="text-gray-500 dark:text-gray-400" style="font-size:0.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">&rarr; ' + escapeHtml(inc.assigned_to_name) + '</div>'
                             : '';
                         html +=
-                            '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';padding:0.625rem 0.875rem;display:flex;flex-direction:column;gap:4px;">' +
+                            '<div class="rounded-lg overflow-hidden outline outline-2 -outline-offset-2 ' + cardCls + '" style="padding:0.625rem 0.875rem;display:flex;flex-direction:column;gap:4px;">' +
                             '<div style="display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
                             icon +
-                            '<span style="font-size:0.85rem;font-weight:600;color:white;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
+                            '<span class="text-gray-900 dark:text-white" style="font-size:0.85rem;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
                             sosBadge +
                             statusBadge +
                             '</div>' +
-                            '<div style="font-size:0.78rem;color:#d1d5db;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + msgText + '</div>' +
+                            '<div class="text-gray-700 dark:text-gray-300" style="font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + msgText + '</div>' +
                             assigneeLine +
-                            '<div style="font-size:0.68rem;color:#6b7280;">' + timeStr + '</div>' +
+                            '<div class="text-gray-500 dark:text-gray-400" style="font-size:0.68rem;">' + timeStr + '</div>' +
                             '</div>';
                         return;
                     }
 
                     html +=
-                        '<div style="border-radius:0.5rem;overflow:hidden;outline:2px solid ' + (isSosDev ? '#ef4444' : isSosMob ? '#f97316' : 'rgba(255,255,255,0.1)') + ';outline-offset:-2px;background:' + (isSosDev ? 'rgba(69,10,10,0.4)' : isSosMob ? 'rgba(67,20,7,0.4)' : 'rgba(31,41,55,0.5)') + ';display:flex;flex-direction:column;height:100%;">' +
+                        '<div class="rounded-lg overflow-hidden outline outline-2 -outline-offset-2 ' + cardCls + '" style="display:flex;flex-direction:column;height:100%;">' +
                         // Header
-                        '<div style="padding:0.75rem 1rem;background:' + (isSosDev ? 'rgba(127,29,29,0.6)' : isSosMob ? 'rgba(124,45,18,0.6)' : 'rgba(55,65,81,0.6)') + ';display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
+                        '<div class="' + headerCls + '" style="padding:0.75rem 1rem;display:flex;align-items:center;gap:0.5rem;min-width:0;">' +
                         icon +
-                        '<span style="font-size:0.875rem;font-weight:600;color:white;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
+                        '<span class="text-gray-900 dark:text-white" style="font-size:0.875rem;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(inc.duck_id) + '</span>' +
                         sosBadge +
                         statusBadge +
                         retransBadge +
@@ -930,10 +927,10 @@ $(document).ready(function () {
                         // Body: message, map button, timestamp
                         '<div style="padding:0.75rem 1rem 1rem;display:flex;flex-direction:column;flex:1;justify-content:space-between;">' +
                         '<div>' +
-                        '<div style="font-size:0.875rem;color:#d1d5db;word-break:break-word;overflow-wrap:break-word;">' + msgText + '</div>' +
+                        '<div class="text-gray-700 dark:text-gray-300" style="font-size:0.875rem;word-break:break-word;overflow-wrap:break-word;">' + msgText + '</div>' +
                         mapBtn +
                         '</div>' +
-                        '<div style="font-size:0.7rem;color:#6b7280;margin-top:0.75rem;">' + timeStr + '</div>' +
+                        '<div class="text-gray-500 dark:text-gray-400" style="font-size:0.7rem;margin-top:0.75rem;">' + timeStr + '</div>' +
                         '</div>' +
                         // Relay footer
                         relayRow +
@@ -945,7 +942,7 @@ $(document).ready(function () {
                 html += '</div>';
 
                 if (hiddenCount > 0) {
-                    html += '<p style="margin-top:0.75rem;font-size:0.75rem;color:#9ca3af;text-align:center;">+' + hiddenCount + ' more \u2014 see full dashboard for all active incidents</p>';
+                    html += '<p class="text-gray-500 dark:text-gray-400" style="margin-top:0.75rem;font-size:0.75rem;text-align:center;">+' + hiddenCount + ' more \u2014 see full dashboard for all active incidents</p>';
                 }
 
                 // Only repaint when content changed to avoid flicker
