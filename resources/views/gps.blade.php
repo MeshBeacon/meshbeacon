@@ -797,14 +797,7 @@
       var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
       
       <?php
-      $maxNativeZoom = 19;
-      if (file_exists(config('services.map.mbtiles_path'))) {
-          try {
-              $pdo = new PDO('sqlite:' . config('services.map.mbtiles_path'));
-              $res = $pdo->query("SELECT value FROM metadata WHERE name = 'maxzoom'")->fetchColumn();
-              if (is_numeric($res)) $maxNativeZoom = (int) $res;
-          } catch (\Exception $e) {}
-      }
+      $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path'));
       ?>
       var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
         attribution: '&copy; MeshBeacon / OpenStreetMap',
