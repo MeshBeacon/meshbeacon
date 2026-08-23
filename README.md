@@ -347,5 +347,25 @@ Pull requests and issues are welcome! Please open an issue to discuss proposed f
 ### Contributors
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/muhammadn">
+                    <img src="https://avatars.githubusercontent.com/u/3349747?v=4" width="100;" alt="muhammadn"/>
+                    <br />
+                    <sub><b>Muhammad Nuzaihan Bin Kamal Luddin</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/9M2PJU">
+                    <img src="https://avatars.githubusercontent.com/u/991353?v=4" width="100;" alt="9M2PJU"/>
+                    <br />
+                    <sub><b>9M2PJU</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
 
