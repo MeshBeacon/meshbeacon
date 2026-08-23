@@ -3,10 +3,10 @@
 <div id="operations-page" data-status-url="{{ route('system-health.status') }}" class="space-y-6">
   <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      <p class="text-sm text-gray-400">{{ __('Runtime health and service activity') }}</p>
-      <p id="operations-updated" class="mt-1 text-xs text-gray-500">{{ __('Loading status…') }}</p>
+      <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Runtime health and service activity') }}</p>
+      <p id="operations-updated" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Loading status…') }}</p>
     </div>
-    <div id="operations-overall" class="inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10">
+    <div id="operations-overall" class="inline-flex w-fit items-center gap-2 rounded-full bg-gray-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-200 dark:ring-white/10">
       <span class="relative flex size-2">
         <span id="operations-overall-ping" class="absolute inline-flex h-full w-full rounded-full opacity-75"></span>
         <span id="operations-overall-dot" class="relative inline-flex size-2 rounded-full bg-gray-500"></span>
@@ -16,78 +16,78 @@
   </div>
 
   <div>
-    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-white">{{ __('Health checks') }}</h2>
+    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Health checks') }}</h2>
     <dl id="operations-checks" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
         <div class="flex items-center justify-between gap-2">
-          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Database') }}</dt>
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Database') }}</dt>
           <span data-check-dot="database" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
         </div>
-        <dd data-check="database" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+        <dd data-check="database" class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('Checking…') }}</dd>
       </div>
-      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
         <div class="flex items-center justify-between gap-2">
-          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Migrations') }}</dt>
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Migrations') }}</dt>
           <span data-check-dot="migrations" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
         </div>
-        <dd data-check="migrations" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+        <dd data-check="migrations" class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('Checking…') }}</dd>
       </div>
-      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
         <div class="flex items-center justify-between gap-2">
-          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('MQTT broker') }}</dt>
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('MQTT broker') }}</dt>
           <span data-check-dot="mqtt" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
         </div>
-        <dd data-check="mqtt" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+        <dd data-check="mqtt" class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('Checking…') }}</dd>
       </div>
-      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
+      <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
         <div class="flex items-center justify-between gap-2">
-          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Queue') }}</dt>
+          <dt class="truncate text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Queue') }}</dt>
           <span data-check-dot="queue" class="size-2 shrink-0 rounded-full bg-gray-500"></span>
         </div>
-        <dd data-check="queue" class="mt-2 text-sm font-medium text-white">{{ __('Checking…') }}</dd>
+        <dd data-check="queue" class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('Checking…') }}</dd>
       </div>
-      <div class="overflow-hidden rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10 sm:col-span-2">
-        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">{{ __('Workers') }}</dt>
-        <dd id="operations-workers" class="mt-2 space-y-1.5 text-sm font-medium text-white">
-          <p class="text-gray-400">{{ __('Checking…') }}</p>
+      <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10 sm:col-span-2">
+        <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Workers') }}</dt>
+        <dd id="operations-workers" class="mt-2 space-y-1.5 text-sm font-medium text-gray-900 dark:text-white">
+          <p class="text-gray-500 dark:text-gray-400">{{ __('Checking…') }}</p>
         </dd>
       </div>
     </dl>
   </div>
 
   <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
-    <section class="rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('Queue activity') }}</h2>
+    <section class="rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Queue activity') }}</h2>
       <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
-          <dt class="text-gray-500">{{ __('Pending jobs') }}</dt>
-          <dd id="queue-pending" class="mt-1 font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Pending jobs') }}</dt>
+          <dd id="queue-pending" class="mt-1 font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
         <div>
-          <dt class="text-gray-500">{{ __('Failed jobs') }}</dt>
-          <dd id="queue-failed" class="mt-1 font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Failed jobs') }}</dt>
+          <dd id="queue-failed" class="mt-1 font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
         <div class="col-span-2">
-          <dt class="text-gray-500">{{ __('Last failure') }}</dt>
-          <dd id="queue-last-failure" class="mt-1 break-words font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Last failure') }}</dt>
+          <dd id="queue-last-failure" class="mt-1 break-words font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
       </dl>
     </section>
 
-    <section class="rounded-lg bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-white/10">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-white">{{ __('MQTT activity') }}</h2>
+    <section class="rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('MQTT activity') }}</h2>
       <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
-          <dt class="text-gray-500">{{ __('Connection') }}</dt>
-          <dd id="mqtt-connection" class="mt-1 font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Connection') }}</dt>
+          <dd id="mqtt-connection" class="mt-1 font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
         <div>
-          <dt class="text-gray-500">{{ __('Last message') }}</dt>
-          <dd id="mqtt-last-message" class="mt-1 font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Last message') }}</dt>
+          <dd id="mqtt-last-message" class="mt-1 font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
         <div class="col-span-2">
-          <dt class="text-gray-500">{{ __('Last heartbeat') }}</dt>
-          <dd id="mqtt-last-heartbeat" class="mt-1 font-medium text-gray-200">-</dd>
+          <dt class="text-gray-500 dark:text-gray-400">{{ __('Last heartbeat') }}</dt>
+          <dd id="mqtt-last-heartbeat" class="mt-1 font-medium text-gray-700 dark:text-gray-200">-</dd>
         </div>
       </dl>
     </section>
@@ -119,9 +119,9 @@
     down: '{{ __('System down') }}',
   };
   const overallStyle = {
-    ok: { text: 'text-emerald-400', dot: 'bg-emerald-400', ping: 'bg-emerald-400' },
-    degraded: { text: 'text-amber-400', dot: 'bg-amber-400', ping: 'bg-amber-400' },
-    down: { text: 'text-red-400', dot: 'bg-red-500', ping: 'bg-red-500' },
+    ok: { text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-400', ping: 'bg-emerald-400' },
+    degraded: { text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-400', ping: 'bg-amber-400' },
+    down: { text: 'text-red-600 dark:text-red-400', dot: 'bg-red-500', ping: 'bg-red-500' },
   };
   const dotColor = {
     ok: 'bg-emerald-400',
@@ -146,7 +146,7 @@
     const overallState = payload.ready === false ? 'down' : (payload.status === 'degraded' ? 'degraded' : 'ok');
     const style = overallStyle[overallState];
 
-    if (overall) overall.className = `inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium ${style.text} ring-1 ring-inset ring-white/10`;
+    if (overall) overall.className = `inline-flex w-fit items-center gap-2 rounded-full bg-gray-100 dark:bg-white/5 px-3 py-1 text-xs font-medium ${style.text} ring-1 ring-inset ring-gray-200 dark:ring-white/10`;
     if (overallLabel) overallLabel.textContent = overallLabels[overallState];
     if (overallDot) overallDot.className = `relative inline-flex size-2 rounded-full ${style.dot}`;
     if (overallPing) overallPing.className = `absolute inline-flex h-full w-full rounded-full opacity-75 ${overallState === 'ok' ? `animate-ping ${style.ping}` : style.ping}`;
@@ -161,8 +161,8 @@
             const row = document.createElement('div');
             row.className = 'flex items-center justify-between gap-2';
             row.innerHTML = `
-              <span class="text-sm capitalize text-gray-300">${worker}</span>
-              <span class="inline-flex items-center gap-1.5 text-sm font-medium text-white">
+              <span class="text-sm capitalize text-gray-600 dark:text-gray-300">${worker}</span>
+              <span class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-white">
                 <span class="size-2 shrink-0 rounded-full ${dotColor[state.status] || 'bg-gray-500'}"></span>
                 ${labels[state.status] || state.status}
               </span>`;
@@ -203,7 +203,7 @@
       const overallLabel = document.getElementById('operations-overall-label');
       const overallDot = document.getElementById('operations-overall-dot');
       const overallPing = document.getElementById('operations-overall-ping');
-      if (overall) overall.className = 'inline-flex w-fit items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10';
+      if (overall) overall.className = 'inline-flex w-fit items-center gap-2 rounded-full bg-gray-100 dark:bg-white/5 px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 ring-1 ring-inset ring-gray-200 dark:ring-white/10';
       if (overallDot) overallDot.className = 'relative inline-flex size-2 rounded-full bg-gray-500';
       if (overallPing) overallPing.className = 'absolute inline-flex h-full w-full rounded-full opacity-75 bg-gray-500';
       if (overallLabel) overallLabel.textContent = '{{ __('Unable to check') }}';

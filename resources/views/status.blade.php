@@ -9,7 +9,7 @@
       {{ __('Send Message to Duck') }}
     </button>
     <button type="button" id="open-broadcast-btn"
-      class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892L5.18 9.817a.75.75 0 0 0 .985.985l2.15-.975a2.75 2.75 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.475ZM3.5 6.75A3.25 3.25 0 0 1 6.75 3.5h.75a.75.75 0 0 1 0 1.5h-.75A1.75 1.75 0 0 0 5 6.75v5.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 14 12.25v-.75a.75.75 0 0 1 1.5 0v.75A3.25 3.25 0 0 1 12.25 15.5h-5.5A3.25 3.25 0 0 1 3.5 12.25v-5.5Z" />
       </svg>
@@ -152,11 +152,11 @@
   </div>
   <div id="duck-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 @foreach ($mamaducks as $mamaduck)
-<div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-500/30 overflow-hidden rounded-lg bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}" data-online="{{ $mamaduck->created_at->gt(now()->subHour()) ? '1' : '0' }}" data-incident-status="{{ ($activeIncidents[$mamaduck->duck_id] ?? null)?->status ?? '' }}">
+<div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-300 dark:divide-red-500/30 overflow-hidden rounded-lg bg-red-100 dark:bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-gray-200 dark:divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}" data-online="{{ $mamaduck->created_at->gt(now()->subHour()) ? '1' : '0' }}" data-incident-status="{{ ($activeIncidents[$mamaduck->duck_id] ?? null)?->status ?? '' }}">
   <!-- Header -->
-  <div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'px-4 py-4 sm:px-6 flex flex-col gap-2 bg-red-900/50' : 'px-4 py-4 sm:px-6 flex flex-col gap-2' }}">
+  <div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'px-4 py-4 sm:px-6 flex flex-col gap-2 bg-red-200 dark:bg-red-900/50' : 'px-4 py-4 sm:px-6 flex flex-col gap-2' }}">
     <div class="flex items-center justify-between">
-      <span class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'text-sm font-bold text-red-300 tracking-wide' : 'text-sm font-semibold text-gray-900 dark:text-white' }}">
+      <span class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'text-sm font-bold text-red-700 dark:text-red-300 tracking-wide' : 'text-sm font-semibold text-gray-900 dark:text-white' }}">
         {{ $mamaduck->duck_id }}
       </span>
       @php
@@ -168,15 +168,15 @@
           default        => __('OPEN'),
         };
         $incClass = match($incStatus) {
-          'acknowledged' => 'bg-amber-500/20 text-amber-300 ring-amber-500/40',
-          'responding'   => 'bg-blue-500/20 text-blue-300 ring-blue-500/40',
-          default        => 'bg-red-500/20 text-red-300 ring-red-500/40',
+          'acknowledged' => 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-amber-300 dark:ring-amber-500/40',
+          'responding'   => 'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 ring-blue-300 dark:ring-blue-500/40',
+          default        => 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 ring-red-300 dark:ring-red-500/40',
         };
       @endphp
       <div class="flex items-center gap-1.5">
         <a href="/dashboard#incidents" data-incident-badge-duck="{{ $mamaduck->duck_id }}"
           class="{{ $activeInc ? '' : '!hidden' }} inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold ring-1 ring-inset {{ $incClass }}">{!! $incLabel !!}</a>
-        <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Online') }}</button>
+        <button type="button" data-status-duck="{{ $mamaduck->duck_id }}" class="rounded bg-green-500 px-2 py-1 text-xs font-semibold text-white hover:bg-green-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500">{{ __('Online') }}</button>
       </div>
     </div>
   </div>
@@ -189,20 +189,20 @@
       <p class="text-sm text-gray-500 dark:text-gray-400 text-wrap break-words">{{ $mamaduck->display_text }}</p>
     @endif
     @if ($mamaduck->sos_from_device)
-      <div class="flex items-start gap-2 rounded-md bg-red-900/50 px-3 py-2 ring-1 ring-inset ring-red-500/40">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-red-400">
+      <div class="flex items-start gap-2 rounded-md bg-red-100 dark:bg-red-900/50 px-3 py-2 ring-1 ring-inset ring-red-300 dark:ring-red-500/40">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-red-700 dark:text-red-400">
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-red-400">{{ __('SOS - Hardware Button Triggered') }}</p>
-          <p class="text-xs text-red-300/80">{{ __('This SOS was sent because the physical SOS button on the device was pressed.') }}</p>
+          <p class="text-xs font-semibold text-red-700 dark:text-red-400">{{ __('SOS - Hardware Button Triggered') }}</p>
+          <p class="text-xs text-red-700/80 dark:text-red-300/80">{{ __('This SOS was sent because the physical SOS button on the device was pressed.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
               @if ($mamaduck->gps_batt !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
-                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-200 dark:bg-red-800/60 text-red-800 dark:text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-200 dark:bg-orange-800/60 text-orange-800 dark:text-orange-300' : 'bg-green-200 dark:bg-green-800/60 text-green-800 dark:text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                     {{ $mamaduck->gps_batt }}%
                   </span>
@@ -211,22 +211,22 @@
               @endif
               @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   @if ($mamaduck->gps_alt !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-200 dark:bg-blue-800/60 text-blue-800 dark:text-blue-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .674.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 13.347l-3.767 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 7.874a.75.75 0 0 1 .416-1.28l4.21-.611L7.327 2.17A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_alt, 1) }} m
                     </span>
                   @endif
                   @if ($mamaduck->gps_spd !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-800/60 text-purple-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-200 dark:bg-purple-800/60 text-purple-800 dark:text-purple-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388a.75.75 0 1 0 1.474.28l.455-2.388Zm4.095.99a.75.75 0 1 0-1.06-1.06L9.22 4.122a.75.75 0 1 0 1.06 1.06l1.302-1.302ZM2.28 8a.75.75 0 1 0-.28-1.474l-2.388.455a.75.75 0 1 0 .28 1.474L2.28 8ZM8 2a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 2ZM5.122 9.22a.75.75 0 0 0 0-1.06L3.818 6.857a.75.75 0 0 0-1.06 1.06l1.304 1.303a.75.75 0 0 0 1.06 0ZM8 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3.25.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm-.44 3.22a.75.75 0 1 0 1.06-1.06l-1.3-1.302a.75.75 0 0 0-1.06 1.06l1.3 1.302Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_spd, 1) }} km/h
                     </span>
                   @endif
                   @if ($mamaduck->gps_hdg !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-800/60 text-sky-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-200 dark:bg-sky-800/60 text-sky-800 dark:text-sky-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 14a6 6 0 1 0 0-12A6 6 0 0 0 8 14ZM9.25 5.75A.75.75 0 0 0 8 5.134a.75.75 0 0 0-1.25.616v4.5a.75.75 0 0 0 1.25.616.75.75 0 0 0 1.25-.616v-4.5Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_hdg, 1) }}&deg;
                     </span>
@@ -239,20 +239,20 @@
         </div>
       </div>
     @elseif ($mamaduck->sos_from_mobile)
-      <div class="flex items-start gap-2 rounded-md bg-orange-900/50 px-3 py-2 ring-1 ring-inset ring-orange-500/40">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-orange-400">
+      <div class="flex items-start gap-2 rounded-md bg-orange-100 dark:bg-orange-900/50 px-3 py-2 ring-1 ring-inset ring-orange-300 dark:ring-orange-500/40">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-orange-700 dark:text-orange-400">
           <path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-xs font-semibold text-orange-400">{{ __('SOS - Mobile Phone Triggered') }}</p>
-          <p class="text-xs text-orange-300/80">{{ __('This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.') }}</p>
+          <p class="text-xs font-semibold text-orange-700 dark:text-orange-400">{{ __('SOS - Mobile Phone Triggered') }}</p>
+          <p class="text-xs text-orange-700/80 dark:text-orange-300/80">{{ __('This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.') }}</p>
           @if ($mamaduck->gps_batt !== null || $mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
             <div class="mt-1.5 flex flex-col gap-1.5">
               @if ($mamaduck->gps_batt !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
-                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
+                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $mamaduck->gps_batt < 20 ? 'bg-red-200 dark:bg-red-800/60 text-red-800 dark:text-red-300' : ($mamaduck->gps_batt < 50 ? 'bg-orange-200 dark:bg-orange-800/60 text-orange-800 dark:text-orange-300' : 'bg-green-200 dark:bg-green-800/60 text-green-800 dark:text-green-300') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
                     {{ $mamaduck->gps_batt }}%
                   </span>
@@ -261,22 +261,22 @@
               @endif
               @if ($mamaduck->gps_alt !== null || $mamaduck->gps_spd !== null || $mamaduck->gps_hdg !== null)
                 <div class="flex items-start gap-1.5">
-                  <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
+                  <span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">{{ __('GPS') }}</span>
                   <div class="flex flex-wrap gap-1.5 flex-1">
                   @if ($mamaduck->gps_alt !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-800/60 text-blue-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-200 dark:bg-blue-800/60 text-blue-800 dark:text-blue-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .674.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 13.347l-3.767 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 7.874a.75.75 0 0 1 .416-1.28l4.21-.611L7.327 2.17A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_alt, 1) }} m
                     </span>
                   @endif
                   @if ($mamaduck->gps_spd !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-800/60 text-purple-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-purple-200 dark:bg-purple-800/60 text-purple-800 dark:text-purple-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388a.75.75 0 1 0 1.474.28l.455-2.388Zm4.095.99a.75.75 0 1 0-1.06-1.06L9.22 4.122a.75.75 0 1 0 1.06 1.06l1.302-1.302ZM2.28 8a.75.75 0 1 0-.28-1.474l-2.388.455a.75.75 0 1 0 .28 1.474L2.28 8ZM8 2a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 8 2ZM5.122 9.22a.75.75 0 0 0 0-1.06L3.818 6.857a.75.75 0 0 0-1.06 1.06l1.304 1.303a.75.75 0 0 0 1.06 0ZM8 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm3.25.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm-.44 3.22a.75.75 0 1 0 1.06-1.06l-1.3-1.302a.75.75 0 0 0-1.06 1.06l1.3 1.302Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_spd, 1) }} km/h
                     </span>
                   @endif
                   @if ($mamaduck->gps_hdg !== null)
-                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-800/60 text-sky-200">
+                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-200 dark:bg-sky-800/60 text-sky-800 dark:text-sky-200">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 14a6 6 0 1 0 0-12A6 6 0 0 0 8 14ZM9.25 5.75A.75.75 0 0 0 8 5.134a.75.75 0 0 0-1.25.616v4.5a.75.75 0 0 0 1.25.616.75.75 0 0 0 1.25-.616v-4.5Z" clip-rule="evenodd"/></svg>
                       {{ number_format($mamaduck->gps_hdg, 1) }}&deg;
                     </span>
@@ -289,13 +289,13 @@
         </div>
       </div>
     @elseif ($mamaduck->roger_from_device)
-      <div class="flex items-start gap-2 rounded-md bg-green-900/50 px-3 py-2 ring-2 ring-inset ring-green-500/60">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-green-400">
+      <div class="flex items-start gap-2 rounded-md bg-green-100 dark:bg-green-900/50 px-3 py-2 ring-2 ring-inset ring-green-400 dark:ring-green-500/60">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-green-700 dark:text-green-400">
           <path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" />
         </svg>
         <div>
-          <p class="text-sm font-bold text-green-300 uppercase tracking-wide">{{ __('Roger - Device Confirmed') }}</p>
-          <p class="text-xs text-green-400/80">{{ __('The person holding the device triple-clicked the button to confirm they have received your message.') }}</p>
+          <p class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wide">{{ __('Roger - Device Confirmed') }}</p>
+          <p class="text-xs text-green-700/80 dark:text-green-400/80">{{ __('The person holding the device triple-clicked the button to confirm they have received your message.') }}</p>
         </div>
       </div>
     @endif
@@ -322,7 +322,7 @@
         {{ __('GPS location unavailable - no satellite fix') }}
       </p>
     @elseif ($mamaduck->gps_hardware_absent)
-      <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500">
+      <p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
           <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
         </svg>
@@ -333,7 +333,7 @@
     @php $mapDialogId = 'map-dialog-' . $mamaduck->id; @endphp
     <div data-map-btn-duck="{{ $mamaduck->duck_id }}" class="{{ $mamaduck->map_url ? '' : 'hidden' }}">
       <button command="show-modal" commandfor="{{ $mapDialogId }}"
-         class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-green-500">
+         class="mt-3 inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
@@ -349,7 +349,7 @@
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $mamaduck->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" data-map-subtitle>
-                    {{ __('Source:') }} <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-400' : 'text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
+                    {{ __('Source:') }} <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
                     @if ($mamaduck->gps_sats !== null)
                       &bull; {{ $mamaduck->gps_sats }} {{ __('satellites') }}
                     @endif
@@ -421,7 +421,7 @@
   </div>
 
   <div class="mt-2 flex shrink-0 items-center gap-3">
-            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">{{ __('Send Message') }}</button>
+            <button type="submit" command="close" commandfor="msg-dialog-{{ $mamaduck->duck_id }}" class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">{{ __('Send Message') }}</button>
             <span class="send-status text-xs"></span>
   </div>
 </form>
@@ -447,7 +447,7 @@
               </div>
               <div>
                 <h2 id="broadcast-dialog-title" class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Emergency Broadcast') }}</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Message will be sent to') }} <span class="font-semibold text-red-400">{{ __('all') }}</span> {{ __('connected devices (topic 24).') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Message will be sent to') }} <span class="font-semibold text-red-600 dark:text-red-400">{{ __('all') }}</span> {{ __('connected devices (topic 24).') }}</p>
               </div>
             </div>
             <form id="broadcast-form" class="flex h-full flex-col">
@@ -465,7 +465,7 @@
               </div>
               <div class="mt-5 flex shrink-0 items-center gap-3">
                 <button type="submit" id="broadcast-send-btn"
-                  class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                  class="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
                     <path d="M2.87 2.298a.75.75 0 0 0-.812.495l-2 6.5a.75.75 0 0 0 .926.926L4 9.32V10a.75.75 0 0 0 .28.585l4.5 3.5A.75.75 0 0 0 10 13.5V10.82l2.985-.897a.75.75 0 0 0 .516-.923L11.578 3.3a.75.75 0 0 0-.812-.495L8 3.6 5.234 3.3 2.87 2.298Z" />
                   </svg>
@@ -513,7 +513,7 @@
               </div>
               <div class="mt-2 flex shrink-0 items-center gap-3">
                 <button type="submit" command="close" commandfor="send-duck-dialog"
-                  class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+                  class="duck-send-message w-full flex justify-center rounded-md bg-orange-500 px-3 py-2 text-sm font-semibold text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
                   {{ __('Send Message') }}
                 </button>
                 <span class="send-status text-xs"></span>
@@ -647,12 +647,12 @@
       toastMsg.textContent = message;
       if (isError) {
         toast.className = toast.className.replace(/bg-\S+/g, '').trim();
-        toast.classList.add('bg-red-700', 'text-gray-900 dark:text-white');
+        toast.classList.add('bg-red-700', 'text-white');
         toastIcon.classList.remove('text-green-300');
         toastIcon.classList.add('text-red-300');
       } else {
         toast.className = toast.className.replace(/bg-\S+/g, '').trim();
-        toast.classList.add('bg-green-700', 'text-gray-900 dark:text-white');
+        toast.classList.add('bg-green-700', 'text-white');
         toastIcon.classList.remove('text-red-300');
         toastIcon.classList.add('text-green-300');
       }

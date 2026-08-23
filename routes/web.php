@@ -57,9 +57,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/incidents/stats', [DashboardController::class, 'incidentStats']);
     Route::get('/dashboard/incidents/responders', [DashboardController::class, 'responders']);
     Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
-    
-    Route::get('/analytics', [DashboardController::class, 'analytics']);
-    Route::get('/analytics/data', [DashboardController::class, 'analyticsData']);
+    Route::get('/dashboard/trends-data', [DashboardController::class, 'trendsData']);
+
     Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
     // Offline map tiles
     Route::get('/tiles/{z}/{x}/{y}.png', [\App\Http\Controllers\TileController::class, 'serveTile'])
@@ -96,10 +95,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
-
-    Route::get('/about', function () {
-        return view('about');
-    })->name('about');
 
     Route::get('/system-health', [HealthController::class, 'operations'])->name('system-health');
     Route::get('/system-health/status', [HealthController::class, 'operationsStatus'])->name('system-health.status');

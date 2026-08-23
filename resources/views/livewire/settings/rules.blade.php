@@ -104,7 +104,7 @@ new class extends Component {
                                     <p class="text-sm font-medium text-white">{{ $rule->name }}</p>
                                     <p class="text-sm text-gray-400">If {{ $rule->condition }} is {{ $rule->threshold }}, then {{ $rule->action }}</p>
                                 </div>
-                                <button wire:click="deleteRule({{ $rule->id }})" class="text-sm font-semibold text-red-400 hover:text-red-300">{{ __('Delete') }}</button>
+                                <button wire:click="deleteRule({{ $rule->id }})" class="text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300">{{ __('Delete') }}</button>
                             </li>
                             @endforeach
                             @if($rules->isEmpty())
