@@ -222,6 +222,34 @@ class ClusterDataRepository
         })->orderByDesc('id')->get();
     }
 
+    /**
+     * Records with battery or RSSI telemetry within the last $hours hours,
+     * optionally restricted to a single duck_id. Oldest first, capped at
+     * $limit rows for performance. Backs the Dashboard's Trends charts.
+     */
+    public function getTrendsRecords(int $hours, ?string $duckId = null, int $limit = 3000): Collection
+    {
+        $query = ClusterData::where(function ($q) {
+                $q->where('payload', 'like', '%BATT:%')
+                  ->orWhere('payload', 'like', '%RSSI:%');
+            })
+            ->where('created_at', '>=', now()->subHours($hours));
+
+        if ($duckId) {
+            $query->where('duck_id', $duckId);
+        }
+
+        // NOTE: gps_batt/gps_rssi are Eloquent accessors that parse BATT:/RSSI:
+        // out of the payload column at runtime — they aren't real DB columns,
+        // so payload (not the accessor names) must be selected here for them
+        // to have anything to parse.
+        return $query->orderByDesc('id')
+            ->limit($limit)
+            ->get(['duck_id', 'payload', 'created_at'])
+            ->reverse()
+            ->values();
+    }
+
     public function getAllInWindow(
         CarbonInterface $start,
         CarbonInterface $end,

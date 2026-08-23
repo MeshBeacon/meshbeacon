@@ -96,7 +96,7 @@
     <div class="col-span-4 flex flex-col rounded-lg bg-white dark:bg-gray-800/75 ring-1 ring-inset ring-gray-200 dark:ring-white/10 p-4 min-h-0">
       <div class="flex items-center gap-3 mb-3 shrink-0">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Active Incidents') }}</h2>
-        <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-400 ring-1 ring-inset ring-red-500/30"></span>
+        <span id="incidents-count" class="hidden inline-flex items-center rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-medium text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-500/30"></span>
       </div>
       <div id="incidents-list" class="@container overflow-y-auto min-h-0" data-compact="true">
         <p class="text-xs text-gray-500 italic">{{ __('Loading…') }}</p>
@@ -122,14 +122,7 @@
         var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
         
         <?php
-        $maxNativeZoom = 19;
-        if (file_exists(config('services.map.mbtiles_path'))) {
-            try {
-                $pdo = new PDO('sqlite:' . config('services.map.mbtiles_path'));
-                $res = $pdo->query("SELECT value FROM metadata WHERE name = 'maxzoom'")->fetchColumn();
-                if (is_numeric($res)) $maxNativeZoom = (int) $res;
-            } catch (\Exception $e) {}
-        }
+        $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path'));
         ?>
         var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
           maxZoom: 19,

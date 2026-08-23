@@ -21,7 +21,7 @@
                                         class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                                 </div>
                                 @error('name')
-                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -32,7 +32,7 @@
                                         class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                                 </div>
                                 @error('email')
-                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -43,7 +43,7 @@
                                         class="block w-full rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-base text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
                                 </div>
                                 @error('password')
-                                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                                    <p class="mt-2 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -76,7 +76,7 @@
                             {{ __('User created.') }}
                         </x-action-message>
 
-                        <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                             {{ __('Create user') }}
                         </button>
                     </div>
@@ -91,11 +91,11 @@
                 <div class="bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 sm:rounded-xl lg:col-span-2">
                     <div class="px-4 py-6 sm:p-8">
                         @error('role')
-                            <p class="mb-4 text-sm text-red-400">{{ $message }}</p>
+                            <p class="mb-4 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                         @enderror
 
                         @error('delete')
-                            <p class="mb-4 text-sm text-red-400">{{ $message }}</p>
+                            <p class="mb-4 text-sm text-red-700 dark:text-red-400">{{ $message }}</p>
                         @enderror
 
                         <div class="divide-y divide-white/10">
@@ -120,7 +120,7 @@
 
                                         @unless ($user->id === auth()->id())
                                             <button type="button" wire:click="deleteUser({{ $user->id }})" wire:confirm="{{ __('Delete this user account?') }}"
-                                                class="rounded-md bg-red-500 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+                                                class="rounded-md bg-red-500 px-2.5 py-1.5 text-sm font-semibold text-white hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
                                                 {{ __('Delete') }}
                                             </button>
                                         @endunless

@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1f2937">
-  <link rel="manifest" href="{{ asset('manifest.json') }}">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script>
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -30,32 +29,28 @@
             <div class="flex items-center">
               <a href="/dashboard" class="flex items-center gap-3 shrink-0 group">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="size-10 group-hover:opacity-80 transition-opacity">
-                <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-orange-600 dark:text-orange-400 transition-colors">MeshBeacon</span>
               </a>
-              <div class="hidden lg:block">
+              <div class="hidden md:block">
                 @php
                   $navLinks = [
                     'dashboard' => ['/dashboard', __('Dashboard')],
-                    'analytics' => ['/analytics', __('Analytics')],
                     'status' => ['/status', __('Status')],
                     'gps' => ['/gps', __('Tracking')],
                     'reports' => ['/reports', __('Reports')],
                     'tak/logs' => ['/tak/logs', __('TAK Logs')],
-                    'telegram/logs' => ['/telegram/logs', __('Telegram Logs')],
                     'messages' => ['/messages', __('Messages')],
-                    'about' => ['/about', __('About')],
                   ];
                 @endphp
-                <div class="ml-4 flex items-baseline space-x-1">
+                <div class="ml-10 flex items-baseline space-x-4">
                   @foreach ($navLinks as $path => [$href, $label])
-                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-white" @else class="rounded-md px-2 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white" @endif>{{ $label }}</a>
+                  <a href="{{ $href }}" @if(request()->is($path)) aria-current="page" class="rounded-md bg-gray-200 dark:bg-gray-950/50 px-3 py-2 text-sm font-medium text-gray-900 dark:text-white" @else class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white" @endif>{{ $label }}</a>
                   @endforeach
                 </div>
               </div>
             </div>
             <div class="hidden lg:block">
               <div class="ml-4 flex items-center gap-3 md:ml-6">
-                <a href="/system-health" class="system-health-indicator inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-gray-400 ring-1 ring-inset ring-white/10 hover:bg-white/5"
+                <a href="/system-health" class="system-health-indicator inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-gray-100 dark:hover:bg-white/5"
                   data-label-ok="{{ __('All systems normal') }}"
                   data-label-degraded="{{ __('Degraded') }}"
                   data-label-down="{{ __('System down') }}"
@@ -91,6 +86,13 @@
 
                   <el-menu anchor="bottom end" popover class="m-0 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 p-0 py-1 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition [--anchor-gap:theme(spacing.2)] [transition-behavior:allow-discrete] data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in">
                     <a href="{{ route('profile.edit') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 focus:bg-gray-100 dark:bg-white/5 focus:outline-none">{{ __('Settings') }}</a>
+                    {{-- Telegram alerting is opt-in (TELEGRAM_BOT_TOKEN); when not
+                         configured, SendTelegramAlert is a no-op and this log would
+                         only ever show "No logs found." — hide the link. Administrative/
+                         audit destination, so it lives here rather than the primary nav. --}}
+                    @if (config('services.telegram.bot_token'))
+                    <a href="{{ route('telegram.logs') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 focus:bg-gray-100 dark:bg-white/5 focus:outline-none">{{ __('Telegram Logs') }}</a>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" data-test="logout-button" class="block w-full px-4 py-2 text-start text-sm text-gray-600 dark:text-gray-300 cursor-pointer focus:bg-gray-100 dark:bg-white/5 focus:outline-none">{{ __('Sign out') }}</button>
@@ -136,7 +138,7 @@
             </div>
           </div>
           <div class="mt-3 space-y-1 px-2">
-            <a href="/system-health" class="system-health-indicator flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-white/5 hover:text-white"
+            <a href="/system-health" class="system-health-indicator flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white"
               data-label-ok="{{ __('All systems normal') }}"
               data-label-degraded="{{ __('Degraded') }}"
               data-label-down="{{ __('System down') }}"
@@ -150,6 +152,9 @@
             <div class="px-3 pb-2">@include('partials.locale-switcher')</div>
             <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white">{{ __('Your profile') }}</a>
             <a href="{{ route('profile.edit') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white">{{ __('Settings') }}</a>
+            @if (config('services.telegram.bot_token'))
+            <a href="{{ route('telegram.logs') }}" wire:navigate class="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white">{{ __('Telegram Logs') }}</a>
+            @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" data-test="logout-button" class="block w-full rounded-md px-3 py-2 text-start text-base font-medium text-gray-500 dark:text-gray-400 cursor-pointer hover:bg-gray-100 dark:bg-white/5 hover:text-gray-900 dark:text-white">{{ __('Sign out') }}</button>
@@ -162,7 +167,7 @@
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         @if(request()->is('dashboard'))
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('MeshBeacon Dashboard') }}</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Dashboard') }}</h1>
           <a href="/kiosk" title="{{ __('Tip: if this will run on a shared/unattended screen, log in there with "Remember me" checked so it stays signed in after a reboot.') }}" class="inline-flex items-center gap-1.5 rounded-md bg-gray-100 dark:bg-white/5 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-gray-200 dark:bg-white/10 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
               <path fill-rule="evenodd" d="M1 3.75A2.75 2.75 0 0 1 3.75 1h8.5A2.75 2.75 0 0 1 15 3.75v6.5A2.75 2.75 0 0 1 12.25 13h-8.5A2.75 2.75 0 0 1 1 10.25v-6.5Zm1.5 0v6.5c0 .69.56 1.25 1.25 1.25h8.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25h-8.5c-.69 0-1.25.56-1.25 1.25ZM6 14.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
@@ -197,13 +202,8 @@
         @endif
         @if(request()->is('system-health'))
         <div class="flex items-center justify-between">
-          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('System Health') }}</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('System Health') }}</h1>
           @yield('page-actions')
-        </div>
-        @endif
-        @if(request()->is('analytics'))
-        <div class="flex items-center justify-between">
-          <h1 class="text-3xl font-bold tracking-tight text-white">{{ __('Analytics & Node Health') }}</h1>
         </div>
         @endif
         @if(request()->is('operations'))
@@ -220,11 +220,6 @@
         @if(request()->is('telegram/logs'))
         <div class="flex flex-wrap items-center justify-between gap-4">
           <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('Telegram Logs') }}</h1>
-        </div>
-        @endif
-        @if(request()->is('about'))
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{{ __('About MeshBeacon') }}</h1>
         </div>
         @endif
       </div>
@@ -253,12 +248,15 @@
 </div>
 @fluxScripts
 <script>
+  // PWA disabled: actively unregister any previously installed service worker
+  // and clear its caches so existing users aren't stuck on stale cached pages.
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.error('ServiceWorker registration failed: ', err);
-      });
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
     });
+  }
+  if (window.caches) {
+    caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
   }
 </script>
 </body>
@@ -329,7 +327,7 @@ if (chartEl && typeof ApexCharts !== 'undefined') {
     const trendEl = document.getElementById('chart-trend');
     if (!trendEl || !trend) return;
     const isUp = trend.direction === 'up';
-    trendEl.className = `flex items-center px-2.5 py-0.5 font-medium text-center ${isUp ? 'text-red-400' : 'text-fg-success'}`;
+    trendEl.className = `flex items-center px-2.5 py-0.5 font-medium text-center ${isUp ? 'text-fg-success' : 'text-red-600 dark:text-red-400'}`;
     trendEl.innerHTML  = (isUp ? upArrow : downArrow) + `<span class="ml-1">${trend.percentage}%</span>`;
     trendEl.title = `Current hour: ${trend.current_hour} msgs · Previous hour: ${trend.previous_hour} msgs`;
   }

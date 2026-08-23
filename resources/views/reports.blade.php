@@ -281,7 +281,7 @@
       `).join('');
     } catch (e) {
       console.error('Failed to load incidents:', e);
-      body.innerHTML = '<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-red-400">Failed to load incidents.</td></tr>';
+      body.innerHTML = '<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-red-600 dark:text-red-400">Failed to load incidents.</td></tr>';
     }
   }
 

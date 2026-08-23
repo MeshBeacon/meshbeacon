@@ -1,4 +1,4 @@
-# MeshBeacon
+# MeshBeacon Ops
 
 <p align="center">
   <img src="public/images/logo.png" alt="MeshBeacon logo" width="180">
@@ -118,13 +118,19 @@ Field nodes preserve all incident and telemetry data locally. When upstream conn
 
 ---
 
-## Features
+### Tuning healthcheck cadence for constrained field hardware
+
+Each `app`, `mqtt-worker`, `queue-worker`, and `scheduler` healthcheck runs `php artisan observability:check`, which boots a short-lived PHP CLI process on every poll. The defaults (`MESHBEACON_HC_INTERVAL=10s`, `MESHBEACON_WORKER_HC_INTERVAL=15s`) suit an always-on server, but on constrained field hardware (a Raspberry Pi, for example) polling that often across several containers adds up in CPU and memory churn for little practical benefit. Set both variables in `.env` to a larger interval, such as `30s`-`60s`, to reduce that overhead - the underlying heartbeat TTLs (`OBSERVABILITY_MQTT_HEARTBEAT_TTL` 90s, `OBSERVABILITY_WORKER_HEARTBEAT_TTL` 45s, by default) already tolerate slower detection than the default poll cadence provides.
+
+## Pre-built Docker images
+
+Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
 
 - **Offline-First Telemetry Ingestion**: Ingests real-time binary and text packets across LoRa mesh networks via MQTT (`hub/event` and `hub/command`).
 - **Tactical Incident Management**: SOS auto-triage, responder assignment, triage notes, lifecycle status tracking, and mesh retransmissions.
 - **High-Performance Offline MBTiles Map Engine**: Upload regional raster `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
 - **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
-- **Deep Incident & Telemetry Analytics (`/analytics`)**: Historical charts for packet volume, hop distributions, battery drain trajectories, RSSI/SNR signal degradation, and responder resolution velocity.
+- **Dashboard Trends**: Battery and RSSI history charts built into `/dashboard`, filterable by duck and time range (24h / 7d / 30d).
 - **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
 - **TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK, iTAK, WinTAK, and OpenTAKServer with dedicated live audit logs (`/tak/logs`).
 - **Automated Telegram Dispatch**: Instant SOS dispatch to Telegram responder channels with one-click responder account linking and live webhook logs (`/telegram/logs`).
@@ -141,7 +147,7 @@ Field nodes preserve all incident and telemetry data locally. When upstream conn
 | **Incident Response** | Acknowledge SOS signals, assign field responders, add timestamped operational notes, change status, resolve, and retransmit mesh packets. |
 | **Tactical & EOC Kiosk** | Launch fullscreen `/kiosk` wallboard for command post monitoring with live maps, alert feeds, and responder queues. |
 | **Spatial & Offline Maps** | Upload `.mbtiles` packages in Settings, toggle between OpenStreetMap and offline raster layers, and track device GPS history. |
-| **Analytics & Telemetry** | Inspect packet traffic, hop distribution, battery curves, and response metrics from `/analytics`. |
+| **Analytics & Telemetry** | Inspect battery and signal-strength trends per duck, filterable by time range, from the Dashboard's Trends section. |
 | **Mesh Operations** | View device health metrics, dispatch remote GPS polls, adjust polling intervals, and broadcast text messages across the mesh. |
 | **Reporting & Export** | Generate CSV archives and print-ready incident dossiers for after-action reviews (AAR) and agency compliance. |
 | **Log Auditing** | Live monitoring of TAK CoT multicasts (`/tak/logs`) and Telegram alert dispatches (`/telegram/logs`). |
