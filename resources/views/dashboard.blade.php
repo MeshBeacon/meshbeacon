@@ -123,14 +123,7 @@
             var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
             
             <?php
-            $maxNativeZoom = 19;
-            if (file_exists(config('services.map.mbtiles_path'))) {
-                try {
-                    $pdo = new PDO('sqlite:' . config('services.map.mbtiles_path'));
-                    $res = $pdo->query("SELECT value FROM metadata WHERE name = 'maxzoom'")->fetchColumn();
-                    if (is_numeric($res)) $maxNativeZoom = (int) $res;
-                } catch (\Exception $e) {}
-            }
+            $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path'));
             ?>
             var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
               maxZoom: 19,
@@ -290,7 +283,7 @@
                   <path fill-rule="evenodd" d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule="evenodd" />
                 </svg>
                 <el-options id="trends-duck-options" anchor="bottom start" popover class="m-0 max-h-60 w-[var(--input-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-xs outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 empty:hidden [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete]">
-                  <el-option value="" class="group/option relative cursor-default select-none py-1.5 pl-3 pr-9 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
+                  <el-option value="{{ __('All Ducks') }}" class="group/option relative cursor-default select-none py-1.5 pl-3 pr-9 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
                     <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ __('All Ducks') }}</span>
                     <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden">
                       <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4">
@@ -483,8 +476,12 @@
 
           const duckFilter = document.getElementById('trends-duck-filter');
           const duckOptionsList = document.getElementById('trends-duck-options');
+          // The 'All Ducks' option must use a non-empty value ({{ __('All Ducks') }}
+          // as text) because the underlying el-autocomplete element ignores clicks
+          // on options with an empty string value, so it maps back to '' here.
+          const ALL_DUCKS_VALUE = @json(__('All Ducks'));
           duckFilter.addEventListener('change', () => {
-            currentDuck = duckFilter.value;
+            currentDuck = duckFilter.value === ALL_DUCKS_VALUE ? '' : duckFilter.value;
             loadTrendsData();
           });
 
