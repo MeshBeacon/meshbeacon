@@ -83,6 +83,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | TAK CoT Bridge (see docs/TAK_BRIDGE.md)
+    |--------------------------------------------------------------------------
+    |
+    | The TAK bridge itself is a separate, standalone service (its own
+    | docker-compose.yml) that forwards CoT XML to TAK/WinTAK and publishes
+    | a summary of each event to the `hub/tak/log` MQTT topic, which this
+    | app records via TakLog. This flag only controls whether the "TAK Logs"
+    | nav link is shown — it does not start or configure the bridge service.
+    | Leave TAK_BRIDGE_ENABLED false/unset if the bridge isn't deployed.
+    |
+    */
+    'tak' => [
+        'enabled' => (bool) env('TAK_BRIDGE_ENABLED', false),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Duck Crypto (mesh end-to-end encryption)
     |--------------------------------------------------------------------------
     |

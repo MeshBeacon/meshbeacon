@@ -13,9 +13,12 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
+                {{-- TAK bridge is a separate opt-in service (TAK_BRIDGE_ENABLED); see docs/TAK_BRIDGE.md --}}
+                @if (config('services.tak.enabled'))
                 <flux:navbar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
                     {{ __('TAK Logs') }}
                 </flux:navbar.item>
+                @endif
                 <flux:navbar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
                     {{ __('Telegram Logs') }}
                 </flux:navbar.item>
@@ -67,9 +70,12 @@
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
                     </flux:sidebar.item>
+                    {{-- TAK bridge is a separate opt-in service (TAK_BRIDGE_ENABLED); see docs/TAK_BRIDGE.md --}}
+                    @if (config('services.tak.enabled'))
                     <flux:sidebar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
                         {{ __('TAK Logs') }}
                     </flux:sidebar.item>
+                    @endif
                     <flux:sidebar.item icon="chat-bubble-left-ellipsis" :href="route('telegram.logs')" :current="request()->routeIs('telegram.logs')" wire:navigate>
                         {{ __('Telegram Logs') }}
                     </flux:sidebar.item>

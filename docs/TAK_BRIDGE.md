@@ -18,7 +18,7 @@ In the MeshBeacon dashboard, you can monitor the TAK forwarding events in real t
 
 ## Configuration
 
-The bridge configuration is primarily managed through environment variables in its `docker-compose.yml` file:
+The bridge configuration is primarily managed through environment variables in its own `docker-compose.yml` (or `.env`) file. **These are not set in this MeshBeacon app's `.env`** — the bridge is a separate service with its own deployment:
 
 - `MQTT_BROKER`: The hostname or IP of the MQTT broker (default: `localhost`).
 - `MQTT_PORT`: The MQTT broker port (default: `1883`).
@@ -26,10 +26,22 @@ The bridge configuration is primarily managed through environment variables in i
 - `TAK_IP`: The multicast IP address or TAK Server IP to send the UDP packets to (default: `239.2.3.1`).
 - `TAK_PORT`: The UDP port for TAK multicast (default: `4242`).
 
+## Connecting the bridge to this MeshBeacon instance
+
+`MQTT_BROKER`/`MQTT_PORT` and `TAK_IP`/`TAK_PORT` are two independent pairs — don't confuse them:
+
+- **`MQTT_BROKER`/`MQTT_PORT` — where the bridge reads MeshBeacon events from.** Point these at this app's mosquitto broker (the `mqtt-server` service in [docker-compose.yml](../docker-compose.yml)):
+  - *Bridge on the same Docker host*, as a sibling container: set `MQTT_BROKER` to the mosquitto container's name (e.g. `meshbeacon-mqtt-server-1`) and attach the bridge's `docker-compose.yml` to the same Docker network as this stack (e.g. an `external` network shared via `networks:`).
+  - *Bridge on a different host/VM*: this app's broker is published on the host at `MQTT_BIND_ADDRESS:MQTT_BIND_PORT` (see this app's `.env`, default `0.0.0.0:1883`) — set `MQTT_BROKER` to that host's reachable IP/hostname and `MQTT_PORT` to the same value as `MQTT_BIND_PORT`.
+- **`TAK_IP`/`TAK_PORT` — where the bridge sends CoT XML to.** These have nothing to do with MeshBeacon; they're your TAK Server's IP/port, or the multicast group/port your ATAK/iTAK/WinTAK clients are already listening on. Leave the defaults (`239.2.3.1:4242`, the standard TAK multicast group) unless your deployment uses a unicast TAK Server or a different multicast group.
+
 ## Deployment
 
-The bridge runs as a containerized service. If you need to make changes to `TAK_IP` or `TAK_PORT`:
+The bridge runs as a containerized service, separate from this repository:
 
-1. Navigate to the bridge directory (e.g. `meshbeacon-tak-bridge/`).
-2. Edit the `docker-compose.yml` file and adjust the `TAK_IP` and `TAK_PORT` environment variables.
-3. Apply the changes by running: `docker compose up -d`.
+1. Obtain the bridge's own repository (e.g. `meshbeacon-tak-bridge/`) and its `docker-compose.yml`.
+2. Set `MQTT_BROKER`/`MQTT_PORT` per "Connecting the bridge to this MeshBeacon instance" above, and `TAK_IP`/`TAK_PORT` for your TAK deployment.
+3. Start it: `docker compose up -d` (run from the bridge's own directory, not this repo).
+4. In **this** MeshBeacon app's `.env`, set `TAK_BRIDGE_ENABLED=true` (see `.env.example`) and restart/redeploy the app. This reveals the **TAK Logs** nav link once the bridge is running and publishing to `hub/tak/log`.
+
+To change `TAK_IP` or `TAK_PORT` later, edit the bridge's own `docker-compose.yml` and re-run `docker compose up -d` there — not in this repo.

@@ -18,9 +18,12 @@
                     <flux:sidebar.item icon="chart-bar" :href="route('system-health')" :current="request()->routeIs('system-health')" wire:navigate>
                         {{ __('System Health') }}
                     </flux:sidebar.item>
+                    {{-- TAK bridge is a separate opt-in service (TAK_BRIDGE_ENABLED); see docs/TAK_BRIDGE.md --}}
+                    @if (config('services.tak.enabled'))
                     <flux:sidebar.item icon="document-text" :href="route('tak.logs')" :current="request()->routeIs('tak.logs')" wire:navigate>
                         {{ __('TAK Logs') }}
                     </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
