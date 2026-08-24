@@ -146,4 +146,42 @@ return [
         'mesh_group_key' => env('DUCK_MESH_GROUP_KEY', ''),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | OpenTAKServer Encrypted Bridge (see docs/OPENTAK_BRIDGE.md)
+    |--------------------------------------------------------------------------
+    |
+    | This is a distinct static X25519 keypair from duck_crypto above -- it
+    | authenticates the MeshBeacon <-> OpenTAKServer plugin link specifically,
+    | so a compromise of one channel's key does not affect the other. Both
+    | keys are raw 32 bytes: public_key hex (64 chars, matches the OTS
+    | plugin's OTS_MESHBEACON_PUBLIC_KEY env var so it can be pasted verbatim),
+    | private_key base64 (only ever consumed by this app's own PHP code).
+    |
+    | peer_public_key is the OpenTAKServer plugin's own static public key
+    | (hex, 64 chars), obtained from the plugin's `get_info()`/setup output
+    | on the OTS side. Both this app and the OTS plugin must have each
+    | other's public key configured before the link will decrypt anything --
+    | see isConfigured() in OpenTakCryptoService.
+    |
+    | event_topic/command_topic are the MQTT topics this bridge uses on this
+    | app's own Mosquitto broker: MeshBeacon publishes encrypted telemetry on
+    | event_topic, and the OTS plugin (an MQTT client connecting to this
+    | broker, the same way the standalone TAK bridge does) publishes
+    | encrypted mesh commands on command_topic.
+    |
+    | Leave enabled=false (or either keypair/peer key empty) to disable the
+    | bridge entirely: ProcessMqttMessage will not dispatch
+    | PublishOpenTakEvent, and incoming command_topic messages are ignored.
+    |
+    */
+    'opentak' => [
+        'enabled' => (bool) env('OPENTAK_BRIDGE_ENABLED', false),
+        'private_key' => env('OPENTAK_BRIDGE_PRIVATE_KEY', ''),
+        'public_key' => env('OPENTAK_BRIDGE_PUBLIC_KEY', ''),
+        'peer_public_key' => env('OPENTAK_SERVER_PUBLIC_KEY', ''),
+        'event_topic' => env('OPENTAK_EVENT_TOPIC', 'hub/opentak/event'),
+        'command_topic' => env('OPENTAK_COMMAND_TOPIC', 'hub/opentak/command'),
+    ],
+
 ];

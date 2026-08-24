@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessMqttMessage;
+use App\Jobs\ProcessOpenTakCommand;
 use App\Services\MqttStatus;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -35,10 +36,17 @@ class MqttSubscribe extends Command
         $port = config('mqtt-client.connections.default.port');
         $status->markStarting();
 
+        $opentakEnabled = (bool) config('services.opentak.enabled');
+        $opentakCommandTopic = config('services.opentak.command_topic');
+        $topics = ['hub/event', 'hub/tak/log'];
+        if ($opentakEnabled) {
+            $topics[] = $opentakCommandTopic;
+        }
+
         Log::info('mqtt.worker_starting', [
             'host' => $host,
             'port' => $port,
-            'topics' => ['hub/event', 'hub/tak/log'],
+            'topics' => $topics,
         ]);
 
         try {
@@ -101,11 +109,23 @@ class MqttSubscribe extends Command
                 ]);
             }, 0);
 
+            if ($opentakEnabled) {
+                $mqtt->subscribe($opentakCommandTopic, function (string $topic, string $message) use ($status): void {
+                    $status->markMessage();
+                    ProcessOpenTakCommand::dispatch($message);
+
+                    Log::debug('mqtt.message_received', [
+                        'topic' => $topic,
+                        'payload_bytes' => strlen($message),
+                    ]);
+                }, 0);
+            }
+
             $status->markConnected();
             Log::info('mqtt.connected', [
                 'host' => $host,
                 'port' => $port,
-                'topics' => ['hub/event', 'hub/tak/log'],
+                'topics' => $topics,
             ]);
 
             $mqtt->loop(true);
