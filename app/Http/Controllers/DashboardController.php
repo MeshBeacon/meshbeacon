@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\PublishOpenTakSosCancel;
 use App\Jobs\SendSosAck;
 use App\Models\ClusterData;
 use App\Models\IncidentLog;
@@ -288,6 +289,7 @@ class DashboardController extends Controller
         ]);
 
         $log = $this->resolveIncidentLog($messageId);
+        $wasResolved = $log->status === 'resolved';
 
         if ($data['status'] !== 'resolved') {
             $this->resolveStraySiblings($log);
@@ -305,6 +307,14 @@ class DashboardController extends Controller
         }
 
         $log->update($update);
+
+        // Tell the OpenTAKServer bridge the SOS is over (see
+        // docs/OPENTAK_BRIDGE.md) only on the actual open->resolved
+        // transition, not on every PATCH that merely leaves an
+        // already-resolved incident resolved (e.g. an edited notes field).
+        if ($data['status'] === 'resolved' && !$wasResolved) {
+            PublishOpenTakSosCancel::dispatch($log->duck_id);
+        }
 
         return response()->json(['message' => 'Status updated', 'status' => $data['status']]);
     }

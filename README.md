@@ -198,6 +198,7 @@ Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
 ## Configuration
 
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
+- [OpenTAKServer Encrypted Bridge](docs/OPENTAK_BRIDGE.md)
 - [OpenTAKServer & TAK Bridge Integration](docs/TAK_BRIDGE.md)
 - [Offline Maps & QGIS Guide](docs/OFFLINE_MAPS.md)
 

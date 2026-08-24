@@ -6,12 +6,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use App\Models\ClusterData;
 use App\Models\DuckIdentity;
+use App\Jobs\PublishOpenTakEvent;
 use App\Jobs\SendSosAck;
 use App\Jobs\SendTelegramAlert;
 use App\Jobs\SyncRecordToCloud;
 use App\Services\DuckCryptoService;
 use App\Services\DuckPayloadDecoder;
 use App\Services\MqttService;
+use App\Services\OpenTakCryptoService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessMqttMessage implements ShouldQueue
@@ -66,7 +68,7 @@ class ProcessMqttMessage implements ShouldQueue
      *   - Hybrid (CENTRAL_DMS_URL configured): `synced` set to false (pending).
      *     SyncRecordToCloud is dispatched and will retry until delivery is confirmed.
      */
-    public function handle(DuckCryptoService $duckCrypto, DuckPayloadDecoder $duckPayloadDecoder): void
+    public function handle(DuckCryptoService $duckCrypto, DuckPayloadDecoder $duckPayloadDecoder, OpenTakCryptoService $openTakCrypto): void
     {
 	    $data = json_decode($this->payload, true);
 
@@ -191,6 +193,13 @@ class ProcessMqttMessage implements ShouldQueue
 
         // Evaluate automated rules for this telemetry ping
         EvaluateRules::dispatch($record);
+
+        // Forward this telemetry to the OpenTAKServer plugin over the
+        // encrypted MQTT bridge (see docs/OPENTAK_BRIDGE.md). No-op unless
+        // both OPENTAK_BRIDGE_ENABLED and the bridge keypair are configured.
+        if (config('services.opentak.enabled') && $openTakCrypto->isConfigured()) {
+            PublishOpenTakEvent::dispatch($record->id);
+        }
     }
 
     /**
