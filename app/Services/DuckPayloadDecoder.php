@@ -253,6 +253,11 @@ class DuckPayloadDecoder
             $out .= sprintf(',HDG:%u', $hdgDeg);
         }
 
+        $sats = $this->getVarint($f, 9);
+        if ($sats !== 0) {
+            $out .= sprintf(',SATS:%u', $sats);
+        }
+
         return $out.sprintf(',BATT:%d', $battPct);
     }
 
@@ -282,6 +287,11 @@ class DuckPayloadDecoder
             $hdgDeg = $this->getVarint($f, 8);
             if ($hdgDeg !== 0) {
                 $out .= sprintf(',HDG:%u', $hdgDeg);
+            }
+
+            $sats = $this->getVarint($f, 11);
+            if ($sats !== 0) {
+                $out .= sprintf(',SATS:%u', $sats);
             }
 
             $out .= ','.'GPS:'.(self::GPS_SOURCE_NAMES[$this->getVarint($f, 2)] ?? 'NONE');
