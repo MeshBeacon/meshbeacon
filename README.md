@@ -22,11 +22,13 @@
 <p align="center">
   <a href="#choose-a-deployment">Deployments</a> |
   <a href="#quick-install">Install</a> |
+  <a href="#pre-built-docker-images">Docker Images</a> |
   <a href="#how-it-works">How it works</a> |
   <a href="#features">Features</a> |
   <a href="#operator-workflows">Workflows</a> |
   <a href="#offline-maps">Offline Maps</a> |
-  <a href="#tak-cot-bridge">TAK Bridge</a> |
+  <a href="#tak-bridges">TAK Bridges</a> |
+  <a href="#duckcrypto-mesh-security">DuckCrypto</a> |
   <a href="#configuration">Configuration</a> |
   <a href="#licensing">License</a> |
   <a href="#contributing">Contributors</a>
@@ -125,18 +127,37 @@ Each `app`, `mqtt-worker`, `queue-worker`, and `scheduler` healthcheck runs `php
 
 ## Pre-built Docker images
 
-Instead of building the image locally, you can use the pre-built multi-architecture images from the GitHub Container Registry (GHCR).
+Pre-built multi-architecture (`linux/amd64`, `linux/arm64`) container images are published to the GitHub Container Registry (GHCR):
+
+```sh
+# Pull directly from GHCR
+docker pull ghcr.io/9m2pju/meshbeacon:latest
+```
+
+To use published images in Docker Compose without compiling locally, set the following in `.env`:
+
+```env
+MESHBEACON_IMAGE_SOURCE=ghcr
+MESHBEACON_GHCR_IMAGE=ghcr.io/9m2pju/meshbeacon:latest
+```
+
+---
+
+## Features
 
 - **Offline-First Telemetry Ingestion**: Ingests real-time binary and text packets across LoRa mesh networks via MQTT (`hub/event` and `hub/command`).
 - **Tactical Incident Management**: SOS auto-triage, responder assignment, triage notes, lifecycle status tracking, and mesh retransmissions.
+- **DuckCrypto End-to-End Encryption**: Authenticated, tamper-proof mesh communication using X25519 ECDH + ChaCha20-Poly1305 AEAD + HKDF-SHA256, Trust-On-First-Use (TOFU) public key exchange, sealed uplinks, and mesh group broadcast authentication.
+- **Dual TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK/iTAK/WinTAK (`docs/TAK_BRIDGE.md`) and encrypted OpenTAKServer plugin bridge (`docs/OPENTAK_BRIDGE.md`) with live audit logs (`/tak/logs`).
 - **High-Performance Offline MBTiles Map Engine**: Upload regional raster `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
 - **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
-- **Dashboard Trends**: Battery and RSSI history charts built into `/dashboard`, filterable by duck and time range (24h / 7d / 30d).
-- **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
-- **TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK, iTAK, WinTAK, and OpenTAKServer with dedicated live audit logs (`/tak/logs`).
+- **Dashboard Telemetry Trends**: Synchronized battery and RSSI signal-strength history charts with local browser timezone support, filterable by duck and time range (24h / 7d / 30d).
+- **Rules Engine**: Automated trigger and action evaluation on incoming mesh events and thresholds.
 - **Automated Telegram Dispatch**: Instant SOS dispatch to Telegram responder channels with one-click responder account linking and live webhook logs (`/telegram/logs`).
+- **Bilingual Interface**: Native multi-language support (English & Bahasa Melayu `ms`) with instant switching and user preference persistence.
 - **System Health & Observability**: Production-grade liveness/readiness probes (`/health/live`, `/health/ready`), Prometheus metric endpoints (`/metrics`), and an interactive System Health dashboard (`/system-health`).
 - **Comprehensive Reporting**: Export period-based and incident-specific audit reports in CSV and print-optimized PDF formats.
+- **Progressive Web App (PWA)**: Offline fallback support and mobile/desktop installability.
 - **Security & Access Control**: Two-Factor Authentication (2FA via Fortify), Role-Based Access Control (`admin`, `responder`, `viewer`), and read-only instance locks.
 
 ---
@@ -162,21 +183,58 @@ MeshBeacon enables zero-connectivity mapping using standard raster MBTiles:
 
 1. **Generate MBTiles**: Create regional raster map tiles using QGIS, TileMill, or MOBAC (see [docs/OFFLINE_MAPS.md](docs/OFFLINE_MAPS.md)).
 2. **Upload**: Navigate to **Settings > Offline Map** in the MeshBeacon web dashboard and upload your `.mbtiles` file (supports uploads up to 500MB).
-3. **Seamless Rendering**: The system automatically serves tiles via the high-speed `/tiles/{z}/{x}/{y}.png` endpoint.
+3. **Seamless Rendering**: The system automatically serves tiles via the high-speed `/tiles/{z}/{x}/{y}.png` endpoint directly via [`public/tiles.php`](public/tiles.php).
 4. **Smart Zoom**: If operators zoom beyond the pre-rendered zoom level of the MBTiles file, MeshBeacon natively upscales existing tiles to avoid gray placeholder tiles.
 
 ---
 
-## TAK CoT bridge
+## TAK bridges
 
-MeshBeacon integrates directly with tactical situational awareness software (ATAK, iTAK, WinTAK, OpenTAKServer) via Cursor-on-Target (CoT):
+MeshBeacon supports two distinct TAK (Team Awareness Kit) bridge integrations:
 
-1. **Ingest**: GPS coordinates and emergency beacons received from mesh nodes (PapaDuck/MamaDuck) are captured over MQTT.
-2. **Translate**: The standalone bridge converts node telemetry into standard CoT XML payloads.
-3. **Broadcast**: Payloads are transmitted via TAK Multicast (`239.2.3.1:4242`) or direct UDP to OpenTAKServer.
-4. **Live Logs**: Monitor outgoing CoT transmissions directly from the **TAK Logs** dashboard (`/tak/logs`).
+```mermaid
+flowchart TD
+    subgraph MeshBeacon
+        MB[MeshBeacon Ingestion]
+    end
 
-Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
+    subgraph Option A: Standalone CoT Bridge
+        MB -->|hub/event| SB[TAK CoT Bridge]
+        SB -->|CoT XML over UDP/Multicast 239.2.3.1:4242| TAK[ATAK / iTAK / WinTAK / Generic TAK Server]
+    end
+
+    subgraph Option B: OpenTAKServer Encrypted Plugin
+        MB -->|hub/opentak/event (Encrypted X25519)| OTS_P[OTS MeshBeacon Plugin]
+        OTS_P -->|CoT XML + GeoChat + Alerts| OTS[OpenTAKServer Core]
+        OTS -->|Encrypted Downlink Command| OTS_P
+        OTS_P -->|hub/opentak/command| MB
+    end
+```
+
+> **Important**: Do not run the standalone TAK CoT bridge and the OpenTAKServer Encrypted Plugin bridge against the same OpenTAKServer instance simultaneously. They use different device identification schemes (`DeviceID` vs `meshbeacon-<duck_id>`), which would create duplicate markers on OTS maps.
+
+### 1. Standalone TAK CoT Bridge (`docs/TAK_BRIDGE.md`)
+* Broadcasts GPS coordinates and emergency beacons as standard Cursor-on-Target (CoT) XML over UDP multicast (`239.2.3.1:4242`) or unicast.
+* Ideal for generic ATAK, iTAK, WinTAK devices and standard TAK Server instances.
+* Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
+
+### 2. OpenTAKServer Encrypted Plugin Bridge (`docs/OPENTAK_BRIDGE.md`)
+* Runs as a native plugin inside OpenTAKServer (`opentakserver-meshbeacon-plugin`).
+* Features end-to-end encrypted MQTT communication with MeshBeacon using dedicated static X25519 keypairs.
+* Supports bi-directional GeoChat messaging, emergency alerts, SOS cancel events, and remote mesh command execution.
+* Read the setup guide in [docs/OPENTAK_BRIDGE.md](docs/OPENTAK_BRIDGE.md).
+
+---
+
+## DuckCrypto mesh security
+
+MeshBeacon incorporates cryptographic primitives to secure communications with ClusterDuck Protocol mesh nodes:
+
+* **Key Generation**: Run `php artisan duck:keygen` to generate a dedicated static X25519 keypair for OpenDMS.
+* **Sealed Uplinks (`0x07`)**: Ducks encrypt field telemetry and SOS alerts using ephemeral X25519 keys and OpenDMS's static public key (`DUCK_CRYPTO_PUBLIC_KEY`). Payloads are decrypted and authenticated on arrival via ChaCha20-Poly1305.
+* **Trust-On-First-Use (TOFU)**: OpenDMS securely discovers and tracks Duck public keys in the `duck_identities` table upon first verified contact.
+* **Encrypted Downlinks (`0x08`)**: Downlink commands to known Ducks are automatically encrypted using their recorded public key.
+* **Mesh Group Broadcast Authentication**: Broadcast emergency alerts from the dashboard are signed using a pre-shared 256-bit group key (`DUCK_MESH_GROUP_KEY`) to prevent unauthorized spoofing across the mesh.
 
 ---
 
@@ -197,9 +255,10 @@ Read the setup guide in [docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md).
 
 ## Configuration
 
+Documentation:
 - [Hybrid Store-and-Forward Deployment](docs/HYBRID_DEPLOYMENT.md)
 - [OpenTAKServer Encrypted Bridge](docs/OPENTAK_BRIDGE.md)
-- [OpenTAKServer & TAK Bridge Integration](docs/TAK_BRIDGE.md)
+- [TAK CoT Bridge Integration](docs/TAK_BRIDGE.md)
 - [Offline Maps & QGIS Guide](docs/OFFLINE_MAPS.md)
 
 Key settings from [.env.example](.env.example):
@@ -209,7 +268,8 @@ Key settings from [.env.example](.env.example):
 | `APP_URL` | Public base URL and Telegram webhook origin | `https://mesh.example.org` |
 | `APP_KEY` | Laravel application encryption key | `base64:...` |
 | `APP_DEBUG` | Enable debug mode (disable in production) | `false` |
-| `MESHBEACON_IMAGE` | Docker container image repository | `ghcr.io/9m2pju/meshbeacon:latest` |
+| `MESHBEACON_IMAGE_SOURCE` | Container image source (`local` or `ghcr`) | `ghcr` |
+| `MESHBEACON_GHCR_IMAGE` | GHCR image repository tag | `ghcr.io/9m2pju/meshbeacon:latest` |
 | `MESHBEACON_PORT` | Exposed HTTP port | `8080` |
 | `MESHBEACON_ADMIN_EMAIL` | Initial administrator email | `admin@example.com` |
 | `MESHBEACON_ADMIN_PASSWORD` | Initial administrator password | Strong random string |
@@ -217,7 +277,6 @@ Key settings from [.env.example](.env.example):
 | `DB_DATABASE` | SQLite path or remote database name | `/var/www/database/database.sqlite` |
 | `QUEUE_CONNECTION` | Queue driver | `database` |
 | `MQTT_HOST` / `MQTT_PORT` | Mosquitto broker host and port | `mqtt-server` / `1883` |
-| `MQTT_AUTH_USERNAME` / `MQTT_AUTH_PASSWORD` | Optional broker credentials | Empty by default |
 | `CENTRAL_DMS_URL` | Central aggregation server URL | `https://central.example.org` |
 | `CENTRAL_DMS_TOKEN` | Shared hybrid synchronization token | Random 64-char token |
 | `DASHBOARD_READONLY` | Lock UI to read-only on central aggregators | `false` |
@@ -225,6 +284,14 @@ Key settings from [.env.example](.env.example):
 | `TELEGRAM_BOT_USERNAME` | Telegram Bot username | `MeshBeaconAlertBot` |
 | `TELEGRAM_WEBHOOK_SECRET` | Secret token validating incoming webhooks | Random 32-char hex |
 | `MAP_OFFLINE_ENABLED` | Toggle offline MBTiles map engine | `true` |
+| `TAK_BRIDGE_ENABLED` | Toggle TAK Logs navigation link in UI | `false` |
+| `DUCK_CRYPTO_PRIVATE_KEY` | OpenDMS static X25519 private key (base64) | Generated via `duck:keygen` |
+| `DUCK_CRYPTO_PUBLIC_KEY` | OpenDMS static X25519 public key (hex, 64 chars) | Generated via `duck:keygen` |
+| `DUCK_MESH_GROUP_KEY` | Symmetric mesh group broadcast key (hex, 64 chars) | Pre-shared secret |
+| `OPENTAK_BRIDGE_ENABLED` | Toggle OpenTAKServer encrypted plugin bridge | `false` |
+| `OPENTAK_BRIDGE_PRIVATE_KEY`| Bridge static X25519 private key (base64) | Generated via `opentak:keygen` |
+| `OPENTAK_BRIDGE_PUBLIC_KEY` | Bridge static X25519 public key (hex, 64 chars) | Generated via `opentak:keygen` |
+| `OPENTAK_SERVER_PUBLIC_KEY` | OTS plugin static public key (hex, 64 chars) | Obtained from OTS plugin |
 
 ---
 
@@ -277,7 +344,15 @@ npm ci
 npm run build
 ```
 
-Set `MESHBEACON_ADMIN_PASSWORD` in `.env` before running `php artisan migrate --seed`.
+Generate encryption keys:
+
+```sh
+# Generate OpenDMS DuckCrypto keypair
+php artisan duck:keygen
+
+# Generate OpenTAKServer bridge keypair
+php artisan opentak:keygen
+```
 
 Start local development processes:
 
@@ -292,6 +367,8 @@ Run test suite and style linters:
 
 ```sh
 composer run test
+php artisan test --filter=DuckCryptoServiceTest
+php artisan test --filter=MqttServiceTest
 php artisan test --filter=HybridSyncTest
 php artisan test --filter=DashboardReadonlyTest
 ```
@@ -302,11 +379,12 @@ php artisan test --filter=DashboardReadonlyTest
 
 | Path | Description |
 | --- | --- |
-| `app/Console` | Artisan CLI commands (MQTT worker, GPS polling, health heartbeats) |
-| `app/Jobs` | Background queue jobs (MQTT processing, hybrid sync, alerts) |
+| `app/Console` | Artisan CLI commands (MQTT worker, GPS polling, keygen, health heartbeats) |
+| `app/Jobs` | Background queue jobs (MQTT processing, OpenTAK events, hybrid sync, alerts) |
 | `app/Http/Controllers` | Web, API, healthcheck, and tile server controllers |
 | `app/Livewire` | Reactive Livewire Flux components and interactive log viewers |
-| `app/Models` | Eloquent models (telemetry, incidents, GPS, rules, logs) |
+| `app/Models` | Eloquent models (telemetry, incidents, GPS, rules, logs, identities) |
+| `app/Services` | Core business logic (`DuckCryptoService`, `OpenTakCryptoService`, `MbtilesService`, `MqttService`) |
 | `database/migrations` | Relational database schema definitions |
 | `lang/` | Bilingual translation catalogs (`en`, `ms`) |
 | `resources/views` | Blade templates (Dashboard, Kiosk, Analytics, GPS, Status) |
@@ -318,7 +396,7 @@ php artisan test --filter=DashboardReadonlyTest
 | `install.sh` | Automated Linux (Docker) and FreeBSD deployment installer |
 | `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward architecture and configuration |
 | `docs/OFFLINE_MAPS.md` | Guide to creating and loading raster MBTiles |
-| `docs/TAK_BRIDGE.md` | TAK Cursor-on-Target (CoT) integration guide |
+| `docs/TAK_BRIDGE.md` | Standalone TAK Cursor-on-Target (CoT) integration guide |
 | `docs/OPENTAK_BRIDGE.md` | OpenTAKServer encrypted plugin bridge (`ots-meshbeacon-bridge`) guide |
 
 ---
@@ -327,6 +405,7 @@ php artisan test --filter=DashboardReadonlyTest
 
 - Maintain `APP_DEBUG=false` on all production and field nodes.
 - Protect `APP_KEY`, database secrets, MQTT credentials, and hybrid sync tokens.
+- Back up `DUCK_CRYPTO_PRIVATE_KEY` and `DUCK_MESH_GROUP_KEY` securely.
 - Update the default administrator password immediately after installation.
 - Restrict Mosquitto network listeners or enable TLS and authentication on exposed networks.
 - Enforce HTTPS and secure reverse proxy termination on public endpoints.
