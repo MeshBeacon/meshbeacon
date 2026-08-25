@@ -198,13 +198,13 @@ flowchart TD
         MB[MeshBeacon Ingestion]
     end
 
-    subgraph Option A: Standalone CoT Bridge
+    subgraph optionA ["Option A: Standalone CoT Bridge"]
         MB -->|hub/event| SB[TAK CoT Bridge]
-        SB -->|CoT XML over UDP/Multicast 239.2.3.1:4242| TAK[ATAK / iTAK / WinTAK / Generic TAK Server]
+        SB -->|"CoT XML over UDP/Multicast 239.2.3.1:4242"| TAK[ATAK / iTAK / WinTAK / Generic TAK Server]
     end
 
-    subgraph Option B: OpenTAKServer Encrypted Plugin
-        MB -->|hub/opentak/event (Encrypted X25519)| OTS_P[OTS MeshBeacon Plugin]
+    subgraph optionB ["Option B: OpenTAKServer Encrypted Plugin"]
+        MB -->|"hub/opentak/event (Encrypted X25519)"| OTS_P[OTS MeshBeacon Plugin]
         OTS_P -->|CoT XML + GeoChat + Alerts| OTS[OpenTAKServer Core]
         OTS -->|Encrypted Downlink Command| OTS_P
         OTS_P -->|hub/opentak/command| MB
