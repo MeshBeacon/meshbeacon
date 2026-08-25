@@ -258,6 +258,11 @@ class DuckPayloadDecoder
             $out .= sprintf(',SATS:%u', $sats);
         }
 
+        $rssiDbm = $this->getZigzag32($f, 11);
+        if ($rssiDbm !== 0) {
+            $out .= sprintf(',RSSI:%d', $rssiDbm);
+        }
+
         return $out.sprintf(',BATT:%d', $battPct);
     }
 
@@ -295,6 +300,11 @@ class DuckPayloadDecoder
             }
 
             $out .= ','.'GPS:'.(self::GPS_SOURCE_NAMES[$this->getVarint($f, 2)] ?? 'NONE');
+        }
+
+        $rssiDbm = $this->getZigzag32($f, 10);
+        if ($rssiDbm !== 0) {
+            $out .= sprintf(',RSSI:%d', $rssiDbm);
         }
 
         return $out.sprintf(',BATT:%d', $this->getVarint($f, 9));
