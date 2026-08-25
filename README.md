@@ -319,6 +319,7 @@ php artisan test --filter=DashboardReadonlyTest
 | `docs/HYBRID_DEPLOYMENT.md` | Store-and-forward architecture and configuration |
 | `docs/OFFLINE_MAPS.md` | Guide to creating and loading raster MBTiles |
 | `docs/TAK_BRIDGE.md` | TAK Cursor-on-Target (CoT) integration guide |
+| `docs/OPENTAK_BRIDGE.md` | OpenTAKServer encrypted plugin bridge (`ots-meshbeacon-bridge`) guide |
 
 ---
 

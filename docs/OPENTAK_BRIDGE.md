@@ -2,6 +2,8 @@
 
 Unlike the [TAK CoT Bridge](TAK_BRIDGE.md) (a separate, unencrypted standalone service that broadcasts plain CoT XML over UDP multicast), the OpenTAKServer bridge is a **plugin that runs inside OpenTAKServer itself** and exchanges data with this MeshBeacon instance over MQTT using end-to-end encryption, authenticated with a static X25519 keypair on each side.
 
+> **Don't also enable the [TAK CoT Bridge](TAK_BRIDGE.md) against the same OpenTAKServer instance.** The two bridges use different `uid` conventions for the same Duck (`meshbeacon-<duck_id>` here vs. raw `DeviceID` there), so running both would produce two separate, unsynchronized markers per device in OTS — the plaintext one with none of this bridge's SOS/GeoChat/command features. Use the standalone TAK bridge only for targets that aren't running this plugin (plain ATAK/iTAK/WinTAK, or an OTS instance without it installed).
+
 ## How it works
 
 ```mermaid

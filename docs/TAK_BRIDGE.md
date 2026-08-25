@@ -4,6 +4,8 @@ The MeshBeacon to TAK CoT (Cursor on Target) Bridge is a standalone service that
 
 This enables field operators using TAK (Android Team Awareness Kit) or WinTAK to seamlessly see the real-time locations of MeshBeacon devices (Ducks) on their maps without any manual intervention.
 
+> **If your target is OpenTAKServer specifically:** don't run this bridge *and* the [OpenTAKServer Encrypted Bridge](OPENTAK_BRIDGE.md) plugin pointed at the same OTS instance. This bridge and the `ots-meshbeacon-bridge` plugin use different `uid` conventions for the same Duck (raw `DeviceID` here vs. `meshbeacon-<duck_id>` there), so OTS would show two separate, unsynchronized markers per device — one plaintext with no SOS/GeoChat/command support, one encrypted with full feature support. Pick one per target: this bridge for generic ATAK/iTAK/WinTAK/plain-OTS reach, or the OpenTAKServer plugin once it's installed there.
+
 ## How it works
 
 1. The bridge connects to the local MeshBeacon MQTT broker (e.g., `meshbeacon-mqtt-server-1:1883`) and subscribes to the `hub/event` topic.
