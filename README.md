@@ -131,14 +131,14 @@ Pre-built multi-architecture (`linux/amd64`, `linux/arm64`) container images are
 
 ```sh
 # Pull directly from GHCR
-docker pull ghcr.io/9m2pju/meshbeacon:latest
+docker pull ghcr.io/meshbeacon/meshbeacon:latest
 ```
 
 To use published images in Docker Compose without compiling locally, set the following in `.env`:
 
 ```env
 MESHBEACON_IMAGE_SOURCE=ghcr
-MESHBEACON_GHCR_IMAGE=ghcr.io/9m2pju/meshbeacon:latest
+MESHBEACON_GHCR_IMAGE=ghcr.io/meshbeacon/meshbeacon:latest
 ```
 
 ---
@@ -269,7 +269,7 @@ Key settings from [.env.example](.env.example):
 | `APP_KEY` | Laravel application encryption key | `base64:...` |
 | `APP_DEBUG` | Enable debug mode (disable in production) | `false` |
 | `MESHBEACON_IMAGE_SOURCE` | Container image source (`local` or `ghcr`) | `ghcr` |
-| `MESHBEACON_GHCR_IMAGE` | GHCR image repository tag | `ghcr.io/9m2pju/meshbeacon:latest` |
+| `MESHBEACON_GHCR_IMAGE` | GHCR image repository tag | `ghcr.io/meshbeacon/meshbeacon:latest` |
 | `MESHBEACON_PORT` | Exposed HTTP port | `8080` |
 | `MESHBEACON_ADMIN_EMAIL` | Initial administrator email | `admin@example.com` |
 | `MESHBEACON_ADMIN_PASSWORD` | Initial administrator password | Strong random string |

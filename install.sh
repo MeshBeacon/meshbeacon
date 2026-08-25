@@ -148,7 +148,7 @@ prepare_environment() {
     [ -n "$image" ] || image=meshbeacon:local
 
     ghcr_image=${MESHBEACON_GHCR_IMAGE:-$(get_env_value MESHBEACON_GHCR_IMAGE)}
-    [ -n "$ghcr_image" ] || ghcr_image=ghcr.io/9m2pju/meshbeacon:latest
+    [ -n "$ghcr_image" ] || ghcr_image=ghcr.io/meshbeacon/meshbeacon:latest
 
     case "$image_source" in
         local|build)
