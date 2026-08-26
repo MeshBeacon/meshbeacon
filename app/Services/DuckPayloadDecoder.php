@@ -8,17 +8,20 @@ namespace App\Services;
  * 0x01 -- see meshbeacon-firmware's src/payloads/DuckPayloads.h) and
  * reconstructs the exact same "legacy text" representation the gateway's
  * own duckpayload::*ToLegacyText() helpers produce for UNENCRYPTED
- * gps/alert/health/status traffic (see
+ * gps/alert/health/status/dcmd traffic (see
  * meshbeacon-uplink/clusterduck/src/payloads/DuckPayloads.cpp), so an
  * encrypted report and a plaintext report of the same data end up with
- * byte-identical ClusterData.payload strings.
+ * byte-identical ClusterData.payload strings. dcmd (topic 22) carries an
+ * OpText message -- operator-message ACK replies such as "MSG_READ:TEXT:..."
+ * built by buildOpText() (examples/Basic-Ducks/common/PayloadBuilders.h).
  *
  * Only needed for payloads that arrived ENCRYPTED: the gateway already
  * does this exact protobuf -> legacy-text conversion itself for plaintext
- * gps/alert/health/status topics before OpenDMS ever sees them (it can't
- * do the same for sealed_uplink/encrypted_data, since it has no private
- * key to decrypt those -- only OpenDMS does), so this class mirrors that
- * gateway-side step for the cases the gateway couldn't perform.
+ * gps/alert/health/status/dcmd topics before OpenDMS ever sees them (it
+ * can't do the same for sealed_uplink/encrypted_data, since it has no
+ * private key to decrypt those -- only OpenDMS does), so this class
+ * mirrors that gateway-side step for the cases the gateway couldn't
+ * perform.
  *
  * Hand-rolled minimal protobuf wire-format parser rather than the full
  * google/protobuf runtime + protoc codegen: duck_payloads.proto has no
@@ -47,7 +50,7 @@ class DuckPayloadDecoder
     private const STATUS_MSG_SRC_DEVICE = 2;
 
     /**
-     * @param  string  $topicName  recovered app-level topic name (e.g. 'gps', 'alert', 'health', 'status')
+     * @param  string  $topicName  recovered app-level topic name (e.g. 'gps', 'alert', 'health', 'status', 'dcmd')
      * @param  string  $body  decrypted plaintext body AFTER stripping the
      *                        app-topic byte (see
      *                        ProcessMqttMessage::splitDecryptedTopic()) --
@@ -65,7 +68,7 @@ class DuckPayloadDecoder
             return null;
         }
 
-        if (!in_array($topicName, ['gps', 'alert', 'health', 'status'], true)) {
+        if (!in_array($topicName, ['gps', 'alert', 'health', 'status', 'dcmd'], true)) {
             return null;
         }
 
@@ -80,6 +83,7 @@ class DuckPayloadDecoder
             'alert' => $this->sosToLegacyText($fields),
             'health' => $this->healthToLegacyText($fields),
             'status' => $this->statusReportToLegacyText($fields),
+            'dcmd' => $this->opTextToLegacyText($fields),
         };
     }
 
@@ -350,5 +354,17 @@ class DuckPayloadDecoder
         }
 
         return '';
+    }
+
+    /**
+     * Mirrors buildOpText()/duckcdp_OpText (see meshbeacon-firmware's
+     * examples/Basic-Ducks/common/PayloadBuilders.h) -- OpText.text (field
+     * 1) already contains the full legacy-text string verbatim (e.g.
+     * "MSG_READ:TEXT:...", "ALERT_ACK"), so no further reconstruction is
+     * needed, unlike the other topics above.
+     */
+    private function opTextToLegacyText(array $f): string
+    {
+        return $this->getString($f, 1);
     }
 }
