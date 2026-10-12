@@ -16,7 +16,9 @@ services:
     user: "0:0"
     restart: "no"
     command: >
-      sh -ec "php artisan migrate --no-interaction --force &&
+      sh -ec "rm -rf /var/www/public/* /var/www/public/.[!.]* 2>/dev/null;
+      cp -a /var/www/public-dist/. /var/www/public/ &&
+      php artisan migrate --no-interaction --force &&
       php artisan db:seed --no-interaction --force &&
       php artisan observability:check migrations"
     healthcheck:

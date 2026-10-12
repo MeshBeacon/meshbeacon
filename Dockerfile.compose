@@ -78,6 +78,15 @@ RUN php artisan package:discover --ansi \
     && chmod +x services/docker/worker-entrypoint.sh \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database
 
+# docker-compose.yml mounts a named volume over /var/www/public so the
+# webserver container can read built assets. Docker only auto-populates an
+# empty named volume from the image once; later image rebuilds never touch
+# an already-populated volume, so without this snapshot every asset update
+# (new CSS/JS/views) would silently keep serving stale files. Keep an
+# unmounted reference copy so it can be re-synced into the volume on every
+# startup (see the migrate service command in docker-compose.yml).
+RUN cp -a public public-dist
+
 USER www-data
 
 EXPOSE 9000
