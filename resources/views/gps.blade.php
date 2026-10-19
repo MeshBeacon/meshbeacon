@@ -221,7 +221,7 @@
 
       @php $mapDialogId = 'gps-map-dialog-' . $record->id; @endphp
       <button command="show-modal" commandfor="{{ $mapDialogId }}"
-         class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
+         class="gps-view-map-btn mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />
         </svg>
@@ -249,13 +249,7 @@
                 <button command="close" commandfor="{{ $mapDialogId }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>
               </div>
               <div class="w-full h-96">
-                <iframe
-                  src="{{ $record->map_embed_url }}"
-                  class="w-full h-full border-0"
-                  allowfullscreen
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+                <div data-leaflet-gps-map data-lat="{{ $record->gps_lat }}" data-lng="{{ $record->gps_lng }}" class="w-full h-full"></div>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
                 <a href="{{ $record->map_url }}" target="_blank" rel="noopener noreferrer"
@@ -391,6 +385,28 @@
 <script>
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Shared OSM/offline tile layer, mirrors the Dashboard duck map: serves
+  // local .mbtiles-derived raster tiles when available (or when offline),
+  // otherwise falls back to the public OpenStreetMap tile servers.
+  function createOsmTileLayer(map) {
+    var localUrl = '/tiles/{z}/{x}/{y}.png';
+    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
+
+    <?php $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path')); ?>
+    var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
+      attribution: '&copy; MeshBeacon / OpenStreetMap',
+      maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
+      maxZoom: 19
+    }).addTo(map);
+
+    if (!hasOfflineMap) {
+      window.addEventListener('offline', function () { tileLayer.setUrl(localUrl); });
+      window.addEventListener('online', function () { tileLayer.setUrl(osmUrl); });
+    }
+    return tileLayer;
   }
 
   function badgeClass(label) {
@@ -530,7 +546,7 @@
         '<p class="font-mono text-sm text-gray-900 dark:text-white">' + escHtml(rec.gps_lat) + ', ' + escHtml(rec.gps_lng) + '</p>' +
         sats + '</div>' + telHtml +
         '<button command="show-modal" commandfor="' + dlgId + '"' +
-          ' class="mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">' +
+          ' class="gps-view-map-btn mt-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-green-500">' +
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">' +
             '<path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" />' +
           '</svg>View on Map</button>' +
@@ -546,7 +562,7 @@
                 '</p></div>' +
                 '<button command="close" commandfor="' + dlgId + '" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>' +
               '</div>' +
-              '<div class="w-full h-96"><iframe src="' + escHtml(rec.map_embed_url) + '" class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>' +
+              '<div class="w-full h-96"><div data-leaflet-gps-map data-lat="' + escHtml(String(rec.gps_lat)) + '" data-lng="' + escHtml(String(rec.gps_lng)) + '" class="w-full h-full"></div></div>' +
               '<div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">' +
                 '<a href="' + escHtml(rec.map_url) + '" target="_blank" rel="noopener noreferrer" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Open in Google Maps &rarr;</a>' +
                 '<button command="close" commandfor="' + dlgId + '" class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">Close</button>' +
@@ -792,23 +808,7 @@
 
     if (!historyMap) {
       historyMap = L.map('gps-history-map');
-      var localUrl = '/tiles/{z}/{x}/{y}.png';
-      var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
-      
-      <?php
-      $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path'));
-      ?>
-      var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
-        attribution: '&copy; MeshBeacon / OpenStreetMap',
-        maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
-        maxZoom: 19
-      }).addTo(historyMap);
-
-      if (!hasOfflineMap) {
-        window.addEventListener('offline', function() { tileLayer.setUrl(localUrl); });
-        window.addEventListener('online', function() { tileLayer.setUrl(osmUrl); });
-      }
+      createOsmTileLayer(historyMap);
     }
     setTimeout(function () { historyMap.invalidateSize(); }, 50);
 
@@ -842,6 +842,35 @@
       .catch(function () {
         statusEl.textContent = 'Failed to load history.';
       });
+  });
+
+  // ── Single-point "View on Map" dialogs (per GPS record) - delegated ─────
+  // Leaflet needs a visible container to size itself correctly, so the map
+  // is created lazily the first time its dialog is opened (mirrors the GPS
+  // history map above) rather than eagerly for every hidden dialog.
+  var gpsRecordMaps = {};
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.gps-view-map-btn');
+    if (!btn) return;
+    var dialogId = btn.getAttribute('commandfor');
+    var dialog = document.getElementById(dialogId);
+    if (!dialog) return;
+    var container = dialog.querySelector('[data-leaflet-gps-map]');
+    if (!container) return;
+    var lat = parseFloat(container.getAttribute('data-lat'));
+    var lng = parseFloat(container.getAttribute('data-lng'));
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    setTimeout(function () {
+      var entry = gpsRecordMaps[dialogId];
+      if (entry) entry.map.remove();
+      var map = L.map(container).setView([lat, lng], 15);
+      createOsmTileLayer(map);
+      var marker = L.marker([lat, lng]).addTo(map);
+      gpsRecordMaps[dialogId] = { map: map, marker: marker };
+      map.invalidateSize();
+    }, 50);
   });
 
   // ── Request GPS (per-card buttons) - delegated so new cards work ────────

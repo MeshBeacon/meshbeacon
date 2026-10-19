@@ -53,7 +53,9 @@ class ClusterDataService
                     'display_text'  => $cluster->display_text,
                     'urgency_value' => $urgency?->value,
                     'urgency_label' => $urgency?->label(),
-                    'map_embed_url' => $cluster->map_embed_url,
+                    'map_url'       => $cluster->map_url,
+                    'gps_lat'       => $cluster->gps_lat,
+                    'gps_lng'       => $cluster->gps_lng,
                 ]);
             });
 

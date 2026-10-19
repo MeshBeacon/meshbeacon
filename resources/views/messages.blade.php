@@ -97,5 +97,37 @@
     </table>
   </div>
 </div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  (function () {
+    var localUrl = '/tiles/{z}/{x}/{y}.png';
+    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
+
+    <?php $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path')); ?>
+    var maxNativeZoom = {{ $maxNativeZoom }};
+
+    // Shared OSM/offline tile layer, mirrors the Dashboard duck map: serves
+    // local .mbtiles-derived raster tiles when available (or when offline),
+    // otherwise falls back to the public OpenStreetMap tile servers. Exposed
+    // globally so app.js (which has no access to Blade/config values) can
+    // use it for the per-row "Map" expander below.
+    window.createOsmTileLayer = function (map) {
+      var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
+        attribution: '&copy; MeshBeacon / OpenStreetMap',
+        maxNativeZoom: hasOfflineMap ? maxNativeZoom : 19,
+        maxZoom: 19
+      }).addTo(map);
+
+      if (!hasOfflineMap) {
+        window.addEventListener('offline', function () { tileLayer.setUrl(localUrl); });
+        window.addEventListener('online', function () { tileLayer.setUrl(osmUrl); });
+      }
+      return tileLayer;
+    };
+  })();
+</script>
 @endsection
 </x-layouts::app>

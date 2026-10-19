@@ -150,6 +150,8 @@
       </div>
     </div>
   </div>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <div id="duck-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 @foreach ($mamaducks as $mamaduck)
 <div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-300 dark:divide-red-500/30 overflow-hidden rounded-lg bg-red-100 dark:bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-gray-200 dark:divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}" data-online="{{ $mamaduck->created_at->gt(now()->subHour()) ? '1' : '0' }}" data-incident-status="{{ ($activeIncidents[$mamaduck->duck_id] ?? null)?->status ?? '' }}">
@@ -361,14 +363,7 @@
                 <button command="close" commandfor="{{ $mapDialogId }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>
               </div>
               <div class="w-full h-96">
-                <iframe
-                  data-map-iframe
-                  src="{{ $mamaduck->map_embed_url }}"
-                  class="w-full h-full border-0"
-                  allowfullscreen
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+                <div data-leaflet-dlg-map data-lat="{{ $mamaduck->gps_lat }}" data-lng="{{ $mamaduck->gps_lng }}" class="w-full h-full"></div>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
                 <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in Google Maps') }} &rarr;</a>
@@ -614,6 +609,108 @@
   document.getElementById('incident-filter').addEventListener('change', applyFilters);
   document.getElementById('online-only-toggle').addEventListener('change', applyFilters);
   window.applyFilters = applyFilters;
+
+  // ── Leaflet "View on Map" dialogs + inline GPS preview ───────────────────
+  // Mirrors the Dashboard duck map: serves local .mbtiles-derived raster
+  // tiles when available (or when offline), otherwise falls back to the
+  // public OpenStreetMap tile servers. Maps are created lazily (Leaflet
+  // needs a visible container to size itself) and only kept in sync while
+  // their dialog is actually open.
+  (function () {
+    if (typeof L === 'undefined') return;
+
+    function createOsmTileLayer(map) {
+      var localUrl = '/tiles/{z}/{x}/{y}.png';
+      var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
+
+      <?php $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path')); ?>
+      var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
+        attribution: '&copy; MeshBeacon / OpenStreetMap',
+        maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
+        maxZoom: 19
+      }).addTo(map);
+
+      if (!hasOfflineMap) {
+        window.addEventListener('offline', function () { tileLayer.setUrl(localUrl); });
+        window.addEventListener('online', function () { tileLayer.setUrl(osmUrl); });
+      }
+      return tileLayer;
+    }
+
+    var dialogMaps  = {}; // duckId -> { map, marker }
+    var previewMaps = {}; // duckId -> { map, marker }
+
+    function upsertMap(registry, duckId, container, lat, lng) {
+      lat = parseFloat(lat);
+      lng = parseFloat(lng);
+      if (!container || isNaN(lat) || isNaN(lng)) return;
+
+      var entry = registry[duckId];
+      if (entry && entry.map.getContainer() !== container) {
+        entry.map.remove();
+        entry = null;
+      }
+      if (!entry) {
+        var map = L.map(container).setView([lat, lng], 15);
+        createOsmTileLayer(map);
+        var marker = L.marker([lat, lng]).addTo(map);
+        entry = registry[duckId] = { map: map, marker: marker };
+      } else {
+        entry.marker.setLatLng([lat, lng]);
+      }
+      setTimeout(function () { entry.map.invalidateSize(); }, 50);
+    }
+
+    // Called by pollHistory() in app.js whenever fresh coordinates arrive.
+    // Always refreshes the cached data-lat/data-lng attributes (so a later
+    // manual open always has the latest fix), but only actually (re)renders
+    // the Leaflet map while the dialog is open.
+    window.updateStatusDuckMap = function (duckId, lat, lng) {
+      var dlg = document.querySelector('dialog[data-map-duck="' + duckId + '"]');
+      if (!dlg) return;
+      var container = dlg.querySelector('[data-leaflet-dlg-map]');
+      if (!container) return;
+      if (lat !== null && lat !== undefined) container.setAttribute('data-lat', lat);
+      if (lng !== null && lng !== undefined) container.setAttribute('data-lng', lng);
+      if (!dlg.open) return;
+      upsertMap(dialogMaps, duckId, container, lat, lng);
+    };
+
+    window.updateStatusPreviewMap = function (duckId, lat, lng) {
+      var container = document.querySelector('[data-leaflet-preview-map="' + duckId + '"]');
+      var dlg = container && container.closest('dialog');
+      if (!dlg || !dlg.open) return;
+      upsertMap(previewMaps, duckId, container, lat, lng);
+    };
+
+    // Lazily (re)initialize a dialog's map the moment it's opened, so a map
+    // shows up immediately even if no poll has refreshed its coordinates yet.
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[command="show-modal"]');
+      if (!btn) return;
+      var target = btn.getAttribute('commandfor') || '';
+
+      if (target.indexOf('map-dialog-') === 0) {
+        var dlg = document.getElementById(target);
+        var duckId = dlg && dlg.getAttribute('data-map-duck');
+        var container = dlg && dlg.querySelector('[data-leaflet-dlg-map]');
+        if (duckId && container) {
+          setTimeout(function () {
+            upsertMap(dialogMaps, duckId, container, container.getAttribute('data-lat'), container.getAttribute('data-lng'));
+          }, 50);
+        }
+      } else if (target.indexOf('msg-dialog-') === 0) {
+        var previewDuckId = target.slice('msg-dialog-'.length);
+        var previewContainer = document.querySelector('[data-leaflet-preview-map="' + previewDuckId + '"]');
+        if (previewContainer) {
+          setTimeout(function () {
+            upsertMap(previewMaps, previewDuckId, previewContainer, previewContainer.getAttribute('data-lat'), previewContainer.getAttribute('data-lng'));
+          }, 50);
+        }
+      }
+    });
+  })();
 
   // On initial load, only show the empty-state message if there are truly no
   // ducks at all. We deliberately do NOT call applyFilters() here - some

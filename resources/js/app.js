@@ -201,17 +201,21 @@ $(document).ready(function () {
                 },
             },
             {
-                data: "map_embed_url",
+                data: null,
                 defaultContent: null,
                 orderable: false,
                 className:
                     "hidden border-t border-gray-200 dark:border-white/10 px-3 py-3.5 text-sm lg:table-cell",
                 render: function (data, type, row) {
-                    if (!data)
+                    if (!row.gps_lat || !row.gps_lng)
                         return '<span class="text-gray-400 dark:text-gray-600">&mdash;</span>';
                     return (
-                        '<button class="dt-map-btn inline-flex items-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2 py-1 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20" data-embed="' +
-                        escapeHtml(data) +
+                        '<button class="dt-map-btn inline-flex items-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2 py-1 text-xs font-semibold text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20" data-lat="' +
+                        escapeHtml(row.gps_lat) +
+                        '" data-lng="' +
+                        escapeHtml(row.gps_lng) +
+                        '" data-map-url="' +
+                        escapeHtml(row.map_url || "") +
                         '"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd" /></svg>Map</button>'
                     );
                 },
@@ -243,23 +247,61 @@ $(document).ready(function () {
         }
     });
 
+    var dtMapInstances = {};
+
     $("#ducks-table tbody").on("click", ".dt-map-btn", function () {
-        var tr = $(this).closest("tr");
+        var btn = this;
+        var tr = $(btn).closest("tr");
         var row = table.row(tr);
-        var url = $(this).data("embed");
+        var rowKey = tr.get(0);
+
         if (row.child.isShown()) {
+            if (dtMapInstances[rowKey]) {
+                dtMapInstances[rowKey].remove();
+                delete dtMapInstances[rowKey];
+            }
             row.child.hide();
             tr.removeClass("dt-map-shown");
-        } else {
+            return;
+        }
+
+        var lat = parseFloat($(btn).data("lat"));
+        var lng = parseFloat($(btn).data("lng"));
+        var mapUrl = $(btn).data("map-url");
+
+        if (isNaN(lat) || isNaN(lng) || typeof L === "undefined" || !window.createOsmTileLayer) {
             row.child(
-                '<div class="p-3 bg-gray-100 dark:bg-gray-900">' +
-                    '<iframe src="' +
-                    url +
-                    '" class="w-full h-64 rounded-md border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
-                    "</div>",
+                '<div class="p-3 bg-gray-100 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-400">No location data available.</div>',
             ).show();
             tr.addClass("dt-map-shown");
+            return;
         }
+
+        var mapId = "dt-map-" + Math.random().toString(36).slice(2);
+        var linkHtml = mapUrl
+            ? '<div class="px-3 py-2 bg-gray-100 dark:bg-gray-900 text-right"><a href="' +
+              escapeHtml(mapUrl) +
+              '" target="_blank" rel="noopener noreferrer" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Open in Google Maps &rarr;</a></div>'
+            : "";
+        row.child(
+            '<div class="p-3 bg-gray-100 dark:bg-gray-900">' +
+                '<div id="' +
+                mapId +
+                '" class="w-full h-64 rounded-md"></div>' +
+                "</div>" +
+                linkHtml,
+        ).show();
+        tr.addClass("dt-map-shown");
+
+        setTimeout(function () {
+            var container = document.getElementById(mapId);
+            if (!container) return;
+            var map = L.map(container).setView([lat, lng], 15);
+            window.createOsmTileLayer(map);
+            L.marker([lat, lng]).addTo(map);
+            dtMapInstances[rowKey] = map;
+            map.invalidateSize();
+        }, 50);
     });
 
     // Link the custom input to the DataTables search functionality
@@ -1647,10 +1689,6 @@ $(document).ready(function () {
                                 $gps.data("last-html", noFixHtml);
                             }
                         } else if (lastCoords) {
-                            var embedUrl = lastCoords.map_url.replace(
-                                "maps?q=",
-                                "maps?output=embed&q=",
-                            );
                             var noFixBanner = duck.gps_unavailable
                                 ? '<div style="display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;background:rgba(234,179,8,0.1);font-size:0.7rem;color:#ca8a04;border-bottom:1px solid rgba(234,179,8,0.2);">' +
                                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0"><path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
@@ -1699,11 +1737,30 @@ $(document).ready(function () {
                                         '" target="_blank" rel="noopener noreferrer" class="gps-toggle-map">Open in Maps</a>' +
                                         "</div>" +
                                         "</div>" +
-                                        '<iframe src="' +
-                                        escapeHtml(embedUrl) +
-                                        '" class="w-full border-0" style="height:180px" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>' +
+                                        '<div data-leaflet-preview-map="' +
+                                        escapeHtml(duckId) +
+                                        '" data-lat="' +
+                                        escapeHtml(
+                                            lastCoords.lat != null
+                                                ? lastCoords.lat
+                                                : "",
+                                        ) +
+                                        '" data-lng="' +
+                                        escapeHtml(
+                                            lastCoords.lng != null
+                                                ? lastCoords.lng
+                                                : "",
+                                        ) +
+                                        '" class="w-full" style="height:180px"></div>' +
                                         "</div>",
                                 );
+                                if (window.updateStatusPreviewMap) {
+                                    window.updateStatusPreviewMap(
+                                        duckId,
+                                        lastCoords.lat,
+                                        lastCoords.lng,
+                                    );
+                                }
                             } else {
                                 // Just refresh the "X ago" label without re-rendering the whole block
                                 $gps.find(".gps-age").text(
@@ -1711,25 +1768,20 @@ $(document).ready(function () {
                                 );
                             }
 
-                            // Sync the map dialog header + iframe with the latest GPS data
+                            // Sync the map dialog's Leaflet marker with the latest GPS data
                             var $dlg = $(
                                 'dialog[data-map-duck="' + duckId + '"]',
                             );
                             if ($dlg.length) {
-                                // Only swap the iframe src when there is a valid embed URL and it
-                                // differs from the current one.  Compare via endsWith() because
-                                // browsers normalise iframe.src to an absolute URL while the API
-                                // may return a relative path.
-                                var dlgIframe =
-                                    $dlg.find("[data-map-iframe]")[0];
-                                if (
-                                    dlgIframe &&
-                                    lastCoords.map_embed_url &&
-                                    !dlgIframe.src.endsWith(
-                                        lastCoords.map_embed_url,
-                                    )
-                                ) {
-                                    dlgIframe.src = lastCoords.map_embed_url;
+                                // Keep the Leaflet marker in sync while the dialog is open;
+                                // updateStatusDuckMap() no-ops (but still caches the coords)
+                                // when the dialog is closed.
+                                if (window.updateStatusDuckMap) {
+                                    window.updateStatusDuckMap(
+                                        duckId,
+                                        lastCoords.lat,
+                                        lastCoords.lng,
+                                    );
                                 }
                                 // Update the external link only when a URL is available
                                 if (lastCoords.map_url) {
