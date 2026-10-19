@@ -81,7 +81,6 @@ class StatusController extends Controller
             'gps_spd'          => $r->gps_spd,
             'gps_hdg'          => $r->gps_hdg,
             'map_url'          => $r->map_url,
-            'map_embed_url'    => $r->map_embed_url,
             'last_known_lat'   => ($lastKnownCoords[$r->duck_id] ?? null)?->gps_lat,
             'last_known_lng'   => ($lastKnownCoords[$r->duck_id] ?? null)?->gps_lng,
             'last_known_alt'   => ($lastKnownCoords[$r->duck_id] ?? null)?->gps_alt,

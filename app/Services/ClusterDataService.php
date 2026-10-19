@@ -143,7 +143,6 @@ class ClusterDataService
 
                 return [
                     'map_url'          => $first->map_url,
-                    'map_embed_url'    => $first->map_embed_url,
                     'created_at'       => $first->created_at,
                     'lat'              => $lat,
                     'lng'              => $lng,
@@ -235,7 +234,7 @@ class ClusterDataService
                 'topic'      => $r->topic,
                 'source'     => $r->gps_from_phone ? 'Phone' : 'Satellite',
                 'created_at' => $r->created_at->diffForHumans(),
-                'map_url'    => 'https://www.google.com/maps?q=' . $r->gps_lat . ',' . $r->gps_lng,
+                'map_url'    => 'https://www.openstreetmap.org/?mlat=' . $r->gps_lat . '&mlon=' . $r->gps_lng . '#map=16/' . $r->gps_lat . '/' . $r->gps_lng,
             ])
             ->values()
             ->toArray();
@@ -360,7 +359,6 @@ class ClusterDataService
                 ] : null,
                 'last_coords'         => $lastCoords->has($duckId) ? [
                     'map_url'               => $lastCoords[$duckId]['map_url'],
-                    'map_embed_url'         => $lastCoords[$duckId]['map_embed_url'],
                     'created_at'            => $lastCoords[$duckId]['created_at'],
                     'created_at_for_humans' => $lastCoords[$duckId]['created_at']->diffForHumans(),
                     'lat'                   => $lastCoords[$duckId]['lat'],

@@ -15,10 +15,6 @@ class ClusterData extends Model
     ];
 
     /**
-     * Parse LAT/LNG from the payload and return a Google Maps URL, or null
-     * if no coordinates are present.
-     */
-    /**
      * Extract the TEXT: value from a MSG payload, or return the raw payload.
      * e.g. "MSG,URGENCY:low,LAT:6.1,LNG:102.2,TEXT:Lalala" → "Lalala"
      */
@@ -35,6 +31,10 @@ class ClusterData extends Model
         return $this->payload;
     }
 
+    /**
+     * Parse LAT/LNG from the payload and return an OpenStreetMap URL, or
+     * null if no coordinates are present.
+     */
     public function getMapUrlAttribute(): ?string
     {
         if (!$this->payload) {
@@ -42,20 +42,7 @@ class ClusterData extends Model
         }
 
         if (preg_match('/LAT:(-?\d+(?:\.\d+)?),LNG:(-?\d+(?:\.\d+)?)/', $this->payload, $matches)) {
-            return 'https://www.google.com/maps?q=' . $matches[1] . ',' . $matches[2];
-        }
-
-        return null;
-    }
-
-    public function getMapEmbedUrlAttribute(): ?string
-    {
-        if (!$this->payload) {
-            return null;
-        }
-
-        if (preg_match('/LAT:(-?\d+(?:\.\d+)?),LNG:(-?\d+(?:\.\d+)?)/', $this->payload, $matches)) {
-            return 'https://maps.google.com/maps?q=' . $matches[1] . ',' . $matches[2] . '&z=15&output=embed';
+            return 'https://www.openstreetmap.org/?mlat=' . $matches[1] . '&mlon=' . $matches[2] . '#map=16/' . $matches[1] . '/' . $matches[2];
         }
 
         return null;

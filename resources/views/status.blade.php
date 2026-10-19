@@ -366,7 +366,7 @@
                 <div data-leaflet-dlg-map data-lat="{{ $mamaduck->gps_lat }}" data-lng="{{ $mamaduck->gps_lng }}" class="w-full h-full"></div>
               </div>
               <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
-                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in Google Maps') }} &rarr;</a>
+                <a href="{{ $mamaduck->map_url }}" target="_blank" rel="noopener noreferrer" data-map-ext-link class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in OpenStreetMap') }} &rarr;</a>
                 <button command="close" commandfor="{{ $mapDialogId }}" class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">{{ __('Close') }}</button>
               </div>
             </el-dialog-panel>

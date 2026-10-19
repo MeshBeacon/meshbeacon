@@ -281,7 +281,7 @@ $(document).ready(function () {
         var linkHtml = mapUrl
             ? '<div class="px-3 py-2 bg-gray-100 dark:bg-gray-900 text-right"><a href="' +
               escapeHtml(mapUrl) +
-              '" target="_blank" rel="noopener noreferrer" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Open in Google Maps &rarr;</a></div>'
+              '" target="_blank" rel="noopener noreferrer" class="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Open in OpenStreetMap &rarr;</a></div>'
             : "";
         row.child(
             '<div class="p-3 bg-gray-100 dark:bg-gray-900">' +
