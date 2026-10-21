@@ -86,7 +86,22 @@ function meshBeaconOfflineVectorStyle(cfg) {
             { id: "landuse", type: "fill", source: SRC, "source-layer": "landuse", paint: { "fill-color": "#e8e4dd", "fill-opacity": 0.5 } },
             { id: "park", type: "fill", source: SRC, "source-layer": "park", paint: { "fill-color": "#cdebc6", "fill-opacity": 0.6 } },
             { id: "water", type: "fill", source: SRC, "source-layer": "water", paint: { "fill-color": "#a6cbe3" } },
-            { id: "waterway", type: "line", source: SRC, "source-layer": "waterway", paint: { "line-color": "#a6cbe3", "line-width": 1 } },
+            {
+                id: "waterway",
+                type: "line",
+                source: SRC,
+                "source-layer": "waterway",
+                layout: { "line-join": "round", "line-cap": "round" },
+                // Previously the same pale blue as the water fill at a flat
+                // 1px width, making rivers/streams nearly invisible against
+                // lakes/sea at any zoom. Darker line + width that scales
+                // with zoom (like the road layers) keeps them visible when
+                // zoomed out and readable when zoomed in.
+                paint: {
+                    "line-color": "#5f8fb5",
+                    "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 14, 2.5],
+                },
+            },
             {
                 id: "aeroway",
                 type: "fill",
