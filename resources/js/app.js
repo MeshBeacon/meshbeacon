@@ -1,5 +1,302 @@
 //import ApexCharts from 'apexcharts'
 
+import * as maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+// MapLibre GL loads its tile/GeoJSON processing logic (incl. clustering) in
+// a separate Web Worker file. It resolves the worker's URL relative to its
+// own module at runtime, which breaks once everything is bundled into a
+// single app-*.js by Vite (the worker file never gets copied/served,
+// producing a 404 and a silent "Worker failed to load" failure — clusters
+// and tile processing then never run). Importing it with `?url` makes Vite
+// copy the file into the build output and gives us its real served URL so
+// we can register it explicitly before any map is created.
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+
+maplibregl.setWorkerUrl(maplibreWorkerUrl);
+
+window.maplibregl = maplibregl;
+
+// ── Shared MapLibre map helper ──────────────────────────────────────────
+// Replaces the formerly-triplicated Leaflet `createOsmTileLayer()` function
+// (previously duplicated in dashboard.blade.php, kiosk.blade.php,
+// gps.blade.php, messages.blade.php and status.blade.php). Tile source
+// config (online/offline URLs, max native zoom) is now computed once in
+// layouts/app.blade.php and exposed via window.MESHBEACON_MAP_CONFIG, since
+// this file has no access to Blade/PHP config values.
+// Online fallback: OpenStreetMap's standard raster XYZ tiles.
+function meshBeaconOnlineRasterStyle() {
+    var cfg = window.MESHBEACON_MAP_CONFIG || {};
+    return {
+        version: 8,
+        // Required for any symbol layer with a `text-field` (e.g. the
+        // cluster-count labels) to render text at all — MapLibre silently
+        // skips text rendering with no error if a style has no glyphs URL.
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+        sources: {
+            "meshbeacon-raster": {
+                type: "raster",
+                tiles: cfg.osmUrls,
+                tileSize: 256,
+                maxzoom: 19,
+                attribution: "&copy; MeshBeacon / OpenStreetMap",
+            },
+        },
+        layers: [{ id: "meshbeacon-raster-layer", type: "raster", source: "meshbeacon-raster" }],
+    };
+}
+
+// Offline maps are Vector (OpenMapTiles-schema) MBTiles only — see
+// docs/OFFLINE_MAPS.md. This is a compact general-purpose style covering the
+// layers most vector tile generators (Planetiler, OpenMapTiles, Tilemaker,
+// etc.) produce. It's good enough for situational-awareness use, not a
+// pixel-perfect basemap.
+function meshBeaconOfflineVectorStyle(cfg) {
+    var SRC = "meshbeacon-vector";
+    // MapLibre loads vector (PBF) tiles inside its Web Worker, which has no
+    // document/base URL context to resolve a relative "/tiles/..." path
+    // against — it throws "Failed to construct 'Request': Failed to parse
+    // URL" and silently never fetches a single tile. Raster tiles are
+    // unaffected because those fetches happen on the main thread. Resolve
+    // against window.location.origin (rather than baking an absolute URL
+    // into MESHBEACON_MAP_CONFIG server-side) so this works regardless of
+    // APP_URL/port mismatches between environments (e.g. local dev servers).
+    var tileUrl = /^https?:\/\//i.test(cfg.localUrl) ? cfg.localUrl : window.location.origin + cfg.localUrl;
+    return {
+        version: 8,
+        glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+        sources: {
+            [SRC]: {
+                type: "vector",
+                tiles: [tileUrl],
+                maxzoom: cfg.maxNativeZoom,
+            },
+        },
+        layers: [
+            { id: "background", type: "background", paint: { "background-color": "#f6f3ee" } },
+            {
+                id: "landcover",
+                type: "fill",
+                source: SRC,
+                "source-layer": "landcover",
+                paint: {
+                    "fill-color": ["match", ["get", "class"], "wood", "#d4e4c8", "grass", "#d7ecc6", "#e3efd3"],
+                    "fill-opacity": 0.6,
+                },
+            },
+            { id: "landuse", type: "fill", source: SRC, "source-layer": "landuse", paint: { "fill-color": "#e8e4dd", "fill-opacity": 0.5 } },
+            { id: "park", type: "fill", source: SRC, "source-layer": "park", paint: { "fill-color": "#cdebc6", "fill-opacity": 0.6 } },
+            { id: "water", type: "fill", source: SRC, "source-layer": "water", paint: { "fill-color": "#a6cbe3" } },
+            { id: "waterway", type: "line", source: SRC, "source-layer": "waterway", paint: { "line-color": "#a6cbe3", "line-width": 1 } },
+            {
+                id: "aeroway",
+                type: "fill",
+                source: SRC,
+                "source-layer": "aeroway",
+                filter: ["in", ["get", "class"], ["literal", ["runway", "taxiway", "apron"]]],
+                paint: { "fill-color": ["match", ["get", "class"], "runway", "#c9c9d1", "taxiway", "#d6d6dd", "#e2e2e7"] },
+            },
+            {
+                id: "building",
+                type: "fill",
+                source: SRC,
+                "source-layer": "building",
+                minzoom: 13,
+                paint: { "fill-color": "#dcd3c7", "fill-outline-color": "#c9bdaf" },
+            },
+            {
+                id: "boundary",
+                type: "line",
+                source: SRC,
+                "source-layer": "boundary",
+                filter: ["<=", ["get", "admin_level"], 4],
+                paint: { "line-color": "#9b8fae", "line-width": 1, "line-dasharray": [2, 1] },
+            },
+            {
+                id: "transportation-case",
+                type: "line",
+                source: SRC,
+                "source-layer": "transportation",
+                filter: ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary"]]],
+                layout: { "line-join": "round", "line-cap": "round" },
+                paint: {
+                    "line-color": "#ffffff",
+                    "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.5, 14, 6],
+                },
+            },
+            {
+                id: "transportation",
+                type: "line",
+                source: SRC,
+                "source-layer": "transportation",
+                layout: { "line-join": "round", "line-cap": "round" },
+                paint: {
+                    "line-color": [
+                        "match",
+                        ["get", "class"],
+                        "motorway",
+                        "#f6a04d",
+                        "trunk",
+                        "#f7b267",
+                        "primary",
+                        "#f9d27a",
+                        "secondary",
+                        "#fcebaf",
+                        "rail",
+                        "#9a9a9a",
+                        "#ffffff",
+                    ],
+                    "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.3, 14, 4],
+                },
+            },
+            {
+                id: "transportation-name",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "transportation_name",
+                minzoom: 12,
+                layout: {
+                    "symbol-placement": "line",
+                    "text-field": ["get", "name"],
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 12, 10, 16, 13],
+                    "text-letter-spacing": 0.05,
+                },
+                paint: { "text-color": "#5a5a5a", "text-halo-color": "#ffffff", "text-halo-width": 1 },
+            },
+            {
+                id: "mountain-peak",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "mountain_peak",
+                minzoom: 10,
+                layout: {
+                    "text-field": ["get", "name"],
+                    "text-size": 11,
+                    "text-offset": [0, 0.8],
+                    "text-anchor": "top",
+                },
+                paint: { "text-color": "#7a6a4f", "text-halo-color": "#ffffff", "text-halo-width": 1 },
+            },
+            {
+                id: "water-name",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "water_name",
+                layout: {
+                    "text-field": ["get", "name"],
+                    "text-size": 12,
+                },
+                paint: { "text-color": "#6a93b5", "text-halo-color": "#ffffff", "text-halo-width": 1 },
+            },
+            {
+                id: "poi-circle",
+                type: "circle",
+                source: SRC,
+                "source-layer": "poi",
+                minzoom: 14,
+                paint: { "circle-radius": 2.5, "circle-color": "#b05c4e", "circle-stroke-color": "#ffffff", "circle-stroke-width": 1 },
+            },
+            {
+                id: "poi-label",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "poi",
+                minzoom: 14,
+                layout: {
+                    "text-field": ["get", "name"],
+                    "text-size": 11,
+                    "text-offset": [0, 0.8],
+                    "text-anchor": "top",
+                },
+                paint: { "text-color": "#8a4a3d", "text-halo-color": "#ffffff", "text-halo-width": 1 },
+            },
+            {
+                id: "housenumber",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "housenumber",
+                minzoom: 17,
+                layout: { "text-field": ["get", "housenumber"], "text-size": 9 },
+                paint: { "text-color": "#9a9a9a", "text-halo-color": "#ffffff", "text-halo-width": 1 },
+            },
+            {
+                id: "place",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "place",
+                layout: {
+                    "text-field": ["get", "name"],
+                    "text-size": ["interpolate", ["linear"], ["zoom"], 4, 10, 12, 16],
+                    "text-max-width": 8,
+                },
+                paint: { "text-color": "#2d2d2d", "text-halo-color": "#ffffff", "text-halo-width": 1.2 },
+            },
+        ],
+    };
+}
+
+function meshBeaconMapStyle() {
+    var cfg = window.MESHBEACON_MAP_CONFIG || {};
+    var useLocal = cfg.hasOfflineMap || !navigator.onLine;
+    return useLocal ? meshBeaconOfflineVectorStyle(cfg) : meshBeaconOnlineRasterStyle();
+}
+
+// Creates a MapLibre map wired to the shared raster tile source, including
+// the same online/offline URL swap the old Leaflet tileLayer.setUrl() calls
+// did. `options.center` is [lng, lat] (note: MapLibre is lng/lat, not
+// Leaflet's lat/lng).
+window.createMeshBeaconMap = function (container, options) {
+    options = options || {};
+    var cfg = window.MESHBEACON_MAP_CONFIG || {};
+    var map = new maplibregl.Map({
+        container: container,
+        style: meshBeaconMapStyle(),
+        center: options.center || [101.6869, 3.139],
+        zoom: options.zoom != null ? options.zoom : 6,
+        attributionControl: options.attributionControl === false ? false : { compact: true },
+    });
+    if (options.navControl !== false) {
+        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    }
+
+    if (!cfg.hasOfflineMap) {
+        window.addEventListener("offline", function () {
+            var src = map.getSource("meshbeacon-raster");
+            if (src) src.setTiles([cfg.localUrl]);
+        });
+        window.addEventListener("online", function () {
+            var src = map.getSource("meshbeacon-raster");
+            if (src) src.setTiles(cfg.osmUrls);
+        });
+    }
+
+    return map;
+};
+
+// Recenter-to-bounds button control, mirrors the old Leaflet
+// `L.Control.extend` RecenterControl used on the Dashboard duck map.
+function MeshBeaconRecenterControl(onClick) {
+    this._onClick = onClick;
+}
+MeshBeaconRecenterControl.prototype.onAdd = function (map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.title = "Recenter map";
+    btn.style.cssText = "width:29px;height:29px;display:flex;align-items:center;justify-content:center;padding:0;";
+    btn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#333"><path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-2.079 3.51-4.793 3.51-8.227 0-4.589-3.514-8.1-7.8-8.1S4.2 4.76 4.2 9.34c0 3.434 1.566 6.148 3.51 8.227a19.58 19.58 0 0 0 2.684 2.282 16.975 16.975 0 0 0 1.144.742ZM12 13.45a4.11 4.11 0 1 0 0-8.22 4.11 4.11 0 0 0 0 8.22Z" clip-rule="evenodd"/></svg>';
+    btn.addEventListener("click", this._onClick);
+    this._container.appendChild(btn);
+    return this._container;
+};
+MeshBeaconRecenterControl.prototype.onRemove = function () {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+};
+window.MeshBeaconRecenterControl = MeshBeaconRecenterControl;
+
 // True on a hybrid-deployment central aggregator instance (DASHBOARD_READONLY
 // env var) — see docs/HYBRID_DEPLOYMENT.md. Incident dispatch (acknowledge,
 // assign, notes, resolve) only ever happens at the field site; this flag
@@ -8,24 +305,54 @@
 // central operators aren't confused by controls that would 403.
 var DASHBOARD_READONLY = document.body && document.body.dataset.dashboardReadonly === "1";
 
-// Configure jQuery so every AJAX request:
-//  - sends Accept: application/json  → Laravel returns 401 JSON (not a login redirect)
-//  - sends the CSRF token for mutating requests
-$.ajaxSetup({
-    headers: {
-        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-        Accept: "application/json",
-    },
-});
-
-// Global handler: redirect to /login on any 401 (session expired / not authenticated)
-$(document).ajaxError(function (event, jqXHR) {
-    if (jqXHR.status === 401) {
-        window.location.href = "/login";
+// jQuery is loaded globally via a plain <script> tag in layouts/app.blade.php
+// rather than imported into this module, so its readiness relative to this
+// module's execution isn't guaranteed by normal parser ordering alone — under
+// Livewire's wire:navigate (which re-executes/re-fetches scripts on each SPA
+// navigation via dynamically created script elements, not the browser's
+// native parser-driven defer/order guarantees) this module can run before
+// the jQuery <script> tag has finished loading, throwing "$ is not defined".
+// Gate all jQuery-dependent code behind an explicit readiness check instead
+// of assuming `$`/`window.jQuery` already exists.
+function whenJQueryReady(fn) {
+    if (window.jQuery) {
+        fn();
+        return;
     }
-});
+    var tries = 0;
+    var timer = setInterval(function () {
+        tries++;
+        if (window.jQuery) {
+            clearInterval(timer);
+            fn();
+        } else if (tries > 200) {
+            clearInterval(timer);
+            console.error("jQuery failed to load; dashboard features depending on it will not work.");
+        }
+    }, 10);
+}
 
-$(document).ready(function () {
+whenJQueryReady(function () {
+    var $ = window.jQuery;
+
+    // Configure jQuery so every AJAX request:
+    //  - sends Accept: application/json  → Laravel returns 401 JSON (not a login redirect)
+    //  - sends the CSRF token for mutating requests
+    $.ajaxSetup({
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            Accept: "application/json",
+        },
+    });
+
+    // Global handler: redirect to /login on any 401 (session expired / not authenticated)
+    $(document).ajaxError(function (event, jqXHR) {
+        if (jqXHR.status === 401) {
+            window.location.href = "/login";
+        }
+    });
+
+    $(document).ready(function () {
     // Initialize the DataTable
     var table = $("#ducks-table").DataTable({
         dom: "t",
@@ -269,7 +596,7 @@ $(document).ready(function () {
         var lng = parseFloat($(btn).data("lng"));
         var mapUrl = $(btn).data("map-url");
 
-        if (isNaN(lat) || isNaN(lng) || typeof L === "undefined" || !window.createOsmTileLayer) {
+        if (isNaN(lat) || isNaN(lng) || !window.createMeshBeaconMap) {
             row.child(
                 '<div class="p-3 bg-gray-100 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-400">No location data available.</div>',
             ).show();
@@ -296,11 +623,10 @@ $(document).ready(function () {
         setTimeout(function () {
             var container = document.getElementById(mapId);
             if (!container) return;
-            var map = L.map(container).setView([lat, lng], 15);
-            window.createOsmTileLayer(map);
-            L.marker([lat, lng]).addTo(map);
+            var map = window.createMeshBeaconMap(container, { center: [lng, lat], zoom: 15, navControl: false });
+            new maplibregl.Marker().setLngLat([lng, lat]).addTo(map);
             dtMapInstances[rowKey] = map;
-            map.invalidateSize();
+            map.resize();
         }, 50);
     });
 
@@ -2005,4 +2331,5 @@ $(document).ready(function () {
             },
         });
     });
+});
 });

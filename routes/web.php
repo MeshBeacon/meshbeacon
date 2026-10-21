@@ -59,8 +59,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/incidents', [DashboardController::class, 'incidents']);
     Route::get('/dashboard/trends-data', [DashboardController::class, 'trendsData']);
     Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
-    // Offline map tiles
-    Route::get('/tiles/{z}/{x}/{y}.png', [\App\Http\Controllers\TileController::class, 'serveTile'])
+    // Offline map tiles (Vector/PBF MBTiles only — see docs/OFFLINE_MAPS.md)
+    Route::get('/tiles/{z}/{x}/{y}.pbf', [\App\Http\Controllers\TileController::class, 'serveTile'])
         ->where(['z' => '[0-9]+', 'x' => '[0-9]+', 'y' => '[0-9]+'])
         ->name('tiles.serve');
 

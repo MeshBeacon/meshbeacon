@@ -108,75 +108,95 @@
               <span class="relative inline-flex size-2 rounded-full bg-green-500"></span>
             </span>
           </div>
-          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-          <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-          <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
           <div id="duck-map" class="rounded-lg overflow-hidden ring-1 ring-inset ring-gray-200 dark:ring-white/10 h-64 sm:h-96 lg:h-[420px]"></div>
-          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-          <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
           <script>
-          (function () {
-            var map = L.map('duck-map', { zoomControl: true }).setView([3.139, 101.6869], 6);
-
-            var localUrl = '/tiles/{z}/{x}/{y}.png';
-            var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-            var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
-            
-            <?php
-            $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path'));
-            ?>
-            var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
-              maxZoom: 19,
-              maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
-              attribution: '&copy; MeshBeacon / OpenStreetMap'
-            }).addTo(map);
-
-            if (!hasOfflineMap) {
-                window.addEventListener('offline', function() {
-                    tileLayer.setUrl(localUrl);
-                });
-                window.addEventListener('online', function() {
-                    tileLayer.setUrl(osmUrl);
-                });
-            }
-
-            var clusterGroup = L.markerClusterGroup();
-            map.addLayer(clusterGroup);
+          document.addEventListener('DOMContentLoaded', function () {
+            var map = window.createMeshBeaconMap('duck-map', { center: [101.6869, 3.139], zoom: 6 });
 
             var lastBounds = null;
             var initialFitDone = false;
 
-            // Recenter control
-            var RecenterControl = L.Control.extend({
-              options: { position: 'topleft' },
-              onAdd: function () {
-                var btn = L.DomUtil.create('button', '');
-                btn.title = 'Recenter map';
-                btn.style.cssText = 'width:30px;height:30px;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
-                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#333"><path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-2.079 3.51-4.793 3.51-8.227 0-4.589-3.514-8.1-7.8-8.1S4.2 4.76 4.2 9.34c0 3.434 1.566 6.148 3.51 8.227a19.58 19.58 0 0 0 2.684 2.282 16.975 16.975 0 0 0 1.144.742ZM12 13.45a4.11 4.11 0 1 0 0-8.22 4.11 4.11 0 0 0 0 8.22Z" clip-rule="evenodd"/></svg>';
-                L.DomEvent.on(btn, 'click', L.DomEvent.stopPropagation);
-                L.DomEvent.on(btn, 'click', function () {
-                  if (lastBounds && lastBounds.length) {
-                    map.fitBounds(lastBounds, { maxZoom: 14, padding: [40, 40] });
-                  } else {
-                    map.setView([3.139, 101.6869], 6);
-                  }
-                });
-                return btn;
+            map.addControl(new window.MeshBeaconRecenterControl(function () {
+              if (lastBounds) {
+                map.fitBounds(lastBounds, { maxZoom: 14, padding: 40 });
+              } else {
+                map.flyTo({ center: [101.6869, 3.139], zoom: 6 });
               }
-            });
-            new RecenterControl().addTo(map);
+            }), 'top-left');
 
-            function makeIcon(badge) {
-              var color = badge === 'Satellite' ? '#22c55e'
-                        : badge === 'Phone'     ? '#3b82f6'
-                        : '#eab308';
-              return L.divIcon({
-                className: '',
-                html: '<div style="width:12px;height:12px;border-radius:50%;background:' + color + ';border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.5);"></div>',
-                iconSize:    [12, 12],
-                iconAnchor:  [6, 6],
-                popupAnchor: [0, -10],
+            function colorFor(badge) {
+              return badge === 'Satellite' ? '#22c55e'
+                   : badge === 'Phone'     ? '#3b82f6'
+                   : '#eab308';
+            }
+
+            function addDuckLayers(geojson) {
+              map.addSource('duck-pins', {
+                type: 'geojson',
+                data: geojson,
+                cluster: true,
+                clusterMaxZoom: 13,
+                clusterRadius: 50,
+              });
+
+              map.addLayer({
+                id: 'duck-clusters',
+                type: 'circle',
+                source: 'duck-pins',
+                filter: ['has', 'point_count'],
+                paint: {
+                  'circle-color': '#eab308',
+                  'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26],
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#fff',
+                },
+              });
+
+              map.addLayer({
+                id: 'duck-cluster-count',
+                type: 'symbol',
+                source: 'duck-pins',
+                filter: ['has', 'point_count'],
+                layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 12 },
+                paint: { 'text-color': '#1f2937' },
+              });
+
+              map.addLayer({
+                id: 'duck-unclustered',
+                type: 'circle',
+                source: 'duck-pins',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                  'circle-color': ['get', 'color'],
+                  'circle-radius': 6,
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#fff',
+                },
+              });
+
+              map.on('click', 'duck-clusters', function (e) {
+                var features = map.queryRenderedFeatures(e.point, { layers: ['duck-clusters'] });
+                var clusterId = features[0].properties.cluster_id;
+                map.getSource('duck-pins').getClusterExpansionZoom(clusterId).then(function (zoom) {
+                  map.easeTo({ center: features[0].geometry.coordinates, zoom: zoom });
+                }).catch(function () {});
+              });
+
+              map.on('click', 'duck-unclustered', function (e) {
+                var p = e.features[0].properties;
+                var popupHtml = '<div style="min-width:160px;line-height:1.5">'
+                  + '<p style="font-weight:600;margin:0 0 2px">' + p.duck_id + '</p>'
+                  + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + Number(p.lat).toFixed(5) + ', ' + Number(p.lng).toFixed(5) + '</p>'
+                  + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + p.source + ' &nbsp;·&nbsp; ' + p.topic + '</p>'
+                  + '<p style="font-size:.75rem;color:#6b7280;margin:0">' + p.created_at + '</p>'
+                  + '<a href="' + p.map_url + '" target="_blank" rel="noopener" style="font-size:.75rem;color:#eab308">Open in Maps ↗</a>'
+                  + '</div>';
+                new maplibregl.Popup().setLngLat(e.features[0].geometry.coordinates).setHTML(popupHtml).addTo(map);
+              });
+
+              ['duck-clusters', 'duck-unclustered'].forEach(function (layerId) {
+                map.on('mouseenter', layerId, function () { map.getCanvas().style.cursor = 'pointer'; });
+                map.on('mouseleave', layerId, function () { map.getCanvas().style.cursor = ''; });
               });
             }
 
@@ -189,29 +209,40 @@
               })
               .then(function (r) { return r.json(); })
               .then(function (pins) {
-                clusterGroup.clearLayers();
-                var bounds = [];
+                var features = [];
+                var bounds = null;
 
                 pins.forEach(function (duck) {
                   var lat = duck.lat;
                   var lng = duck.lng;
                   if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
 
-                  var mapsLink = duck.map_url;
-                  var popup = '<div style="min-width:160px;line-height:1.5">'
-                    + '<p style="font-weight:600;margin:0 0 2px">' + duck.duck_id + '</p>'
-                    + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + lat.toFixed(5) + ', ' + lng.toFixed(5) + '</p>'
-                    + '<p style="font-size:.75rem;color:#9ca3af;margin:0">' + duck.source + ' &nbsp;·&nbsp; ' + duck.topic + '</p>'
-                    + '<p style="font-size:.75rem;color:#6b7280;margin:0">' + duck.created_at + '</p>'
-                    + '<a href="' + mapsLink + '" target="_blank" rel="noopener" style="font-size:.75rem;color:#eab308">Open in Maps ↗</a>'
-                    + '</div>';
+                  features.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [lng, lat] },
+                    properties: {
+                      duck_id: duck.duck_id,
+                      lat: lat,
+                      lng: lng,
+                      source: duck.source,
+                      topic: duck.topic,
+                      created_at: duck.created_at,
+                      map_url: duck.map_url,
+                      color: colorFor(duck.source),
+                    },
+                  });
 
-                  L.marker([lat, lng], { icon: makeIcon(duck.source) })
-                   .bindPopup(popup)
-                   .addTo(clusterGroup);
-
-                  bounds.push([lat, lng]);
+                  bounds = bounds || new maplibregl.LngLatBounds();
+                  bounds.extend([lng, lat]);
                 });
+
+                var geojson = { type: 'FeatureCollection', features: features };
+                var source = map.getSource('duck-pins');
+                if (source) {
+                  source.setData(geojson);
+                } else {
+                  addDuckLayers(geojson);
+                }
 
                 lastBounds = bounds;
 
@@ -219,17 +250,19 @@
                 // preserve the user's current pan/zoom position.
                 if (!initialFitDone) {
                   initialFitDone = true;
-                  if (bounds.length) {
-                    map.fitBounds(bounds, { maxZoom: 14, padding: [40, 40] });
+                  if (bounds) {
+                    map.fitBounds(bounds, { maxZoom: 14, padding: 40 });
                   }
                 }
               })
               .catch(function (e) { console.error('Map refresh error', e); });
             }
 
-            refreshMap();
-            setInterval(refreshMap, 30000);
-          })();
+            map.on('load', function () {
+              refreshMap();
+              setInterval(refreshMap, 30000);
+            });
+          });
           </script>
         </div>
 

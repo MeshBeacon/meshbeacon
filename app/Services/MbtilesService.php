@@ -16,12 +16,50 @@ use PDOException;
  * hard requirement for offline map support no matter which primary
  * database driver is configured, so failures here are logged rather than
  * silently swallowed.
+ *
+ * MeshBeacon only supports Vector (PBF) MBTiles — see docs/OFFLINE_MAPS.md.
  */
 class MbtilesService
 {
     public function sqliteDriverAvailable(): bool
     {
         return in_array('sqlite', PDO::getAvailableDrivers(), true);
+    }
+
+    /**
+     * Returns the mbtiles file's declared tile format (e.g. 'pbf', 'png',
+     * 'jpg'), lowercased, or null if the file is missing, unreadable, the
+     * pdo_sqlite driver isn't installed, or the metadata row is absent.
+     */
+    public function getFormat(string $mbtilesPath): ?string
+    {
+        if (!file_exists($mbtilesPath) || !$this->sqliteDriverAvailable()) {
+            return null;
+        }
+
+        try {
+            $pdo = new PDO('sqlite:' . $mbtilesPath);
+            $value = $pdo->query("SELECT value FROM metadata WHERE name = 'format'")->fetchColumn();
+
+            return is_string($value) ? strtolower(trim($value)) : null;
+        } catch (PDOException $e) {
+            Log::warning('Failed to read format metadata from mbtiles file.', [
+                'mbtiles_path' => $mbtilesPath,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * True only if the mbtiles file declares itself as a Vector (PBF)
+     * tileset — the only format MeshBeacon's MapLibre vector style and
+     * TileController know how to serve/render.
+     */
+    public function isVectorTileset(string $mbtilesPath): bool
+    {
+        return $this->getFormat($mbtilesPath) === 'pbf';
     }
 
     /**

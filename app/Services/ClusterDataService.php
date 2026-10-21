@@ -209,6 +209,57 @@ class ClusterDataService
     }
 
     /**
+     * Roster for the GPS Tracking page — every known duck (same broad roster
+     * as the Status page's getLatestRecordPerDuck: any topic, ever), not just
+     * ones that have already sent a 'gps'-topic message.
+     *
+     * A duck that has only sent status/alert messages so far (e.g. it just
+     * raised an SOS but hasn't reported a GPS fix yet) previously had no row
+     * on this page at all, making it impossible for an operator to request
+     * its location from here. Such ducks now get a placeholder record
+     * (gps_never_reported = true, no coordinates) so they're visible and the
+     * existing Request GPS / Auto-poll controls can be used on them.
+     */
+    public function getGpsTrackingRecords(): Collection
+    {
+        $gpsRecords = $this->repository->getLatestGpsPerDuck()->keyBy('duck_id');
+
+        return $this->repository->getLatestRecordPerDuck()
+            ->reject(fn (ClusterData $r) => $r->duck_id === 'BROADCAST')
+            ->map(function (ClusterData $r) use ($gpsRecords) {
+                if ($gpsRecords->has($r->duck_id)) {
+                    return $gpsRecords->get($r->duck_id);
+                }
+
+                $placeholder = new ClusterData([
+                    'duck_id'   => $r->duck_id,
+                    'duck_type' => $r->duck_type,
+                ]);
+                $placeholder->id = $r->id;
+                $placeholder->created_at = $r->created_at;
+                $placeholder->setAttribute('gps_never_reported', true);
+
+                return $placeholder;
+            })
+            // Ducks with real GPS data stay ahead of never-reported
+            // placeholders regardless of fleet size, so the page doesn't get
+            // buried in "No Data" cards as more (possibly stale/test) duck
+            // IDs accumulate over time; recency still governs within each
+            // group.
+            ->sort(function (ClusterData $a, ClusterData $b) {
+                $aNeverReported = (bool) ($a->gps_never_reported ?? false);
+                $bNeverReported = (bool) ($b->gps_never_reported ?? false);
+
+                if ($aNeverReported !== $bNeverReported) {
+                    return $aNeverReported ? 1 : -1;
+                }
+
+                return $b->created_at <=> $a->created_at;
+            })
+            ->values();
+    }
+
+    /**
      * Most recent GPS record with valid coordinates for the given duck IDs.
      * Keyed by duck_id.
      */

@@ -44,7 +44,7 @@ class StatusController extends Controller
 
     public function gps()
     {
-        $gpsRecords = $this->clusterDataService->getLatestGpsPerDuck();
+        $gpsRecords = $this->clusterDataService->getGpsTrackingRecords();
         $pollStates = GpsPoll::whereIn('duck_id', $gpsRecords->pluck('duck_id'))
                              ->get()
                              ->keyBy('duck_id');
@@ -57,7 +57,7 @@ class StatusController extends Controller
 
     public function gpsJson(): JsonResponse
     {
-        $records = $this->clusterDataService->getLatestGpsPerDuck();
+        $records = $this->clusterDataService->getGpsTrackingRecords();
         $polls = GpsPoll::whereIn('duck_id', $records->pluck('duck_id'))
                          ->get()
                          ->keyBy('duck_id');
@@ -66,10 +66,11 @@ class StatusController extends Controller
         $lastKnownCoords = $this->clusterDataService->getLastKnownCoordsPerDuck($noFixDuckIds);
 
         $data = $records->keyBy('duck_id')->map(fn ($r) => [
-            'id'               => $r->id,
-            'duck_id'          => $r->duck_id,
-            'gps_source_label' => $r->gps_source_label,
-            'gps_badge_label'  => $r->gps_badge_label,
+            'id'                  => $r->id,
+            'duck_id'             => $r->duck_id,
+            'gps_never_reported'  => (bool) $r->gps_never_reported,
+            'gps_source_label'    => $r->gps_never_reported ? __('No Data') : $r->gps_source_label,
+            'gps_badge_label'     => $r->gps_never_reported ? __('No Data') : $r->gps_badge_label,
             'gps_fix_zero'     => $r->gps_fix_zero,
             'gps_from_phone'   => $r->gps_from_phone,
             'gps_no_phone'     => $r->gps_no_phone,

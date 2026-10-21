@@ -24,8 +24,16 @@ try {
     $stmt->execute([$z, $x, $tmsY]);
     $tileData = $stmt->fetchColumn();
     if ($tileData) {
-        header('Content-Type: image/png');
+        // MBTiles vector (PBF) tiles are conventionally gzip-compressed in
+        // storage; the browser only auto-decompresses on fetch if told via
+        // Content-Encoding, otherwise MapLibre's MVT parser gets raw gzip
+        // bytes instead of protobuf and silently fails to render.
+        $isGzipped = substr($tileData, 0, 2) === "\x1f\x8b";
+        header('Content-Type: application/x-protobuf');
         header('Cache-Control: public, max-age=604800');
+        if ($isGzipped) {
+            header('Content-Encoding: gzip');
+        }
         echo $tileData;
     } else {
         header("HTTP/1.0 404 Not Found");

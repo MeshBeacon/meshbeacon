@@ -32,9 +32,21 @@ class TileController extends Controller
             $tileData = $stmt->fetchColumn();
 
             if ($tileData) {
-                return response($tileData, 200)
-                    ->header('Content-Type', 'image/png')
+                // MBTiles vector (PBF) tiles are conventionally gzip-compressed
+                // in storage; browsers only auto-decompress a fetch if told via
+                // Content-Encoding, otherwise MapLibre's MVT parser gets raw
+                // gzip bytes instead of protobuf and silently fails to render.
+                $isGzipped = substr($tileData, 0, 2) === "\x1f\x8b";
+
+                $response = response($tileData, 200)
+                    ->header('Content-Type', 'application/x-protobuf')
                     ->header('Cache-Control', 'public, max-age=604800'); // 7 days
+
+                if ($isGzipped) {
+                    $response->header('Content-Encoding', 'gzip');
+                }
+
+                return $response;
             }
 
         } catch (\Exception $e) {

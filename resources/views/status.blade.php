@@ -150,8 +150,6 @@
       </div>
     </div>
   </div>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <div id="duck-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 @foreach ($mamaducks as $mamaduck)
 <div class="{{ $mamaduck->urgency === \App\Enums\Urgency::Critical ? 'critical-card flex flex-col divide-y divide-red-300 dark:divide-red-500/30 overflow-hidden rounded-lg bg-red-100 dark:bg-red-950/40 outline outline-2 -outline-offset-2 outline-red-500' : 'flex flex-col divide-y divide-gray-200 dark:divide-white/10 overflow-hidden rounded-lg bg-white dark:bg-gray-800/50 outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10' }}" data-duck-id="{{ $mamaduck->duck_id }}" data-urgency="{{ $mamaduck->urgency !== null ? $mamaduck->urgency->value : '' }}" data-online="{{ $mamaduck->created_at->gt(now()->subHour()) ? '1' : '0' }}" data-incident-status="{{ ($activeIncidents[$mamaduck->duck_id] ?? null)?->status ?? '' }}">
@@ -610,32 +608,20 @@
   document.getElementById('online-only-toggle').addEventListener('change', applyFilters);
   window.applyFilters = applyFilters;
 
-  // ── Leaflet "View on Map" dialogs + inline GPS preview ───────────────────
-  // Mirrors the Dashboard duck map: serves local .mbtiles-derived raster
-  // tiles when available (or when offline), otherwise falls back to the
-  // public OpenStreetMap tile servers. Maps are created lazily (Leaflet
-  // needs a visible container to size itself) and only kept in sync while
-  // their dialog is actually open.
-  (function () {
-    if (typeof L === 'undefined') return;
-
-    function createOsmTileLayer(map) {
-      var localUrl = '/tiles/{z}/{x}/{y}.png';
-      var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-      var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
-
-      <?php $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path')); ?>
-      var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
-        attribution: '&copy; MeshBeacon / OpenStreetMap',
-        maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
-        maxZoom: 19
-      }).addTo(map);
-
-      if (!hasOfflineMap) {
-        window.addEventListener('offline', function () { tileLayer.setUrl(localUrl); });
-        window.addEventListener('online', function () { tileLayer.setUrl(osmUrl); });
-      }
-      return tileLayer;
+  // ── MapLibre "View on Map" dialogs + inline GPS preview ──────────────────
+  // Maps are created lazily (MapLibre needs a visible container to size
+  // itself) and only kept in sync while their dialog is actually open.
+  //
+  // This script runs as a plain classic <script> tag, which executes
+  // synchronously as soon as the parser reaches it — i.e. before the
+  // deferred `type="module"` resources/js/app.js has run. window.createMeshBeaconMap
+  // is defined by that module, so a one-shot "if (!window.createMeshBeaconMap) return;"
+  // check here would always bail out on a fresh page load. Poll until it's
+  // ready instead of assuming it's already set.
+  (function whenMapReady() {
+    if (!window.createMeshBeaconMap) {
+      setTimeout(whenMapReady, 20);
+      return;
     }
 
     var dialogMaps  = {}; // duckId -> { map, marker }
@@ -652,14 +638,13 @@
         entry = null;
       }
       if (!entry) {
-        var map = L.map(container).setView([lat, lng], 15);
-        createOsmTileLayer(map);
-        var marker = L.marker([lat, lng]).addTo(map);
+        var map = window.createMeshBeaconMap(container, { center: [lng, lat], zoom: 15, navControl: false });
+        var marker = new maplibregl.Marker().setLngLat([lng, lat]).addTo(map);
         entry = registry[duckId] = { map: map, marker: marker };
       } else {
-        entry.marker.setLatLng([lat, lng]);
+        entry.marker.setLngLat([lng, lat]);
       }
-      setTimeout(function () { entry.map.invalidateSize(); }, 50);
+      setTimeout(function () { entry.map.resize(); }, 50);
     }
 
     // Called by pollHistory() in app.js whenever fresh coordinates arrive.

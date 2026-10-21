@@ -1,17 +1,55 @@
 @vite('resources/css/app.css')
 @vite('resources/js/app.js')
-<html class="h-full bg-gray-50 dark:bg-gray-900" x-data="{ theme: localStorage.getItem('theme') || 'dark' }" :class="{ 'dark': theme === 'dark' }">
+<html class="h-full bg-gray-50 dark:bg-gray-900">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1f2937">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script>
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
+    // Single source of truth for the dark/light class on <html>. Defaults to
+    // dark unless the user explicitly chose light. Runs on initial load AND
+    // on every Livewire wire:navigate transition (via livewire:navigated) —
+    // Livewire's SPA-style navigation morphs <html>'s class attribute against
+    // the freshly-fetched *static* server HTML (which never contains the
+    // dynamically-added "dark" token), silently stripping it on every soft
+    // navigation unless it's explicitly reapplied here.
+    function meshBeaconApplyTheme() {
+      if (localStorage.theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
     }
+    meshBeaconApplyTheme();
+    document.addEventListener('livewire:navigated', meshBeaconApplyTheme);
+  </script>
+  {{-- Shared raster tile source config for the MapLibre-based maps (Dashboard,
+       Kiosk, Tracking, Messages, Status). Computed once here instead of being
+       duplicated per-page; consumed by window.createMeshBeaconMap() in app.js. --}}
+  @php
+    $mbtilesPath = config('services.map.mbtiles_path');
+    $mbtilesService = app(\App\Services\MbtilesService::class);
+    // Only a Vector (PBF) MBTiles file is ever usable as the offline map (see
+    // docs/OFFLINE_MAPS.md) — checking the declared format here, not just
+    // file_exists(), means an incompatible/corrupt installed file falls back
+    // to online tiles instead of breaking every map on the page.
+    $hasOfflineMap = file_exists($mbtilesPath)
+        && !file_exists(storage_path('app/use_osm_map.flag'))
+        && $mbtilesService->isVectorTileset($mbtilesPath);
+    $maxNativeZoom = $mbtilesService->getMaxNativeZoom($mbtilesPath);
+  @endphp
+  <script>
+    window.MESHBEACON_MAP_CONFIG = {
+      localUrl: '/tiles/{z}/{x}/{y}.pbf',
+      osmUrls: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ],
+      hasOfflineMap: {{ $hasOfflineMap ? 'true' : 'false' }},
+      maxNativeZoom: {{ $maxNativeZoom }},
+    };
   </script>
 </head>
 <body class="h-full" data-dashboard-readonly="{{ config('services.central_dms.dashboard_readonly') ? '1' : '0' }}">
@@ -67,7 +105,7 @@
 
                 @include('partials.locale-switcher')
 
-                <button type="button" onclick="const t = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.theme = t; document.documentElement.classList.toggle('dark');" class="rounded-full bg-white dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-orange-500" title="{{ __('Toggle theme') }}">
+                <button type="button" onclick="localStorage.theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; meshBeaconApplyTheme();" class="rounded-full bg-white dark:bg-gray-800 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white outline-none focus-visible:ring-2 focus-visible:ring-orange-500" title="{{ __('Toggle theme') }}">
                   <span class="sr-only">{{ __('Toggle dark mode') }}</span>
                   <svg class="size-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />

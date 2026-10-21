@@ -194,7 +194,7 @@ MESHBEACON_GHCR_IMAGE=ghcr.io/meshbeacon/meshbeacon:latest
 - **Mesh Group Broadcast Signing**: Dashboard emergency broadcasts are signed with a pre-shared 256-bit symmetric key (`DUCK_MESH_GROUP_KEY`) to prevent spoofing across the mesh.
 - **Protobuf & Legacy Payload Decoding**: Built-in wire-format parser (`DuckPayloadDecoder`) for GPS, SOS, Health, Status, and operator command read receipts (`dcmd` / `MSG_READ:TEXT:...`).
 - **Dual TAK (Team Awareness Kit) Integration**: Live Cursor-on-Target (CoT) broadcast bridge for ATAK/iTAK/WinTAK ([docs/TAK_BRIDGE.md](docs/TAK_BRIDGE.md)) and encrypted OpenTAKServer plugin bridge ([docs/OPENTAK_BRIDGE.md](docs/OPENTAK_BRIDGE.md)) with live audit logs (`/tak/logs`).
-- **High-Performance Offline MBTiles Map Engine**: Upload regional raster `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
+- **High-Performance Offline MBTiles Map Engine**: Upload regional Vector (PBF) `.mbtiles` maps directly via UI (up to 500MB). Features sub-millisecond tile delivery via a lightweight PHP bypass (`public/tiles.php`), smart `maxNativeZoom` upscaling, and a global offline/online base layer toggle.
 - **EOC Kiosk Wallboard (`/kiosk`)**: Fullscreen, auto-updating emergency operations center display designed for command post status monitors and TV arrays.
 - **Dashboard Telemetry Trends**: Synchronized battery and RSSI signal-strength history charts with local browser timezone support, filterable by duck and time range (24h / 7d / 30d).
 - **Rules Engine**: Automated trigger and action evaluation on incoming mesh events, signal levels, and battery thresholds.
@@ -227,7 +227,7 @@ MeshBeacon includes a native wire-format parser ([`DuckPayloadDecoder`](app/Serv
 | --- | --- |
 | **Incident Response** | Acknowledge SOS signals, assign field responders, add timestamped operational notes, update incident status, resolve, and retransmit mesh packets. |
 | **Tactical & EOC Kiosk** | Launch fullscreen `/kiosk` wallboard for command post monitoring with live maps, alert feeds, and responder queues. |
-| **Spatial & Offline Maps** | Upload `.mbtiles` packages in Settings, toggle between OpenStreetMap and offline raster layers, and track device GPS history. |
+| **Spatial & Offline Maps** | Upload Vector `.mbtiles` packages in Settings, toggle between OpenStreetMap and offline vector layers, and track device GPS history. |
 | **Analytics & Telemetry** | Inspect battery and signal-strength trends per duck, filterable by time range, from the Dashboard Trends section. |
 | **Mesh Operations** | View device health metrics, dispatch remote GPS polls, adjust polling intervals, and broadcast text messages across the mesh. |
 | **Reporting & Export** | Generate CSV archives and print-ready incident dossiers for after-action reviews (AAR) and agency compliance. |
@@ -238,12 +238,12 @@ MeshBeacon includes a native wire-format parser ([`DuckPayloadDecoder`](app/Serv
 
 ## Offline maps
 
-MeshBeacon enables zero-connectivity mapping using standard raster MBTiles:
+MeshBeacon enables zero-connectivity mapping using standard Vector (PBF) MBTiles:
 
-1. **Generate MBTiles**: Create regional raster map tiles using QGIS, TileMill, or MOBAC (see [docs/OFFLINE_MAPS.md](docs/OFFLINE_MAPS.md)).
-2. **Upload**: Navigate to **Settings > Offline Map** (`/settings/map`) in the MeshBeacon web dashboard and upload your `.mbtiles` file (supports uploads up to 500MB).
-3. **Tile Delivery**: The system serves tiles via `/tiles/{z}/{x}/{y}.png` directly through [`public/tiles.php`](public/tiles.php) without bootstrapping the full framework.
-4. **Smart Zoom**: If operators zoom beyond the pre-rendered zoom level of the MBTiles file, MeshBeacon scales existing tiles to avoid blank tiles.
+1. **Generate MBTiles**: Create a regional Vector MBTiles file (OpenMapTiles schema) using Planetiler, OpenMapTiles, or Tilemaker (see [docs/OFFLINE_MAPS.md](docs/OFFLINE_MAPS.md)).
+2. **Upload**: Navigate to **Settings > Offline Map** (`/settings/map`) in the MeshBeacon web dashboard and upload your `.mbtiles` file (supports uploads up to 500MB). Raster (PNG/JPEG) MBTiles are rejected.
+3. **Tile Delivery**: The system serves tiles via `/tiles/{z}/{x}/{y}.pbf` directly through [`public/tiles.php`](public/tiles.php) without bootstrapping the full framework.
+4. **Smart Zoom**: If operators zoom beyond the pre-rendered zoom level of the MBTiles file, MapLibre continues rendering the vector geometry so labels and lines stay sharp.
 
 ---
 

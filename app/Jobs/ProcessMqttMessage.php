@@ -68,7 +68,7 @@ class ProcessMqttMessage implements ShouldQueue
      *   - Hybrid (CENTRAL_DMS_URL configured): `synced` set to false (pending).
      *     SyncRecordToCloud is dispatched and will retry until delivery is confirmed.
      */
-    public function handle(DuckCryptoService $duckCrypto, DuckPayloadDecoder $duckPayloadDecoder, OpenTakCryptoService $openTakCrypto): void
+    public function handle(DuckCryptoService $duckCrypto, DuckPayloadDecoder $duckPayloadDecoder, OpenTakCryptoService $openTakCrypto, MqttService $mqttService): void
     {
 	    $data = json_decode($this->payload, true);
 
@@ -189,6 +189,15 @@ class ProcessMqttMessage implements ShouldQueue
 
             SendTelegramAlert::dispatch($record->duck_id, $record->display_text ?? '', $record->map_url);
             Log::info("ProcessMqttMessage: Telegram alert queued for {$record->duck_id}");
+
+            // Proactively request a GPS fix so the operator doesn't have to
+            // first notice this duck on the Tracking page and manually
+            // click "Request GPS" during an active emergency -- that
+            // manual step could cost the first and only chance to get a
+            // location. Skipped when the SOS/alert itself already carries
+            // coordinates, or a GPS-topic fix already arrived in the last
+            // few minutes.
+            $this->requestGpsIfStale($record, $mqttService);
         }
 
         // Evaluate automated rules for this telemetry ping
@@ -199,6 +208,37 @@ class ProcessMqttMessage implements ShouldQueue
         // both OPENTAK_BRIDGE_ENABLED and the bridge keypair are configured.
         if (config('services.opentak.enabled') && $openTakCrypto->isConfigured()) {
             PublishOpenTakEvent::dispatch($record->id);
+        }
+    }
+
+    /**
+     * Send an authenticated CMD:GPS_REQUEST for the duck behind an SOS/alert
+     * record, unless it already carries coordinates itself or a GPS-topic
+     * fix already arrived within the last few minutes. Mirrors the manual
+     * "Request GPS" button / PollGps command -- see
+     * StatusController::requestGps() and App\Console\Commands\PollGps.
+     */
+    private function requestGpsIfStale(ClusterData $record, MqttService $mqttService): void
+    {
+        if ($record->map_url !== null) {
+            return;
+        }
+
+        $recentFix = ClusterData::where('duck_id', $record->duck_id)
+            ->where('topic', 'gps')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->exists();
+
+        if ($recentFix) {
+            return;
+        }
+
+        $encrypted = $mqttService->sendEncryptedCommand('CMD:GPS_REQUEST', $record->duck_id);
+
+        if ($encrypted) {
+            Log::info("ProcessMqttMessage: auto GPS request sent for {$record->duck_id} after SOS/alert");
+        } else {
+            Log::warning("ProcessMqttMessage: auto GPS request SKIPPED for {$record->duck_id}: no authenticated channel available (identity unknown or OpenDMS keypair not configured)");
         }
     }
 

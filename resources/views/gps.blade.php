@@ -21,8 +21,15 @@
 <div class="flex flex-col">
 
   <!-- Header row with search + source filter -->
+  @php
+    $gpsReportingCount = $gpsRecords->filter(fn ($r) => ! $r->gps_never_reported)->count();
+    $gpsTotalCount     = $gpsRecords->count();
+  @endphp
   <div class="mb-4 flex items-center justify-between">
-    <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Duck GPS Locations') }}</h1>
+    <div class="flex items-center gap-3">
+      <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Duck GPS Locations') }}</h1>
+      <span id="gps-count-summary" class="text-xs text-gray-500 dark:text-gray-400">{{ __(':reporting of :total ducks reporting GPS', ['reporting' => $gpsReportingCount, 'total' => $gpsTotalCount]) }}</span>
+    </div>
     <div class="flex items-center gap-2">
       <el-select id="source-filter" name="source-filter" value="" class="block w-36">
         <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500 sm:text-sm/6">
@@ -32,7 +39,7 @@
           </svg>
         </button>
         <el-options anchor="bottom start" popover class="m-0 max-h-60 w-[var(--button-width)] overflow-auto rounded-md bg-white dark:bg-gray-800 p-0 py-1 text-base outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 [--anchor-gap:theme(spacing.1)] data-[closed]:data-[leave]:opacity-0 data-[leave]:transition data-[leave]:duration-100 data-[leave]:ease-in data-[leave]:[transition-behavior:allow-discrete] sm:text-sm">
-          @foreach ([['', __('All Sources')], ['Satellite', __('Satellite')], ['Phone', __('Phone')], ['No Fix', __('No Fix')]] as [$val, $label])
+          @foreach ([['', __('All Sources')], ['Satellite', __('Satellite')], ['Phone', __('Phone')], ['No Fix', __('No Fix')], ['No Data', __('No Data')]] as [$val, $label])
           <el-option value="{{ $val }}" class="group/option relative cursor-default select-none py-2 pl-8 pr-4 text-gray-900 dark:text-white focus:bg-orange-500 focus:text-gray-900 focus:outline-none [&:not([hidden])]:block">
             <span class="block truncate font-normal group-aria-selected/option:font-semibold">{{ $label }}</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 text-orange-600 dark:text-orange-400 group-focus/option:text-gray-900 group-[:not([aria-selected='true'])]/option:hidden [el-selectedcontent_&]:hidden">
@@ -62,8 +69,9 @@
 
 @forelse ($gpsRecords as $record)
 @php
-  $srcLabel   = $record->gps_source_label;
-  $badgeLabel = $record->gps_badge_label;
+  $neverReported = (bool) $record->gps_never_reported;
+  $srcLabel   = $neverReported ? __('No Data') : $record->gps_source_label;
+  $badgeLabel = $neverReported ? __('No Data') : $record->gps_badge_label;
   $badgeClass = match($badgeLabel) {
     'Satellite' => 'rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-400 ring-1 ring-inset ring-green-500/30',
     'Phone'     => 'rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400 ring-1 ring-inset ring-blue-500/30',
@@ -261,6 +269,13 @@
           </div>
         </dialog>
       </el-dialog>
+    @elseif ($neverReported)
+      <div class="grow flex flex-col items-center justify-center gap-2 py-2 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-gray-300 dark:text-gray-600">
+          <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
+        </svg>
+        <p class="max-w-[14rem] text-xs text-gray-500">{{ __('No GPS reports yet — tap Request to ask for its location.') }}</p>
+      </div>
     @else
       <p class="mt-1 text-xs text-gray-500">{{ __('No location data in this record.') }}</p>
     @endif
@@ -269,10 +284,16 @@
   <!-- Card footer: timestamp + request GPS button -->
   <div class="px-4 py-3 sm:px-6 flex flex-col gap-2">
     <div class="flex flex-col gap-0.5">
-      <span class="text-sm text-gray-900 dark:text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
+      <div class="flex items-baseline gap-1">
+        @if ($neverReported)
+        <span class="text-xs text-gray-500">{{ __('Last seen') }}</span>
+        @endif
+        <span class="text-sm text-gray-900 dark:text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
+      </div>
       <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->format('j M Y, H:i') }}</span>
     </div>
     <div class="flex items-center gap-1.5">
+      @unless ($neverReported)
       <button type="button"
         class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"
         data-duck-id="{{ $record->duck_id }}">
@@ -281,8 +302,9 @@
         </svg>
         {{ __('History') }}
       </button>
+      @endunless
       <button type="button"
-        class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"
+        class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50 {{ $neverReported ? 'bg-orange-500 text-white hover:bg-orange-400' : 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20' }}"
         data-duck-id="{{ $record->duck_id }}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5">
           <path fill-rule="evenodd" d="M7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
@@ -379,34 +401,9 @@
   </dialog>
 </el-dialog>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // Shared OSM/offline tile layer, mirrors the Dashboard duck map: serves
-  // local .mbtiles-derived raster tiles when available (or when offline),
-  // otherwise falls back to the public OpenStreetMap tile servers.
-  function createOsmTileLayer(map) {
-    var localUrl = '/tiles/{z}/{x}/{y}.png';
-    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    var hasOfflineMap = {{ file_exists(config('services.map.mbtiles_path')) && !file_exists(storage_path('app/use_osm_map.flag')) ? 'true' : 'false' }};
-
-    <?php $maxNativeZoom = app(\App\Services\MbtilesService::class)->getMaxNativeZoom(config('services.map.mbtiles_path')); ?>
-    var tileLayer = L.tileLayer(hasOfflineMap ? localUrl : (navigator.onLine ? osmUrl : localUrl), {
-      attribution: '&copy; MeshBeacon / OpenStreetMap',
-      maxNativeZoom: hasOfflineMap ? {{ $maxNativeZoom }} : 19,
-      maxZoom: 19
-    }).addTo(map);
-
-    if (!hasOfflineMap) {
-      window.addEventListener('offline', function () { tileLayer.setUrl(localUrl); });
-      window.addEventListener('online', function () { tileLayer.setUrl(osmUrl); });
-    }
-    return tileLayer;
   }
 
   function badgeClass(label) {
@@ -570,6 +567,14 @@
             '</el-dialog-panel></div>' +
         '</dialog></el-dialog>';
     }
+    if (rec.gps_never_reported) {
+      return '<div class="grow flex flex-col items-center justify-center gap-2 py-2 text-center">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 text-gray-300 dark:text-gray-600">' +
+          '<path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />' +
+        '</svg>' +
+        '<p class="max-w-[14rem] text-xs text-gray-500">No GPS reports yet \u2014 tap Request to ask for its location.</p>' +
+      '</div>';
+    }
     return '<p class="mt-1 text-xs text-gray-500">No location data in this record.</p>';
   }
 
@@ -578,7 +583,7 @@
     var src = document.getElementById('source-filter').value;
     var visible = 0;
 
-    document.querySelectorAll('#gps-cards-container [data-duck-id]').forEach(function (card) {
+    document.querySelectorAll('#gps-cards-container [data-gps-src]').forEach(function (card) {
       var id      = card.getAttribute('data-duck-id').toLowerCase();
       var gpsSrc  = card.getAttribute('data-gps-src');
 
@@ -611,7 +616,11 @@
     }
   }
 
-  document.getElementById('gps-search').addEventListener('input', applyGpsFilters);
+  var gpsSearchDebounce;
+  document.getElementById('gps-search').addEventListener('input', function () {
+    clearTimeout(gpsSearchDebounce);
+    gpsSearchDebounce = setTimeout(applyGpsFilters, 150);
+  });
   document.getElementById('source-filter').addEventListener('change', applyGpsFilters);
 
   // ── Request GPS (shared CSRF token) ─────────────────────────────────────
@@ -769,7 +778,7 @@
   // ── GPS History / replay modal ──────────────────────────────────────────
   var HISTORY_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5"><path fill-rule="evenodd" d="M8 1a7 7 0 1 0 4.95 11.95.75.75 0 0 0-1.06-1.06A5.5 5.5 0 1 1 13.5 8a.75.75 0 0 0 1.5 0A7 7 0 0 0 8 1Zm0 3a.75.75 0 0 1 .75.75v3.5l2.22 1.28a.75.75 0 0 1-.75 1.3l-2.6-1.5A.75.75 0 0 1 7.25 9V4.75A.75.75 0 0 1 8 4Z" clip-rule="evenodd" /></svg> History';
   var historyMap = null;
-  var historyLayer = null;
+  var historyMarkers = [];
 
   function renderBatteryTrend(points) {
     var container = document.getElementById('gps-history-battery');
@@ -807,37 +816,56 @@
     if (dialog.showModal) dialog.showModal();
 
     if (!historyMap) {
-      historyMap = L.map('gps-history-map');
-      createOsmTileLayer(historyMap);
+      historyMap = window.createMeshBeaconMap('gps-history-map', { center: [101.6869, 3.139], zoom: 6, navControl: false });
     }
-    setTimeout(function () { historyMap.invalidateSize(); }, 50);
+    setTimeout(function () { historyMap.resize(); }, 50);
 
     fetch('/gps/history/' + encodeURIComponent(duckId), { headers: { 'Accept': 'application/json' } })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (result) {
         var points = (result && result.data) || [];
-        if (historyLayer) { historyMap.removeLayer(historyLayer); historyLayer = null; }
+        historyMarkers.forEach(function (m) { m.remove(); });
+        historyMarkers = [];
         renderBatteryTrend(points);
 
-        if (!points.length) {
-          statusEl.textContent = 'No GPS history recorded for this duck yet.';
-          historyMap.setView([0, 0], 2);
-          return;
+        function render() {
+          var lineSrc = historyMap.getSource('history-line');
+
+          if (!points.length) {
+            if (lineSrc) lineSrc.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [] }, properties: {} });
+            historyMap.jumpTo({ center: [0, 0], zoom: 2 });
+            return;
+          }
+
+          var coords = points.map(function (p) { return [p.lng, p.lat]; });
+          var lineData = { type: 'Feature', geometry: { type: 'LineString', coordinates: coords }, properties: {} };
+          if (lineSrc) {
+            lineSrc.setData(lineData);
+          } else {
+            historyMap.addSource('history-line', { type: 'geojson', data: lineData });
+            historyMap.addLayer({ id: 'history-line-layer', type: 'line', source: 'history-line', paint: { 'line-color': '#facc15', 'line-width': 3 } });
+          }
+
+          var bounds = new maplibregl.LngLatBounds();
+          points.forEach(function (p, i) {
+            var isLast = i === points.length - 1;
+            var el = document.createElement('div');
+            el.style.cssText = 'width:' + (isLast ? 14 : 10) + 'px;height:' + (isLast ? 14 : 10) + 'px;border-radius:50%;background:' + (isLast ? '#22d3ee' : '#facc15') + ';border:2px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.5);';
+            var marker = new maplibregl.Marker({ element: el })
+              .setLngLat([p.lng, p.lat])
+              .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(escHtml(p.label) + '<br>' + escHtml(p.source) + (p.batt !== null && p.batt !== undefined ? ' \u00b7 ' + p.batt + '%' : '')))
+              .addTo(historyMap);
+            historyMarkers.push(marker);
+            bounds.extend([p.lng, p.lat]);
+          });
+          historyMap.fitBounds(bounds, { padding: 40 });
         }
 
-        statusEl.textContent = points.length + ' fix' + (points.length === 1 ? '' : 'es') + ' plotted.';
-        var latlngs = points.map(function (p) { return [p.lat, p.lng]; });
-        var group = L.featureGroup();
-        L.polyline(latlngs, { color: '#facc15', weight: 3 }).addTo(group);
-        points.forEach(function (p, i) {
-          L.circleMarker([p.lat, p.lng], {
-            radius: i === points.length - 1 ? 6 : 4,
-            color: i === points.length - 1 ? '#22d3ee' : '#facc15',
-            fillOpacity: 0.8,
-          }).bindPopup(escHtml(p.label) + '<br>' + escHtml(p.source) + (p.batt !== null && p.batt !== undefined ? ' \u00b7 ' + p.batt + '%' : '')).addTo(group);
-        });
-        historyLayer = group.addTo(historyMap);
-        historyMap.fitBounds(group.getBounds().pad(0.15));
+        if (historyMap.isStyleLoaded()) render(); else historyMap.once('load', render);
+
+        statusEl.textContent = points.length
+          ? (points.length + ' fix' + (points.length === 1 ? '' : 'es') + ' plotted.')
+          : 'No GPS history recorded for this duck yet.';
       })
       .catch(function () {
         statusEl.textContent = 'Failed to load history.';
@@ -845,7 +873,7 @@
   });
 
   // ── Single-point "View on Map" dialogs (per GPS record) - delegated ─────
-  // Leaflet needs a visible container to size itself correctly, so the map
+  // MapLibre needs a visible container to size itself correctly, so the map
   // is created lazily the first time its dialog is opened (mirrors the GPS
   // history map above) rather than eagerly for every hidden dialog.
   var gpsRecordMaps = {};
@@ -865,11 +893,10 @@
     setTimeout(function () {
       var entry = gpsRecordMaps[dialogId];
       if (entry) entry.map.remove();
-      var map = L.map(container).setView([lat, lng], 15);
-      createOsmTileLayer(map);
-      var marker = L.marker([lat, lng]).addTo(map);
+      var map = window.createMeshBeaconMap(container, { center: [lng, lat], zoom: 15, navControl: false });
+      var marker = new maplibregl.Marker().setLngLat([lng, lat]).addTo(map);
       gpsRecordMaps[dialogId] = { map: map, marker: marker };
-      map.invalidateSize();
+      map.resize();
     }, 50);
   });
 
@@ -924,17 +951,24 @@
       '</div>' +
       '<div class="px-4 py-3 sm:px-6 flex flex-col gap-2">' +
         '<div class="flex flex-col gap-0.5">' +
-          '<span class="text-sm text-gray-900 dark:text-white" data-gps-ts="' + escHtml(duckId) + '">' + escHtml(rec.created_at_for_humans) + '</span>' +
+          '<div class="flex items-baseline gap-1">' +
+            (rec.gps_never_reported ? '<span class="text-xs text-gray-500">Last seen</span>' : '') +
+            '<span class="text-sm text-gray-900 dark:text-white" data-gps-ts="' + escHtml(duckId) + '">' + escHtml(rec.created_at_for_humans) + '</span>' +
+          '</div>' +
           '<span class="text-xs text-gray-500" data-gps-ts-abs="' + escHtml(duckId) + '">' + escHtml(rec.created_at_formatted) + '</span>' +
         '</div>' +
         '<div class="flex items-center gap-1.5">' +
+          (rec.gps_never_reported ? '' :
           '<button type="button"' +
             ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
             ' data-duck-id="' + escHtml(duckId) + '">' +
             HISTORY_ICON_SVG +
-          '</button>' +
+          '</button>') +
           '<button type="button"' +
-            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50 ' +
+            (rec.gps_never_reported
+              ? 'bg-orange-500 text-white hover:bg-orange-400'
+              : 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20') + '"' +
             ' data-duck-id="' + escHtml(duckId) + '">' +
             GPS_ICON_SVG +
           '</button>' +
@@ -1022,6 +1056,13 @@
 
         // Re-apply search/source filters so new cards respect any active filter.
         if (hadNew) applyGpsFilters();
+
+        var summaryEl = document.getElementById('gps-count-summary');
+        if (summaryEl) {
+          var total     = Object.keys(data).length;
+          var reporting = Object.values(data).filter(function (r) { return !r.gps_never_reported; }).length;
+          summaryEl.textContent = reporting + ' of ' + total + ' ducks reporting GPS';
+        }
       })
       .catch(function () {});
   }

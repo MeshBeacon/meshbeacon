@@ -39,28 +39,43 @@ new class extends Component {
 
         try {
             $destinationPath = config('services.map.mbtiles_path');
-            
+
             // Ensure the directory exists
             $dir = dirname($destinationPath);
             if (!File::exists($dir)) {
                 File::makeDirectory($dir, 0755, true);
             }
 
-            // Move the uploaded file to the configured destination
-            $path = $this->mapFile->storeAs('/', 'map.mbtiles', 'local');
+            // Store the upload under a temporary name first so we can validate
+            // its format before ever touching a working installed map.
+            $path = $this->mapFile->storeAs('/', 'map.mbtiles.upload', 'local');
 
             if ($path) {
                 // Get the absolute path from the Storage facade (this handles Laravel 11's 'private' default correctly)
                 $storedFilePath = Storage::disk('local')->path($path);
-                
+
+                // MeshBeacon only supports Vector (PBF) MBTiles — see
+                // docs/OFFLINE_MAPS.md. Reject anything else (e.g. Raster
+                // PNG/JPEG tilesets) here, before it ever replaces a working
+                // offline map: installing an incompatible format would break
+                // every map in the app since the vector style/TileController
+                // can't render raster tile bytes.
+                if (!app(\App\Services\MbtilesService::class)->isVectorTileset($storedFilePath)) {
+                    File::delete($storedFilePath);
+                    $this->errorMessage = __('This file is not a Vector MBTiles (PBF) tileset. Only Vector MBTiles are supported — see the Offline Maps guide for how to generate one.');
+                    $this->mapFile = null;
+                    return;
+                }
+
                 if ($storedFilePath !== $destinationPath) {
                     if (File::exists($destinationPath)) {
                         File::delete($destinationPath);
                     }
                     File::move($storedFilePath, $destinationPath);
                 }
-                
+
                 $this->successMessage = __('Offline map successfully uploaded and installed!');
+                $this->errorMessage = '';
                 $this->mapFile = null; // Reset
             } else {
                 throw new \Exception("Failed to store uploaded file.");
@@ -119,7 +134,7 @@ new class extends Component {
             @endif
 
             <flux:field>
-                <flux:label>{{ __('Select Map File (.mbtiles)') }}</flux:label>
+                <flux:label>{{ __('Select Map File (Vector .mbtiles)') }}</flux:label>
                 
                 <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-300 dark:border-white/25 px-6 py-10">
                     <div class="text-center">
@@ -133,7 +148,7 @@ new class extends Component {
                             </label>
                             <p class="pl-1">{{ __('or drag and drop') }}</p>
                         </div>
-                        <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">{{ __('MBTiles up to 500MB') }}</p>
+                        <p class="text-xs leading-5 text-gray-500 dark:text-gray-400">{{ __('Vector MBTiles (PBF) up to 500MB') }}</p>
                     </div>
                 </div>
 
