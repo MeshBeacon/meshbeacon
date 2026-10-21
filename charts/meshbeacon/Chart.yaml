@@ -1,0 +1,9 @@
+apiVersion: v2
+name: meshbeacon
+description: MeshBeacon - offline-first mesh beacon dashboard, MQTT bridge, and SOS/TAK integration (Laravel)
+type: application
+version: 0.1.0
+appVersion: "latest"
+home: https://github.com/meshbeacon/meshbeacon
+sources:
+  - https://github.com/meshbeacon/meshbeacon

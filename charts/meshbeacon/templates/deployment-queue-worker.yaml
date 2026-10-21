@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-queue-worker
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.queueWorker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "queue-worker") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "queue-worker") | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.wwwDataGid }}
+      {{- if not .Values.highAvailability }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 18 }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      containers:
+        - name: queue-worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/var/www/services/docker/worker-entrypoint.sh", "queue", "php", "artisan", "queue:work", "--queue=sync,default", "--tries=5", "--timeout=0"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshbeacon.fullname" . }}-config
+            - secretRef:
+                name: {{ include "meshbeacon.secretName" . }}
+          volumeMounts:
+            - name: app-database
+              mountPath: /var/www/database
+            - name: app-storage
+              mountPath: /var/www/storage
+          readinessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "worker", "--worker=queue"]
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 4
+          livenessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "worker", "--worker=queue"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 4
+      volumes:
+        - name: app-database
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-database
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-storage

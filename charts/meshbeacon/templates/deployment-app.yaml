@@ -1,0 +1,119 @@
+# Pod = php-fpm ("app") + nginx sidecar sharing one emptyDir for
+# /var/www/public, mirroring how docker-compose's app+webserver share the
+# public-assets volume, but scoped per-pod instead of cluster-wide. An
+# initContainer repopulates that emptyDir from the image's
+# /var/www/public-dist on every pod start (see Dockerfile.compose).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-app
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.app.replicas }}
+  selector:
+    matchLabels:
+      {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.wwwDataGid }}
+      initContainers:
+        - name: copy-public-assets
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-ec"]
+          args:
+            - "rm -rf /var/www/public/* /var/www/public/.[!.]* 2>/dev/null; cp -a /var/www/public-dist/. /var/www/public/"
+          volumeMounts:
+            - name: public-assets
+              mountPath: /var/www/public
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshbeacon.fullname" . }}-config
+            - secretRef:
+                name: {{ include "meshbeacon.secretName" . }}
+          volumeMounts:
+            - name: app-database
+              mountPath: /var/www/database
+            - name: app-storage
+              mountPath: /var/www/storage
+            - name: public-assets
+              mountPath: /var/www/public
+          readinessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "app"]
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "app"]
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+        - name: nginx
+          image: "{{ .Values.nginxImage.repository }}:{{ .Values.nginxImage.tag }}"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: public-assets
+              mountPath: /var/www/public
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/javascript-mime.conf
+              subPath: javascript-mime.conf
+          readinessProbe:
+            httpGet:
+              path: /health/live
+              port: 80
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: app-database
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-database
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-storage
+        - name: public-assets
+          emptyDir: {}
+        - name: nginx-conf
+          configMap:
+            name: {{ include "meshbeacon.fullname" . }}-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-app
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 4 }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80

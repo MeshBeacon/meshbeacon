@@ -1,0 +1,61 @@
+# Kubernetes/Helm equivalent of docker-compose.yml's `migrate` service -
+# runs on every `helm install`/`helm upgrade` via Helm hooks, so there's no
+# manual "kubectl delete job && kubectl apply" step like the plain-manifest
+# k8s/ version needed. hook-delete-policy removes any previous run first.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-migrate
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "migrate") | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: {{ .Values.wwwDataGid }}
+      {{- if not .Values.highAvailability }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 18 }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-ec"]
+          args:
+            - |
+              php artisan optimize:clear
+              php artisan migrate --no-interaction --force
+              php artisan db:seed --no-interaction --force
+              php artisan observability:check migrations
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshbeacon.fullname" . }}-config
+            - secretRef:
+                name: {{ include "meshbeacon.secretName" . }}
+          volumeMounts:
+            - name: app-database
+              mountPath: /var/www/database
+            - name: app-storage
+              mountPath: /var/www/storage
+      volumes:
+        - name: app-database
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-database
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-storage

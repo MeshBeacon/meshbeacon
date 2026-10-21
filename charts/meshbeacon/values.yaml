@@ -1,0 +1,123 @@
+# Equivalent to docker-compose.yml, parameterized for Kubernetes/Helm.
+# See k8s/README.md's "Important assumption" section (carried over here) for
+# the single-node ReadWriteOnce storage tradeoffs this chart defaults to.
+
+image:
+  repository: ghcr.io/meshbeacon/meshbeacon
+  tag: latest
+  pullPolicy: IfNotPresent
+
+nginxImage:
+  repository: nginx
+  tag: alpine
+
+mosquittoImage:
+  repository: eclipse-mosquitto
+  tag: 2.1.2-alpine
+
+# www-data's uid/gid on the php:8.4-fpm-alpine base image. Used as
+# securityContext.fsGroup so mounted volumes come out writable by php-fpm
+# without a separate chown/"permissions" job.
+wwwDataGid: 82
+
+app:
+  replicas: 1
+
+mqttWorker:
+  replicas: 1
+
+queueWorker:
+  replicas: 1
+
+scheduler:
+  replicas: 1
+
+# When false (default), app/queue-worker/mqtt-worker/scheduler/migrate are
+# pinned together onto one node via podAffinity, matching how
+# docker-compose runs everything on a single host today - required because
+# storage.accessMode defaults to ReadWriteOnce. Set to true only after
+# switching database.connection to mysql/pgsql and storage.accessMode to
+# ReadWriteMany (see k8s/README.md equivalent notes below under storage).
+highAvailability: false
+
+database:
+  # sqlite is fine for a single-node/edge deployment. For multi-node HA
+  # (highAvailability: true) switch this to mysql/pgsql and run a separate
+  # database service - SQLite over shared/networked storage is not safe for
+  # concurrent writers from multiple pods. app-database keeps holding
+  # offline-map .mbtiles files (docs/OFFLINE_MAPS.md) regardless of driver.
+  connection: sqlite
+  host: ""
+  port: 3306
+  name: meshbeacon
+  username: meshbeacon
+
+storage:
+  # ReadWriteOnce is only safe with highAvailability: false (see above).
+  accessMode: ReadWriteOnce
+  storageClassName: ""
+  database:
+    size: 2Gi
+  app:
+    size: 2Gi
+  mqttData:
+    size: 1Gi
+  mqttLog:
+    size: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  host: meshbeacon.example.com
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 500m
+  tls:
+    enabled: false
+    secretName: meshbeacon-tls
+
+# Non-secret environment variables, merged with the chart's own computed
+# values (APP_URL from ingress.host, MQTT_HOST from the in-cluster broker
+# Service, DB_CONNECTION from database.connection, etc.) - see
+# templates/configmap-app-env.yaml. Add any extra .env keys here as plain
+# strings.
+env:
+  APP_NAME: MeshBeacon
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_LOCALE: en
+  APP_FALLBACK_LOCALE: en
+  APP_MAINTENANCE_DRIVER: file
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: info
+  SESSION_DRIVER: database
+  SESSION_LIFETIME: "120"
+  CACHE_STORE: database
+  QUEUE_CONNECTION: database
+  FILESYSTEM_DISK: local
+  BROADCAST_CONNECTION: log
+  TAK_BRIDGE_ENABLED: "false"
+  OPENTAK_BRIDGE_ENABLED: "false"
+  OPENTAK_EVENT_TOPIC: hub/opentak/event
+  OPENTAK_COMMAND_TOPIC: hub/opentak/command
+
+# Secret values (.env secrets). Leave secrets.create: true (default) to have
+# the chart create a Secret from these values via --set/--set-file/a values
+# override file you keep out of git. Set secrets.create: false and
+# secrets.existingSecret to the name of a Secret you manage separately
+# (e.g. via External Secrets Operator or Sealed Secrets) instead.
+secrets:
+  create: true
+  existingSecret: ""
+  appKey: ""
+  dbPassword: ""
+  adminEmail: admin@example.com
+  adminPassword: ""
+  telegramBotToken: ""
+  telegramBotUsername: ""
+  telegramWebhookSecret: ""
+  duckCryptoPrivateKey: ""
+  duckCryptoPublicKey: ""
+  duckMeshGroupKey: ""
+  opentakBridgePrivateKey: ""
+  opentakBridgePublicKey: ""
+  opentakServerPublicKey: ""

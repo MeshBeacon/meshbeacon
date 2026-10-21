@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-scheduler
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.scheduler.replicas }}
+  selector:
+    matchLabels:
+      {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "scheduler") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "scheduler") | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.wwwDataGid }}
+      {{- if not .Values.highAvailability }}
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "app") | nindent 18 }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
+      containers:
+        - name: scheduler
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/var/www/services/docker/worker-entrypoint.sh", "scheduler", "/bin/sh", "-ec", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "meshbeacon.fullname" . }}-config
+            - secretRef:
+                name: {{ include "meshbeacon.secretName" . }}
+          volumeMounts:
+            - name: app-database
+              mountPath: /var/www/database
+            - name: app-storage
+              mountPath: /var/www/storage
+          readinessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "worker", "--worker=scheduler"]
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 4
+          livenessProbe:
+            exec:
+              command: ["php", "artisan", "observability:check", "worker", "--worker=scheduler"]
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 4
+      volumes:
+        - name: app-database
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-database
+        - name: app-storage
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-storage

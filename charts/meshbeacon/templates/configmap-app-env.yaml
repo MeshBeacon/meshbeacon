@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-config
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+data:
+  {{- with .Values.env }}
+  {{- range $key, $value := . }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+  APP_URL: {{ printf "%s://%s" (ternary "https" "http" .Values.ingress.tls.enabled) .Values.ingress.host | quote }}
+  DB_CONNECTION: {{ .Values.database.connection | quote }}
+  {{- if ne .Values.database.connection "sqlite" }}
+  DB_HOST: {{ .Values.database.host | quote }}
+  DB_PORT: {{ .Values.database.port | quote }}
+  DB_DATABASE: {{ .Values.database.name | quote }}
+  DB_USERNAME: {{ .Values.database.username | quote }}
+  {{- end }}
+  MQTT_HOST: {{ include "meshbeacon.mqttHost" . | quote }}
+  MQTT_PORT: "1883"

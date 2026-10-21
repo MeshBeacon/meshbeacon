@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-mqtt-broker
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "mqtt-broker") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "mqtt-broker") | nindent 8 }}
+    spec:
+      containers:
+        - name: mosquitto
+          image: "{{ .Values.mosquittoImage.repository }}:{{ .Values.mosquittoImage.tag }}"
+          ports:
+            - containerPort: 1883
+          volumeMounts:
+            - name: mosquitto-conf
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            - name: mqtt-data
+              mountPath: /mosquitto/data
+            - name: mqtt-log
+              mountPath: /mosquitto/log
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/meshbeacon/healthcheck' -n -q 0"]
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "mosquitto_pub -h 127.0.0.1 -p 1883 -t '$SYS/meshbeacon/healthcheck' -n -q 0"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: mosquitto-conf
+          configMap:
+            name: {{ include "meshbeacon.fullname" . }}-mosquitto
+        - name: mqtt-data
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-mqtt-data
+        - name: mqtt-log
+          persistentVolumeClaim:
+            claimName: {{ include "meshbeacon.fullname" . }}-mqtt-log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "meshbeacon.fullname" . }}-mqtt-broker
+  labels:
+    {{- include "meshbeacon.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "meshbeacon.selectorLabels" (dict "Chart" .Chart "Release" .Release "component" "mqtt-broker") | nindent 4 }}
+  ports:
+    - name: mqtt
+      port: 1883
+      targetPort: 1883
