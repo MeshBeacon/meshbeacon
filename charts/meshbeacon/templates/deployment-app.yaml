@@ -35,6 +35,14 @@ spec:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # app-storage is a persistent PVC shared with the migrate Job, so a
+          # previous image's compiled Blade view/config cache can outlive the
+          # code that produced it once a new image is rolled out. Clear it on
+          # every pod start so stale cached views can never be served (see
+          # the equivalent docker-compose.yml `app` service command).
+          command: ["sh", "-ec"]
+          args:
+            - "php artisan optimize:clear && exec php-fpm"
           ports:
             - containerPort: 9000
           envFrom:

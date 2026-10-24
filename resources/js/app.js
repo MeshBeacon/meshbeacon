@@ -671,15 +671,15 @@ whenJQueryReady(function () {
 
     var urgencyMap = {
         0: {
-            label: "Low",
+            label: t('urgencyLow', 'Low'),
             cls: "bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-400 ring-green-300 dark:ring-green-500/30",
         },
         1: {
-            label: "Medium",
+            label: t('urgencyMedium', 'Medium'),
             cls: "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-800 dark:text-yellow-400 ring-yellow-300 dark:ring-yellow-500/30",
         },
         2: {
-            label: "Critical",
+            label: t('urgencyCritical', 'Critical'),
             cls: "bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-400 ring-red-300 dark:ring-red-500/30",
         },
     };
@@ -715,7 +715,7 @@ whenJQueryReady(function () {
                       : "bg-green-200 dark:bg-green-800/60 text-green-800 dark:text-green-300";
             html +=
                 '<div class="flex items-start gap-1.5">' +
-                '<span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">Device</span>' +
+                '<span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">' + t('device', 'Device') + '</span>' +
                 '<div class="flex flex-wrap gap-1.5 flex-1">' +
                 '<span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium ' +
                 battCls +
@@ -732,6 +732,7 @@ whenJQueryReady(function () {
             if (altM) {
                 gpsPills +=
                     '<span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-blue-200 dark:bg-blue-800/60 text-blue-800 dark:text-blue-200">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 1.75a.75.75 0 0 1 .674.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 13.347l-3.767 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 7.874a.75.75 0 0 1 .416-1.28l4.21-.611L7.327 2.17A.75.75 0 0 1 8 1.75Z" clip-rule="evenodd"/></svg>' +
                     parseFloat(altM[1]).toFixed(1) +
                     " m alt" +
                     "</span>";
@@ -747,13 +748,14 @@ whenJQueryReady(function () {
             if (hdgM) {
                 gpsPills +=
                     '<span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium bg-sky-200 dark:bg-sky-800/60 text-sky-800 dark:text-sky-200">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path fill-rule="evenodd" d="M8 14a6 6 0 1 0 0-12A6 6 0 0 0 8 14ZM9.25 5.75A.75.75 0 0 0 8 5.134a.75.75 0 0 0-1.25.616v4.5a.75.75 0 0 0 1.25.616.75.75 0 0 0 1.25-.616v-4.5Z" clip-rule="evenodd"/></svg>' +
                     parseFloat(hdgM[1]).toFixed(1) +
                     "\u00b0" +
                     "</span>";
             }
             html +=
                 '<div class="flex items-start gap-1.5">' +
-                '<span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">GPS</span>' +
+                '<span class="text-xs text-gray-600 dark:text-gray-500 w-10 shrink-0 pt-0.5">' + t('gps', 'GPS') + '</span>' +
                 '<div class="flex flex-wrap gap-1.5 flex-1">' +
                 gpsPills +
                 "</div>" +
@@ -770,7 +772,7 @@ whenJQueryReady(function () {
         if (!u) return "";
         return (
             '<p class="mt-1 flex items-center gap-1.5 text-xs">' +
-            '<span class="text-gray-500 dark:text-gray-400">Urgency:</span>' +
+            '<span class="text-gray-500 dark:text-gray-400">' + t('urgency', 'Urgency') + ':</span>' +
             '<span class="inline-flex items-center rounded-md px-1.5 py-0.5 font-medium ring-1 ring-inset ' +
             u.cls +
             '">' +
@@ -818,12 +820,12 @@ whenJQueryReady(function () {
                         payloadHtml =
                             '<span class="inline-flex items-center gap-1 font-semibold text-red-700 dark:text-red-400">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
-                            "SOS \u2014 Hardware Button</span>";
+                            t('sosHardwareFeedLabel', 'SOS \u2014 Hardware Button') + "</span>";
                     } else if (isSos) {
                         payloadHtml =
                             '<span class="inline-flex items-center gap-1 font-semibold text-orange-700 dark:text-orange-400">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
-                            "SOS \u2014 Mobile App</span>";
+                            t('sosMobileFeedLabel', 'SOS \u2014 Mobile App') + "</span>";
                     } else if (isMsg) {
                         var textMatch = payload.match(/TEXT:([^,\n]+)/i);
                         var msgText = textMatch
@@ -1006,8 +1008,8 @@ whenJQueryReady(function () {
         }
 
         var currentId    = inc.assigned_to ? String(inc.assigned_to) : '';
-        var currentLabel = 'Unassigned';
-        var optionsHtml  = optionHtml('', 'Unassigned');
+        var currentLabel = t('unassigned', 'Unassigned');
+        var optionsHtml  = optionHtml('', t('unassigned', 'Unassigned'));
         incidentResponders.forEach(function (u) {
             if (String(u.id) === currentId) currentLabel = u.name;
             optionsHtml += optionHtml(u.id, u.name);
@@ -1108,20 +1110,20 @@ whenJQueryReady(function () {
         var incidents = sortIncidents(filterIncidents(lastIncidentsRaw, query));
 
         if (lastIncidentsRaw.length === 0) {
-            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">No active incidents in the past 24 hours.</p>');
+            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">' + t('noActiveIncidents', 'No active incidents in the past 24 hours.') + '</p>');
             $count.addClass("hidden").text("");
             $list.data("last-html", null);
             return;
         }
 
         if (incidents.length === 0) {
-            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">No incidents match your search.</p>');
-            $count.text('0 of ' + lastIncidentsRaw.length).removeClass("hidden");
+            $list.html('<p class="text-xs text-gray-500 dark:text-gray-400 italic">' + t('noIncidentsMatchSearch', 'No incidents match your search.') + '</p>');
+            $count.text(t('incidentsCountOfTotal', ':count of :total').replace(':count', '0').replace(':total', lastIncidentsRaw.length)).removeClass("hidden");
             $list.data("last-html", null);
             return;
         }
 
-        $count.text(query ? incidents.length + ' of ' + lastIncidentsRaw.length : incidents.length).removeClass("hidden");
+        $count.text(query ? t('incidentsCountOfTotal', ':count of :total').replace(':count', incidents.length).replace(':total', lastIncidentsRaw.length) : incidents.length).removeClass("hidden");
 
         // Kiosk mode is view-only and has limited screen space — cap the
         // rendered cards to a sane number (already sorted urgent-first) and
@@ -1169,7 +1171,7 @@ whenJQueryReady(function () {
                     });
 
                     var sosBadge = isSosDev
-                        ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold ' + badgeCls + '">SOS HW</span>'
+                        ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold ' + badgeCls + '">' + t('sosHw', 'SOS HW') + '</span>'
                         : isSosMob
                             ? '<span class="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold ' + badgeCls + '">SOS</span>'
                             : (inc.urgency_label
@@ -1184,7 +1186,13 @@ whenJQueryReady(function () {
                         'responding':   'bg-blue-100 text-blue-800 dark:bg-blue-900/80 dark:text-blue-300',
                         'resolved':     'bg-green-100 text-green-800 dark:bg-green-900/80 dark:text-green-300',
                     };
-                    var statusBadge = '<span class="text-[0.65rem] px-1.5 py-px rounded-sm font-semibold ' + (statusClassMap[incStatus] || statusClassMap['open']) + '">' + incStatus.toUpperCase() + '</span>';
+                    var statusLabelMap = {
+                        open: t('incOpenFull', 'Open'),
+                        acknowledged: t('incAcknowledgedFull', 'Acknowledged'),
+                        responding: t('incRespondingFull', 'Responding'),
+                        resolved: t('incResolvedFull', 'Resolved'),
+                    };
+                    var statusBadge = '<span class="text-[0.65rem] px-1.5 py-px rounded-sm font-semibold ' + (statusClassMap[incStatus] || statusClassMap['open']) + '">' + (statusLabelMap[incStatus] || incStatus).toUpperCase() + '</span>';
 
                     // Retransmission indicator — shown when the duck has re-sent
                     // its SOS more than once while this incident is still open
@@ -1200,12 +1208,12 @@ whenJQueryReady(function () {
                     if (incStatus !== 'resolved') {
                         var btnBase = 'display:inline-flex;align-items:center;gap:3px;padding:2px 10px;border-radius:4px;font-size:0.7rem;font-weight:600;cursor:pointer;border:none;transition:opacity 0.15s;';
                         var ackHtml = incStatus === 'open'
-                            ? '<button class="inc-ack-btn bg-red-100 text-red-700 dark:bg-red-500/25 dark:text-red-300" data-duck="' + escapeHtml(inc.duck_id) + '" data-msgid="' + escapeHtml(inc.message_id) + '" style="' + btnBase + '">📡 Re-send ACK</button>'
+                            ? '<button class="inc-ack-btn bg-red-100 text-red-700 dark:bg-red-500/25 dark:text-red-300" data-duck="' + escapeHtml(inc.duck_id) + '" data-msgid="' + escapeHtml(inc.message_id) + '" style="' + btnBase + '">📡 ' + t('resendAck', 'Re-send ACK') + '</button>'
                             : '';
                         var transMap = {
-                            'open':         [['acknowledged','Acknowledge'],['responding','Responding']],
-                            'acknowledged': [['responding','Responding'],['resolved','Resolved ✓']],
-                            'responding':   [['resolved','Resolved ✓']],
+                            'open':         [['acknowledged', t('acknowledgeAction', 'Acknowledge')],['responding', t('respondingAction', 'Responding')]],
+                            'acknowledged': [['responding', t('respondingAction', 'Responding')],['resolved', t('resolvedAction', 'Resolved') + ' ✓']],
+                            'responding':   [['resolved', t('resolvedAction', 'Resolved') + ' ✓']],
                         };
                         var statusBtns = (transMap[incStatus] || []).map(function(pair) {
                             return '<button class="inc-status-btn bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-300" data-msgid="' + escapeHtml(inc.message_id) + '" data-status="' + pair[0] + '" style="' + btnBase + '">→ ' + pair[1] + '</button>';
@@ -1220,10 +1228,10 @@ whenJQueryReady(function () {
                             '<button class="inc-gps-btn inline-flex items-center gap-1 rounded bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/20 px-2 py-1 text-xs font-medium text-gray-900 dark:text-white transition-colors shrink-0" ' +
                             'data-duck="' + escapeHtml(inc.nearest_relay) + '">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3 pointer-events-none"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                            'Request GPS</button>';
+                            t('requestGps', 'Request GPS') + '</button>';
                         relayRow =
                             '<div class="border-gray-200 dark:border-white/10" style="display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem;padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
-                            '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.7rem;white-space:nowrap;">Nearest relay</span>' +
+                            '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.7rem;white-space:nowrap;">' + t('nearestRelay', 'Nearest relay') + '</span>' +
                             '<span class="font-mono text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-white/10" style="font-size:0.7rem;border-radius:4px;padding:1px 6px;word-break:break-all;">' + escapeHtml(inc.nearest_relay) + '</span>' +
                             '<span style="flex:1;"></span>' +
                             gpsBtn +
@@ -1232,18 +1240,18 @@ whenJQueryReady(function () {
                         relayRow =
                             '<div class="border-gray-200 dark:border-white/10" style="display:flex;align-items:center;gap:0.375rem;padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="text-green-600 dark:text-green-400" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                            '<span class="text-green-600 dark:text-green-400" style="font-size:0.7rem;">Direct to concentrator</span>' +
+                            '<span class="text-green-600 dark:text-green-400" style="font-size:0.7rem;">' + t('directToConcentrator', 'Direct to concentrator') + '</span>' +
                             '</div>';
                     } else {
                         relayRow =
                             '<div class="border-gray-200 dark:border-white/10" style="padding:0.625rem 1rem;border-top-width:1px;border-top-style:solid;">' +
-                            '<span class="text-gray-500 dark:text-gray-500" style="font-size:0.7rem;font-style:italic;">No relay path recorded</span>' +
+                            '<span class="text-gray-500 dark:text-gray-500" style="font-size:0.7rem;font-style:italic;">' + t('noRelayPathRecorded', 'No relay path recorded') + '</span>' +
                             '</div>';
                     }
 
                     var msgText = inc.display_text
                         ? '<span style="word-break:break-word;overflow-wrap:break-word;">' + escapeHtml(inc.display_text) + '</span>'
-                        : '<span class="text-gray-500 dark:text-gray-400" style="font-style:italic;">No message</span>';
+                        : '<span class="text-gray-500 dark:text-gray-400" style="font-style:italic;">' + t('noMessage', 'No message') + '</span>';
                     var mapBtn = "";
                     if (inc.map_url) {
                         mapBtn =
@@ -1251,7 +1259,7 @@ whenJQueryReady(function () {
                             'class="bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-indigo-600 dark:text-indigo-300 transition-colors" ' +
                             'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;font-size:0.75rem;font-weight:500;text-decoration:none;">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                            'View on Map</a>';
+                            t('viewOnMap', 'View on Map') + '</a>';
                     }
 
                     // Assignment + notes row (available regardless of status
@@ -1259,14 +1267,14 @@ whenJQueryReady(function () {
                     var assignNotesHtml =
                         '<div class="border-gray-200 dark:border-white/10" style="display:flex;flex-direction:column;gap:6px;padding:0.5rem 1rem 0.625rem;border-top-width:1px;border-top-style:solid;">' +
                         '<div style="display:flex;align-items:center;gap:6px;">' +
-                        '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.65rem;white-space:nowrap;">Assigned to</span>' +
+                        '<span class="text-gray-500 dark:text-gray-400" style="font-size:0.65rem;white-space:nowrap;">' + t('assignedTo', 'Assigned to') + '</span>' +
                         buildAssignSelect(inc) +
                         '</div>' +
                         '<div style="display:flex;gap:6px;">' +
-                        '<input type="text" class="inc-notes-input bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" data-msgid="' + escapeHtml(inc.message_id) + '" value="' + escapeHtml(inc.incident_notes || '') + '" placeholder="Add a note\u2026" ' +
+                        '<input type="text" class="inc-notes-input bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" data-msgid="' + escapeHtml(inc.message_id) + '" value="' + escapeHtml(inc.incident_notes || '') + '" placeholder="' + t('addNotePlaceholder', 'Add a note\u2026') + '" ' +
                         'style="flex:1;min-width:0;font-size:0.7rem;border:none;border-radius:4px;padding:4px 8px;" />' +
                         '<button class="inc-notes-save bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300" data-msgid="' + escapeHtml(inc.message_id) + '" ' +
-                        'style="font-size:0.7rem;padding:4px 10px;border-radius:4px;border:none;cursor:pointer;">Save</button>' +
+                        'style="font-size:0.7rem;padding:4px 10px;border-radius:4px;border:none;cursor:pointer;">' + t('save', 'Save') + '</button>' +
                         '</div>' +
                         '</div>';
 
@@ -1325,7 +1333,7 @@ whenJQueryReady(function () {
                 html += '</div>';
 
                 if (hiddenCount > 0) {
-                    html += '<p class="text-gray-500 dark:text-gray-400" style="margin-top:0.75rem;font-size:0.75rem;text-align:center;">+' + hiddenCount + ' more \u2014 see full dashboard for all active incidents</p>';
+                    html += '<p class="text-gray-500 dark:text-gray-400" style="margin-top:0.75rem;font-size:0.75rem;text-align:center;">' + t('incidentsMoreSuffix', '+:count more \u2014 see full dashboard for all active incidents').replace(':count', hiddenCount) + '</p>';
                 }
 
                 // Only repaint when content changed to avoid flicker
@@ -1600,6 +1608,11 @@ whenJQueryReady(function () {
     }
 
     // Status page: poll /status/history and refresh each duck's message box (newest first)
+    function t(key, fallback) {
+        var i18n = window.MESHBEACON_I18N;
+        return (i18n && i18n[key]) || fallback;
+    }
+
     function formatHistoryMessage(msg, isRead) {
         var payload = msg.payload || "";
         var isOutbound = msg.direction === "outbound";
@@ -1618,8 +1631,8 @@ whenJQueryReady(function () {
                 ? '<span class="inline-flex items-center gap-0.5 text-xs text-blue-600 dark:text-blue-300 mt-0.5">' +
                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3">' +
                   '<path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>' +
-                  "Received</span>"
-                : '<span class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sent</span>';
+                  t('received', 'Received') + "</span>"
+                : '<span class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + t('sent', 'Sent') + "</span>";
             return (
                 '<div class="flex flex-col items-end">' +
                 '<div class="rounded-md px-3 py-1.5 text-sm bg-indigo-600/70 text-white break-all max-w-full">' +
@@ -1638,8 +1651,8 @@ whenJQueryReady(function () {
                 '<div class="flex items-start gap-2 rounded-md bg-red-900/50 px-3 py-2 ring-1 ring-inset ring-red-500/40">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-3.5 shrink-0 text-red-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" /></svg>' +
                 "<div>" +
-                '<p class="text-xs font-semibold text-red-400">SOS \u2014 Hardware Button Triggered</p>' +
-                '<p class="text-xs text-red-300/80">Physical SOS button was pressed on the device.</p>' +
+                '<p class="text-xs font-semibold text-red-400">' + t('sosHardwareTitle', 'SOS \u2014 Hardware Button Triggered') + '</p>' +
+                '<p class="text-xs text-red-300/80">' + t('sosHardwareBody', 'Physical SOS button was pressed on the device.') + '</p>' +
                 sosDeviceTelemetryHtml(payload) +
                 "</div>" +
                 "</div>"
@@ -1651,8 +1664,8 @@ whenJQueryReady(function () {
                 '<div class="flex items-start gap-2 rounded-md bg-orange-900/50 px-3 py-2 ring-1 ring-inset ring-orange-500/40">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-3.5 shrink-0 text-orange-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" /></svg>' +
                 "<div>" +
-                '<p class="text-xs font-semibold text-orange-400">SOS \u2014 Mobile Phone Triggered</p>' +
-                '<p class="text-xs text-orange-300/80">SOS sent from the mobile app and should include GPS coordinates.</p>' +
+                '<p class="text-xs font-semibold text-orange-400">' + t('sosMobileTitle', 'SOS \u2014 Mobile Phone Triggered') + '</p>' +
+                '<p class="text-xs text-orange-300/80">' + t('sosMobileBody', 'SOS sent from the mobile app and should include GPS coordinates.') + '</p>' +
                 sosDeviceTelemetryHtml(payload) +
                 "</div>" +
                 "</div>"
@@ -1668,8 +1681,8 @@ whenJQueryReady(function () {
             return (
                 '<div class="flex items-start gap-2 rounded-md bg-green-900/50 px-3 py-2 ring-2 ring-inset ring-green-500/60">' +
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-3.5 shrink-0 text-green-400"><path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>' +
-                '<div><p class="text-xs font-bold text-green-300 uppercase tracking-wide">Roger \u2014 Device Confirmed</p>' +
-                '<p class="text-xs text-green-400/80">Triple-click confirmation from the device.</p></div>' +
+                '<div><p class="text-xs font-bold text-green-300 uppercase tracking-wide">' + t('rogerTitle', 'Roger \u2014 Device Confirmed') + '</p>' +
+                '<p class="text-xs text-green-400/80">' + t('rogerBody', 'Triple-click confirmation from the device.') + '</p></div>' +
                 "</div>"
             );
         }
@@ -1814,7 +1827,7 @@ whenJQueryReady(function () {
                     var isOnline = duck.last_seen && duck.last_seen.is_online;
                     if ($statusBtn.length) {
                         $statusBtn
-                            .text(isOnline ? "Online" : "Offline")
+                            .text(isOnline ? t('online', 'Online') : t('offline', 'Offline'))
                             .toggleClass(
                                 "bg-green-500 hover:bg-green-400 focus-visible:outline-green-500",
                                 isOnline,
@@ -1872,8 +1885,8 @@ whenJQueryReady(function () {
                                 bodyHtml =
                                     '<div class="flex items-start gap-2 rounded-md bg-red-100 dark:bg-red-900/50 px-3 py-2 ring-1 ring-inset ring-red-300 dark:ring-red-500/40">' +
                                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-red-700 dark:text-red-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" /></svg>' +
-                                    '<div><p class="text-xs font-semibold text-red-700 dark:text-red-400">SOS \u2014 Hardware Button Triggered</p>' +
-                                    '<p class="text-xs text-red-700/80 dark:text-red-300/80">This SOS was sent because the physical SOS button on the device was pressed.</p>' +
+                                    '<div><p class="text-xs font-semibold text-red-700 dark:text-red-400">' + t('sosHardwareTitle', 'SOS \u2014 Hardware Button Triggered') + '</p>' +
+                                    '<p class="text-xs text-red-700/80 dark:text-red-300/80">' + t('sosHardwareFullBody', 'This SOS was sent because the physical SOS button on the device was pressed.') + '</p>' +
                                     sosDeviceTelemetryHtml(cp) +
                                     "</div>" +
                                     "</div>";
@@ -1881,8 +1894,8 @@ whenJQueryReady(function () {
                                 bodyHtml =
                                     '<div class="flex items-start gap-2 rounded-md bg-orange-100 dark:bg-orange-900/50 px-3 py-2 ring-1 ring-inset ring-orange-300 dark:ring-orange-500/40">' +
                                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-orange-700 dark:text-orange-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" /></svg>' +
-                                    '<div><p class="text-xs font-semibold text-orange-700 dark:text-orange-400">SOS \u2014 Mobile Phone Triggered</p>' +
-                                    '<p class="text-xs text-orange-700/80 dark:text-orange-300/80">This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.</p>' +
+                                    '<div><p class="text-xs font-semibold text-orange-700 dark:text-orange-400">' + t('sosMobileTitle', 'SOS \u2014 Mobile Phone Triggered') + '</p>' +
+                                    '<p class="text-xs text-orange-700/80 dark:text-orange-300/80">' + t('sosMobileFullBody', 'This SOS was sent from the user\'s mobile phone application and should include GPS coordinates.') + '</p>' +
                                     sosDeviceTelemetryHtml(cp) +
                                     "</div>" +
                                     "</div>";
@@ -1890,8 +1903,8 @@ whenJQueryReady(function () {
                                 bodyHtml =
                                     '<div class="flex items-start gap-2 rounded-md bg-green-100 dark:bg-green-900/50 px-3 py-2 ring-2 ring-inset ring-green-400 dark:ring-green-500/60">' +
                                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-green-700 dark:text-green-400"><path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>' +
-                                    '<div><p class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wide">Roger \u2014 Device Confirmed</p>' +
-                                    '<p class="text-xs text-green-700/80 dark:text-green-400/80">The person holding the device triple-clicked the button to confirm they have received your message.</p></div>' +
+                                    '<div><p class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wide">' + t('rogerTitle', 'Roger \u2014 Device Confirmed') + '</p>' +
+                                    '<p class="text-xs text-green-700/80 dark:text-green-400/80">' + t('rogerFullBody', 'The person holding the device triple-clicked the button to confirm they have received your message.') + '</p></div>' +
                                     "</div>";
                             } else {
                                 var displayText =
@@ -1935,8 +1948,8 @@ whenJQueryReady(function () {
                                 '<div class="mt-2 flex items-start gap-2 rounded-md bg-red-950 px-3 py-2 ring-2 ring-inset ring-red-500 animate-pulse">' +
                                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="mt-0.5 size-4 shrink-0 text-red-400"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" /></svg>' +
                                     "<div>" +
-                                    '<p class="text-xs font-bold text-red-400 uppercase tracking-wide">Critical \u2014 Immediate Attention Required</p>' +
-                                    '<p class="text-xs text-red-300/80">This message has been marked as critical urgency and must be attended to immediately.</p>' +
+                                    '<p class="text-xs font-bold text-red-400 uppercase tracking-wide">' + t('criticalTitle', 'Critical \u2014 Immediate Attention Required') + '</p>' +
+                                    '<p class="text-xs text-red-300/80">' + t('criticalBody', 'This message has been marked as critical urgency and must be attended to immediately.') + '</p>' +
                                     "</div>" +
                                     "</div>",
                             );
@@ -1999,12 +2012,12 @@ whenJQueryReady(function () {
                             warnHtml =
                                 '<p class="mt-2 inline-flex items-center gap-1.5 text-xs text-gray-500">' +
                                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd"/></svg>' +
-                                "No GPS hardware \u2014 this device cannot report location</p>";
+                                t('gpsNoHardwareLong', 'No GPS hardware \u2014 this device cannot report location') + "</p>";
                         } else if (duck.gps_unavailable && !lastCoords) {
                             warnHtml =
                                 '<p class="mt-2 inline-flex items-center gap-1.5 text-xs text-yellow-400">' +
                                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                                "GPS location unavailable \u2014 no satellite fix</p>";
+                                t('gpsUnavailableLong', 'GPS location unavailable \u2014 no satellite fix') + "</p>";
                         }
                         if ($gpsWarning.data("last-warn") !== warnHtml) {
                             $gpsWarning.html(warnHtml);
@@ -2027,7 +2040,7 @@ whenJQueryReady(function () {
                             var noGpsHtml =
                                 '<p class="text-xs text-gray-500" style="display:flex;align-items:center;gap:0.375rem;">' +
                                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd"/></svg>' +
-                                "No GPS hardware \u2014 location unavailable" +
+                                t('gpsNoHardwareShort', 'No GPS hardware \u2014 location unavailable') +
                                 "</p>";
                             if ($gps.data("last-html") !== noGpsHtml) {
                                 $gps.html(noGpsHtml);
@@ -2037,7 +2050,7 @@ whenJQueryReady(function () {
                             var noFixHtml =
                                 '<p class="text-xs text-yellow-500" style="display:flex;align-items:center;gap:0.375rem;">' +
                                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                                "No satellite fix \u2014 waiting for GPS signal" +
+                                t('gpsNoFixShort', 'No satellite fix \u2014 waiting for GPS signal') +
                                 "</p>";
                             if ($gps.data("last-html") !== noFixHtml) {
                                 $gps.html(noFixHtml);
@@ -2047,7 +2060,7 @@ whenJQueryReady(function () {
                             var noFixBanner = duck.gps_unavailable
                                 ? '<div style="display:flex;align-items:center;gap:0.375rem;padding:0.375rem 0.75rem;background:rgba(234,179,8,0.1);font-size:0.7rem;color:#ca8a04;border-bottom:1px solid rgba(234,179,8,0.2);">' +
                                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0"><path fill-rule="evenodd" d="m7.539 14.841.003.003.002.002a.755.755 0 0 0 .912 0l.002-.002.003-.003.012-.009a5.57 5.57 0 0 0 .19-.153 15.588 15.588 0 0 0 2.046-2.082c1.101-1.351 2.291-3.342 2.291-5.597A5 5 0 0 0 3 7c0 2.255 1.19 4.246 2.292 5.597a15.591 15.591 0 0 0 2.046 2.082 8.916 8.916 0 0 0 .189.153l.012.01ZM8 8.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                                  "No satellite fix \u2014 showing last known location" +
+                                  t('gpsNoFixLastKnown', 'No satellite fix \u2014 showing last known location') +
                                   "</div>"
                                 : "";
                             var cachedUrl = $gps.attr("data-cached-map-url");
@@ -2070,7 +2083,7 @@ whenJQueryReady(function () {
                                         '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);padding:0.5rem 1.25rem 0.5rem 1rem">' +
                                         '<div style="display:flex;flex-direction:column;gap:1px;font-size:0.75rem;color:#9ca3af">' +
                                         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;color:#4ade80;flex-shrink:0;display:none"></svg>' +
-                                        "<span>Last known location</span>" +
+                                        "<span>" + t('lastKnownLocation', 'Last known location') + "</span>" +
                                         '<span class="gps-age" style="font-size:0.7rem;color:#6b7280">' +
                                         escapeHtml(
                                             lastCoords.created_at_for_humans,
@@ -2083,13 +2096,13 @@ whenJQueryReady(function () {
                                               escapeHtml(lastCoords.lat) +
                                               '" data-lng="' +
                                               escapeHtml(lastCoords.lng) +
-                                              '" title="Copy coordinates">' +
+                                              '" title="' + t('copyCoordinates', 'Copy coordinates') + '">' +
                                               '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;display:inline;vertical-align:middle"><path d="M3.5 2A1.5 1.5 0 0 0 2 3.5v9A1.5 1.5 0 0 0 3.5 14h5a1.5 1.5 0 0 0 1.5-1.5v-1H11a1.5 1.5 0 0 0 1.5-1.5v-5l-3-3H7A1.5 1.5 0 0 0 5.5 3H5V2H3.5zm4 1H8v2.5A.5.5 0 0 0 8.5 6H11v4.5a.5.5 0 0 1-.5.5h-1V8.5A1.5 1.5 0 0 0 8 7H4V3.5a.5.5 0 0 1 .5-.5H7.5z"/></svg>' +
                                               "</button>"
                                             : "") +
                                         '<a href="' +
                                         escapeHtml(lastCoords.map_url) +
-                                        '" target="_blank" rel="noopener noreferrer" class="gps-toggle-map">Open in Maps</a>' +
+                                        '" target="_blank" rel="noopener noreferrer" class="gps-toggle-map">' + t('openInMaps', 'Open in Maps') + '</a>' +
                                         "</div>" +
                                         "</div>" +
                                         '<div data-leaflet-preview-map="' +
@@ -2261,11 +2274,11 @@ whenJQueryReady(function () {
                             acknowledged: 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-amber-300 dark:ring-amber-500/40',
                             responding:   'bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 ring-blue-300 dark:ring-blue-500/40',
                         };
-                        var labelMap = { open: 'OPEN', acknowledged: "ACK'D", responding: 'RESP' };
+                        var labelMap = { open: t('incOpen', 'OPEN'), acknowledged: t('incAckd', "ACK'D"), responding: t('incResp', 'RESP') };
                         $(this)
                             .removeClass('hidden !hidden bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300 ring-red-300 dark:ring-red-500/40 bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 ring-amber-300 dark:ring-amber-500/40 bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 ring-blue-300 dark:ring-blue-500/40')
                             .addClass(colorMap[status] || colorMap['open'])
-                            .text(labelMap[status] || 'OPEN');
+                            .text(labelMap[status] || t('incOpen', 'OPEN'));
 
                         // Keep data-incident-status on the card in sync for the filter
                         var $card = $('[data-duck-id="' + duckId + '"]');

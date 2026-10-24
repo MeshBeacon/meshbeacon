@@ -51,6 +51,73 @@
       maxNativeZoom: {{ $maxNativeZoom }},
     };
   </script>
+  {{-- Translation strings needed by app.js's client-side live polling (duck
+       card body, GPS warnings, Online/Offline badge, incident badges, and
+       the message-modal history) — that content is rebuilt from plain JS
+       template strings with no access to Laravel's __(), so every label it
+       needs is exposed here instead. Keep in sync with the matching keys
+       in lang/ms.json. --}}
+  <script>
+    window.MESHBEACON_I18N = {
+      sent: @json(__('Sent')),
+      received: @json(__('Received')),
+      online: @json(__('Online')),
+      offline: @json(__('Offline')),
+      device: @json(__('Device')),
+      gps: @json(__('GPS')),
+      lastKnownLocation: @json(__('Last known location')),
+      openInMaps: @json(__('Open in Maps')),
+      copyCoordinates: @json(__('Copy coordinates')),
+      noActiveIncidents: @json(__('No active incidents in the past 24 hours.')),
+      noIncidentsMatchSearch: @json(__('No incidents match your search.')),
+      incOpenFull: @json(__('Open')),
+      incAcknowledgedFull: @json(__('Acknowledged')),
+      incRespondingFull: @json(__('Responding')),
+      incResolvedFull: @json(__('Resolved')),
+      sosHw: @json(__('SOS HW')),
+      nearestRelay: @json(__('Nearest relay')),
+      requestGps: @json(__('Request GPS')),
+      directToConcentrator: @json(__('Direct to concentrator')),
+      noRelayPathRecorded: @json(__('No relay path recorded')),
+      noMessage: @json(__('No message')),
+      resendAck: @json(__('Re-send ACK')),
+      acknowledgeAction: @json(__('Acknowledge')),
+      respondingAction: @json(__('Responding')),
+      resolvedAction: @json(__('Resolved')),
+      assignedTo: @json(__('Assigned to')),
+      unassigned: @json(__('Unassigned')),
+      addNotePlaceholder: @json(__('Add a note…')),
+      save: @json(__('Save')),
+      incidentsCountOfTotal: @json(__(':count of :total')),
+      incidentsMoreSuffix: @json(__('+:count more — see full dashboard for all active incidents')),
+      sosHardwareFeedLabel: @json(__('SOS — Hardware Button')),
+      sosMobileFeedLabel: @json(__('SOS — Mobile App')),
+      urgency: @json(__('Urgency')),
+      urgencyLow: @json(__('Low')),
+      urgencyMedium: @json(__('Medium')),
+      urgencyCritical: @json(__('Critical')),
+      viewOnMap: @json(__('View on Map')),
+      sosHardwareTitle: @json(__('SOS — Hardware Button Triggered')),
+      sosHardwareBody: @json(__('Physical SOS button was pressed on the device.')),
+      sosHardwareFullBody: @json(__('This SOS was sent because the physical SOS button on the device was pressed.')),
+      sosMobileTitle: @json(__('SOS — Mobile Phone Triggered')),
+      sosMobileBody: @json(__('SOS sent from the mobile app and should include GPS coordinates.')),
+      sosMobileFullBody: @json(__("This SOS was sent from the user's mobile phone application and should include GPS coordinates.")),
+      rogerTitle: @json(__('Roger — Device Confirmed')),
+      rogerBody: @json(__('Triple-click confirmation from the device.')),
+      rogerFullBody: @json(__('The person holding the device triple-clicked the button to confirm they have received your message.')),
+      criticalTitle: @json(__('Critical — Immediate Attention Required')),
+      criticalBody: @json(__('This message has been marked as critical urgency and must be attended to immediately.')),
+      gpsNoHardwareLong: @json(__('No GPS hardware — this device cannot report location')),
+      gpsUnavailableLong: @json(__('GPS location unavailable — no satellite fix')),
+      gpsNoHardwareShort: @json(__('No GPS hardware — location unavailable')),
+      gpsNoFixShort: @json(__('No satellite fix — waiting for GPS signal')),
+      gpsNoFixLastKnown: @json(__('No satellite fix — showing last known location')),
+      incOpen: @json(__('OPEN')),
+      incAckd: @json(__("ACK'D")),
+      incResp: @json(__('RESP')),
+    };
+  </script>
 </head>
 <body class="h-full" data-dashboard-readonly="{{ config('services.central_dms.dashboard_readonly') ? '1' : '0' }}">
 <script src="{{ asset('vendor/tailwindplus-elements/elements.min.js') }}" type="module"></script>
@@ -353,7 +420,7 @@ if (chartEl && typeof ApexCharts !== 'undefined') {
     },
     yaxis: { show: false },
     noData: {
-      text: 'Loading…',
+      text: @json(__('Loading…')),
       style: { color: '#9ca3af', fontSize: '14px' },
     },
   };
@@ -370,7 +437,9 @@ if (chartEl && typeof ApexCharts !== 'undefined') {
     const isUp = trend.direction === 'up';
     trendEl.className = `flex items-center px-2.5 py-0.5 font-medium text-center ${isUp ? 'text-fg-success' : 'text-red-600 dark:text-red-400'}`;
     trendEl.innerHTML  = (isUp ? upArrow : downArrow) + `<span class="ml-1">${trend.percentage}%</span>`;
-    trendEl.title = `Current hour: ${trend.current_hour} msgs · Previous hour: ${trend.previous_hour} msgs`;
+    trendEl.title = @json(__('Current hour: :current msgs · Previous hour: :previous msgs'))
+      .replace(':current', trend.current_hour)
+      .replace(':previous', trend.previous_hour);
   }
 
   async function loadHourlyData() {
@@ -381,7 +450,7 @@ if (chartEl && typeof ApexCharts !== 'undefined') {
       chart.updateOptions({
         series: [{ name: "Messages", data: json.data, color: brandColor }],
         xaxis: { categories: json.labels },
-        noData: { text: 'No messages today' },
+        noData: { text: @json(__('No messages today')) },
       });
       updateTrend(json.trend);
     } catch (e) {

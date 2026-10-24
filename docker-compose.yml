@@ -52,6 +52,16 @@ services:
     depends_on:
       permissions:
         condition: service_completed_successfully
+    # app-storage is a named volume that persists across image rebuilds, so
+    # Laravel's compiled Blade view / config cache from a previous image can
+    # outlive the code that produced it. The `migrate` service already runs
+    # `optimize:clear` against the new image, but that only happens if Compose
+    # actually recreates the `migrate` container (e.g. `docker compose up
+    # --build`); a bare `docker build` followed by a plain `docker compose up`
+    # can leave stale containers in place, silently serving stale cached
+    # views. Clear it again here on every start so a rebuilt image can never
+    # render stale views regardless of how the operator redeployed it.
+    command: sh -ec "php artisan optimize:clear && exec php-fpm"
     healthcheck:
       test: ["CMD", "php", "artisan", "observability:check", "app"]
       interval: ${MESHBEACON_HC_INTERVAL:-10s}
