@@ -3,6 +3,7 @@
 use App\Livewire\Settings\ManageUsers;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Settings\ResetDatabase;
 use App\Livewire\Settings\TwoFactor;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -30,13 +31,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('settings/users', ManageUsers::class)
         ->middleware('can:admin')
         ->name('users.index');
-        
+
     \Livewire\Volt\Volt::route('settings/rules', 'settings.rules')
         ->middleware('can:admin')
         ->name('settings.rules');
-        
+
     \Livewire\Volt\Volt::route('settings/map', 'settings.map')
         ->middleware('can:admin')
         ->name('settings.map');
-});
 
+    Route::livewire('settings/reset-database', ResetDatabase::class)
+        ->middleware(['can:admin', 'password.confirm'])
+        ->name('settings.reset-database');
+});

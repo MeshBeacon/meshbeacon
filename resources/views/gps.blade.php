@@ -292,7 +292,7 @@
       </div>
       <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->format('j M Y, H:i') }}</span>
     </div>
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5" data-gps-actions="{{ $record->duck_id }}">
       @unless ($neverReported)
       <button type="button"
         class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"
@@ -957,24 +957,34 @@
           '</div>' +
           '<span class="text-xs text-gray-500" data-gps-ts-abs="' + escHtml(duckId) + '">' + escHtml(rec.created_at_formatted) + '</span>' +
         '</div>' +
-        '<div class="flex items-center gap-1.5">' +
-          (rec.gps_never_reported ? '' :
-          '<button type="button"' +
-            ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
-            ' data-duck-id="' + escHtml(duckId) + '">' +
-            HISTORY_ICON_SVG +
-          '</button>') +
-          '<button type="button"' +
-            ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50 ' +
-            (rec.gps_never_reported
-              ? 'bg-orange-500 text-white hover:bg-orange-400'
-              : 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20') + '"' +
-            ' data-duck-id="' + escHtml(duckId) + '">' +
-            GPS_ICON_SVG +
-          '</button>' +
+        '<div class="flex items-center gap-1.5" data-gps-actions="' + escHtml(duckId) + '">' +
+          buildGpsActionsHtml(rec) +
         '</div>' +
       '</div>' +
     '</div>';
+  }
+
+  // ── Footer action buttons (History + Request) for a GPS record ─────────
+  // Shared by buildGpsCard() (brand-new duck) and pollGps()'s in-place update
+  // of an existing card, so the History button appears and the Request
+  // button loses its orange "no data" styling the moment a duck's first GPS
+  // fix actually arrives, instead of only on the next full page reload.
+  function buildGpsActionsHtml(rec) {
+    var duckId = rec.duck_id;
+    return (rec.gps_never_reported ? '' :
+      '<button type="button"' +
+        ' class="gps-history-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-200 dark:bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 disabled:opacity-50"' +
+        ' data-duck-id="' + escHtml(duckId) + '">' +
+        HISTORY_ICON_SVG +
+      '</button>') +
+      '<button type="button"' +
+        ' class="gps-request-btn inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold disabled:opacity-50 ' +
+        (rec.gps_never_reported
+          ? 'bg-orange-500 text-white hover:bg-orange-400'
+          : 'bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20') + '"' +
+        ' data-duck-id="' + escHtml(duckId) + '">' +
+        GPS_ICON_SVG +
+      '</button>';
   }
 
   // ── Live polling ─────────────────────────────────────────────────────────
@@ -1018,6 +1028,8 @@
               if (!card.querySelector('dialog[open]')) {
                 var bodyEl = card.querySelector('[data-gps-body]');
                 if (bodyEl) bodyEl.innerHTML = buildGpsBody(rec);
+                var actionsEl = card.querySelector('[data-gps-actions]');
+                if (actionsEl) actionsEl.innerHTML = buildGpsActionsHtml(rec);
                 card.setAttribute('data-gps-record-id', rec.id);
               }
             }

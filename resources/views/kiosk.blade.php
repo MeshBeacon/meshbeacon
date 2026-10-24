@@ -1,14 +1,46 @@
 <!DOCTYPE html>
-<html class="h-full bg-gray-50 dark:bg-gray-900" x-data="{ theme: localStorage.getItem('theme') || 'dark' }" :class="{ 'dark': theme === 'dark' }">
+<html class="h-full bg-gray-50 dark:bg-gray-900">
 <head>
   <meta charset="utf-8">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <script>
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark')
+    // Must match layouts/app.blade.php's meshBeaconApplyTheme() exactly:
+    // defaults to DARK unless the user has explicitly chosen light. The
+    // previous version here defaulted to light unless the OS/browser
+    // reported `prefers-color-scheme: dark`, which disagreed with every
+    // other page (same localStorage, no stored "theme" key) and made kiosk
+    // show light mode on first visit while the rest of the app showed dark.
+    if (localStorage.theme === 'light') {
+      document.documentElement.classList.remove('dark');
     } else {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add('dark');
     }
+  </script>
+  {{-- Shared raster tile source config for the MapLibre-based duck-position
+       map below. This page doesn't extend layouts.app (it's a standalone
+       unattended-display document), so it has to compute and expose this
+       itself -- without it, window.createMeshBeaconMap() falls back to an
+       empty {} config and the raster source's `tiles` ends up undefined,
+       so the basemap never renders. Mirrors layouts/app.blade.php exactly. --}}
+  @php
+    $mbtilesPath = config('services.map.mbtiles_path');
+    $mbtilesService = app(\App\Services\MbtilesService::class);
+    $hasOfflineMap = file_exists($mbtilesPath)
+        && !file_exists(storage_path('app/use_osm_map.flag'))
+        && $mbtilesService->isVectorTileset($mbtilesPath);
+    $maxNativeZoom = $mbtilesService->getMaxNativeZoom($mbtilesPath);
+  @endphp
+  <script>
+    window.MESHBEACON_MAP_CONFIG = {
+      localUrl: '/tiles/{z}/{x}/{y}.pbf',
+      osmUrls: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ],
+      hasOfflineMap: {{ $hasOfflineMap ? 'true' : 'false' }},
+      maxNativeZoom: {{ $maxNativeZoom }},
+    };
   </script>
   <title>{{ __('MeshBeacon — Kiosk') }}</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -92,7 +124,14 @@
   </dl>
 
   {{-- Main grid: Incidents | Map | Live Feed --}}
-  <div class="grid grid-cols-12 gap-4 flex-1 min-h-0">
+  {{-- auto-rows-fr is required here: with the default implicit `auto` row
+       sizing, this single row sizes itself to its tallest child's CONTENT
+       height rather than stretching to fill the remaining viewport height,
+       so #duck-map (which has no intrinsic content/size of its own) ends up
+       with ~0px height and MapLibre renders nothing. The incidents/live-feed
+       columns don't visibly show this because their scrollable lists still
+       render *something* even when squeezed. --}}
+  <div class="grid grid-cols-12 gap-4 flex-1 min-h-0 auto-rows-fr">
     <div class="col-span-4 flex flex-col rounded-lg bg-white dark:bg-gray-800/75 ring-1 ring-inset ring-gray-200 dark:ring-white/10 p-4 min-h-0">
       <div class="flex items-center gap-3 mb-3 shrink-0">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Active Incidents') }}</h2>
@@ -248,6 +287,11 @@
           refreshMap();
           setInterval(refreshMap, 30000);
         });
+
+        // Safety net: if the container's size changes after load (e.g. the
+        // grid row above still hadn't settled, or the kiosk window itself
+        // is resized), make sure the canvas is re-measured.
+        window.addEventListener('resize', function () { map.resize(); });
       });
       </script>
     </div>

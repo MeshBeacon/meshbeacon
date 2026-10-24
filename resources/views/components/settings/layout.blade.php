@@ -10,6 +10,7 @@
                 <flux:navlist.item :href="route('users.index')" wire:navigate>{{ __('Manage Users') }}</flux:navlist.item>
                 <flux:navlist.item :href="route('settings.rules')" wire:navigate>{{ __('Automated Rules') }}</flux:navlist.item>
                 <flux:navlist.item :href="route('settings.map')" wire:navigate>{{ __('Offline Map') }}</flux:navlist.item>
+                <flux:navlist.item :href="route('settings.reset-database')" wire:navigate class="text-red-600 dark:text-red-400">{{ __('Reset Database') }}</flux:navlist.item>
             @endif
         </flux:navlist>
     </div>

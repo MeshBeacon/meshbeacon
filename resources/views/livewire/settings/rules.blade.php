@@ -75,8 +75,8 @@ new class extends Component {
                                 <label class="block text-sm/6 font-medium text-white">{{ __('Condition') }}</label>
                                 <div class="mt-2">
                                     <select wire:model="condition" class="block w-full rounded-md bg-white/5 px-3 py-2 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6">
-                                        <option value="battery_below">Battery Below</option>
-                                        <option value="rssi_below">RSSI Below</option>
+                                        <option value="battery_below">{{ __('Battery Below') }}</option>
+                                        <option value="rssi_below">{{ __('RSSI Below') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -99,10 +99,22 @@ new class extends Component {
                     <div class="border-t border-white/10 px-4 py-4 sm:px-8">
                         <ul role="list" class="divide-y divide-white/5">
                             @foreach($rules as $rule)
+                            @php
+                                $conditionLabel = match($rule->condition) {
+                                    'battery_below' => __('Battery Below'),
+                                    'rssi_below' => __('RSSI Below'),
+                                    default => $rule->condition,
+                                };
+                                $actionLabel = match($rule->action) {
+                                    'telegram_alert' => __('Telegram Alert'),
+                                    'create_incident' => __('Create Incident'),
+                                    default => $rule->action,
+                                };
+                            @endphp
                             <li class="py-4 flex justify-between items-center">
                                 <div>
                                     <p class="text-sm font-medium text-white">{{ $rule->name }}</p>
-                                    <p class="text-sm text-gray-400">If {{ $rule->condition }} is {{ $rule->threshold }}, then {{ $rule->action }}</p>
+                                    <p class="text-sm text-gray-400">{{ __('If :condition is :threshold, then :action', ['condition' => $conditionLabel, 'threshold' => $rule->threshold, 'action' => $actionLabel]) }}</p>
                                 </div>
                                 <button wire:click="deleteRule({{ $rule->id }})" class="text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300">{{ __('Delete') }}</button>
                             </li>

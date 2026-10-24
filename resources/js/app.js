@@ -816,12 +816,12 @@ whenJQueryReady(function () {
                     var payloadHtml;
                     if (isSos && isDevice) {
                         payloadHtml =
-                            '<span class="inline-flex items-center gap-1 font-semibold text-red-400">' +
+                            '<span class="inline-flex items-center gap-1 font-semibold text-red-700 dark:text-red-400">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
                             "SOS \u2014 Hardware Button</span>";
                     } else if (isSos) {
                         payloadHtml =
-                            '<span class="inline-flex items-center gap-1 font-semibold text-orange-400">' +
+                            '<span class="inline-flex items-center gap-1 font-semibold text-orange-700 dark:text-orange-400">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0"><path fill-rule="evenodd" d="M6.701 2.25c.577-1 2.02-1 2.598 0l5.196 9a1.5 1.5 0 0 1-1.299 2.25H2.804a1.5 1.5 0 0 1-1.3-2.25l5.197-9ZM8 4a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>' +
                             "SOS \u2014 Mobile App</span>";
                     } else if (isMsg) {
@@ -830,7 +830,7 @@ whenJQueryReady(function () {
                             ? escapeHtml(textMatch[1].trim())
                             : escapeHtml(payload);
                         payloadHtml =
-                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0 text-gray-400" style="flex-shrink:0;"><path fill-rule="evenodd" d="M1 8.74C1 9.99 1.99 11 3.21 11H4v1.306c0 .657.793 1.002 1.278.55l1.977-1.856H12.8c1.22 0 2.2-1.01 2.2-2.26V4.26C15 3.01 14.02 2 12.8 2H3.2C1.98 2 1 3.01 1 4.26v4.48Z" clip-rule="evenodd"/></svg>' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0 text-gray-500 dark:text-gray-400" style="flex-shrink:0;"><path fill-rule="evenodd" d="M1 8.74C1 9.99 1.99 11 3.21 11H4v1.306c0 .657.793 1.002 1.278.55l1.977-1.856H12.8c1.22 0 2.2-1.01 2.2-2.26V4.26C15 3.01 14.02 2 12.8 2H3.2C1.98 2 1 3.01 1 4.26v4.48Z" clip-rule="evenodd"/></svg>' +
                             '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">' +
                             msgText +
                             "</span>";
@@ -839,14 +839,14 @@ whenJQueryReady(function () {
                     }
 
                     var duckLink =
-                        '<a href="/status" class="font-medium text-indigo-400 hover:text-indigo-300">' +
+                        '<a href="/status" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">' +
                         escapeHtml(value.duck_id) +
                         " &rarr;</a>";
 
                     var bodyHtml;
                     if (isMsg) {
                         bodyHtml =
-                            '<p class="text-sm text-gray-300" style="display:flex;align-items:center;gap:0.25rem;min-width:0;overflow:hidden;">' +
+                            '<p class="text-sm text-gray-700 dark:text-gray-300" style="display:flex;align-items:center;gap:0.25rem;min-width:0;overflow:hidden;">' +
                             payloadHtml +
                             "</p>" +
                             urgencyRow(payload) +
@@ -855,7 +855,7 @@ whenJQueryReady(function () {
                             "</p>";
                     } else {
                         bodyHtml =
-                            '<p class="text-sm text-gray-400 break-words">' +
+                            '<p class="text-sm text-gray-500 dark:text-gray-400 break-words">' +
                             payloadHtml +
                             "</p>" +
                             '<p class="mt-0.5 text-xs">' +
@@ -866,7 +866,7 @@ whenJQueryReady(function () {
                     let templateData =
                         '<li><div class="relative pb-8"><div class="relative flex space-x-3"><div><img src="/images/logo-small.png" alt="Logo" class="size-10"></div><div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5"><div class="min-w-0 flex-1">' +
                         bodyHtml +
-                        '</div><div class="whitespace-nowrap text-right text-sm text-gray-400 shrink-0"><time datetime="2020-09-22">' +
+                        '</div><div class="whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400 shrink-0"><time datetime="2020-09-22">' +
                         time24h +
                         "</time></div></div></div></div></li>";
                     template.push(templateData);
@@ -1701,6 +1701,20 @@ whenJQueryReady(function () {
             method: "GET",
             dataType: "json",
             success: function (data) {
+                // A duck that has no rendered card yet (freshly deployed with
+                // zero ducks, or any brand-new duck checking in for the first
+                // time) can't be updated in place -- its card markup simply
+                // doesn't exist in the DOM. Detect that case and reload so
+                // the server renders the full card instead of silently doing
+                // nothing until the user manually refreshes.
+                var hasNewDuck = Object.keys(data || {}).some(function (duckId) {
+                    return $('[data-history-duck="' + duckId + '"]').length === 0;
+                });
+                if (hasNewDuck) {
+                    window.location.reload();
+                    return;
+                }
+
                 $.each(data, function (duckId, duck) {
                     var messages = duck.messages || [];
                     var lastCoords = duck.last_coords || null;
@@ -2196,7 +2210,11 @@ whenJQueryReady(function () {
         });
     }
 
-    if ($("[data-history-duck]").length) {
+    // Always poll (even on a freshly deployed status page with zero ducks
+    // rendered yet) -- gating this on an existing [data-history-duck] card
+    // meant the very first duck to ever check in had no running poll loop
+    // to notice it, so its card never appeared until a manual page reload.
+    if ($("#duck-cards-container").length) {
         pollHistory();
         setInterval(pollHistory, 3000);
 

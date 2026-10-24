@@ -6,6 +6,8 @@ use App\Services\OperationalStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class HealthController extends Controller
@@ -33,6 +35,15 @@ class HealthController extends Controller
 
     public function operationsStatus(OperationalStatus $status): JsonResponse
     {
+        return response()->json($status->snapshot(private: true));
+    }
+
+    public function clearFailedJobs(OperationalStatus $status): JsonResponse
+    {
+        Gate::authorize('admin');
+
+        Artisan::call('queue:flush');
+
         return response()->json($status->snapshot(private: true));
     }
 

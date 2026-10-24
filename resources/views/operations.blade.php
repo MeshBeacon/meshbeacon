@@ -57,7 +57,16 @@
 
   <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
     <section class="rounded-lg bg-white dark:bg-gray-800/75 p-4 shadow ring-1 ring-inset ring-gray-200 dark:ring-white/10">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Queue activity') }}</h2>
+      <div class="flex items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Queue activity') }}</h2>
+        @if (auth()->user()->isAdmin())
+          <flux:modal.trigger name="confirm-clear-failed-jobs">
+            <button type="button" id="queue-clear-failed" class="rounded-md bg-red-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+              {{ __('Clear failed jobs') }}
+            </button>
+          </flux:modal.trigger>
+        @endif
+      </div>
       <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
           <dt class="text-gray-500 dark:text-gray-400">{{ __('Pending jobs') }}</dt>
@@ -92,6 +101,38 @@
       </dl>
     </section>
   </div>
+
+  @if (auth()->user()->isAdmin())
+    <flux:modal name="confirm-clear-failed-jobs" class="max-w-md">
+      <div class="space-y-6">
+        <div>
+          <flux:heading size="lg">{{ __('Clear all failed jobs?') }}</flux:heading>
+          <flux:subheading>
+            {{ __('This permanently removes every row from the failed jobs table. Pending/queued jobs are not affected and continue processing normally.') }}
+          </flux:subheading>
+        </div>
+
+        <div class="rounded-md bg-gray-50 dark:bg-white/5 px-4 py-3 text-sm ring-1 ring-inset ring-gray-200 dark:ring-white/10">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-500 dark:text-gray-400">{{ __('Currently failed') }}</span>
+            <span id="modal-failed-count" class="font-medium text-gray-900 dark:text-white">-</span>
+          </div>
+        </div>
+
+        <p id="queue-clear-failed-status" class="text-xs text-gray-500 dark:text-gray-400"></p>
+
+        <div class="flex justify-end gap-2">
+          <flux:modal.close>
+            <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
+          </flux:modal.close>
+
+          <flux:button type="button" id="queue-clear-failed-confirm" variant="danger">
+            {{ __('Clear failed jobs') }}
+          </flux:button>
+        </div>
+      </div>
+    </flux:modal>
+  @endif
 </div>
 
 <script>
@@ -182,6 +223,7 @@
     const queue = payload.checks.queue;
     setText('queue-pending', queue.pending === null ? '-' : String(queue.pending));
     setText('queue-failed', queue.failed === null ? '-' : String(queue.failed));
+    setText('modal-failed-count', queue.failed === null ? '-' : String(queue.failed));
     setText('queue-last-failure', queue.last_failure
       ? `${queue.last_failure.job} | ${formatTime(queue.last_failure.failed_at)}`
       : '-');
@@ -212,6 +254,39 @@
 
   refresh();
   setInterval(refresh, 15000);
+
+  const clearFailedConfirmButton = document.getElementById('queue-clear-failed-confirm');
+  if (clearFailedConfirmButton) {
+    const statusEl = document.getElementById('queue-clear-failed-status');
+    const csrfToken = (document.querySelector('meta[name="csrf-token"]') || {}).getAttribute
+      ? document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      : null;
+
+    clearFailedConfirmButton.addEventListener('click', async () => {
+      clearFailedConfirmButton.disabled = true;
+      if (statusEl) statusEl.textContent = '{{ __('Clearing…') }}';
+
+      try {
+        const response = await fetch('{{ route('system-health.clear-failed') }}', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        renderStatus(await response.json());
+        if (statusEl) statusEl.textContent = '{{ __('Failed jobs cleared.') }}';
+        window.Flux?.modal('confirm-clear-failed-jobs').close();
+      } catch (error) {
+        if (statusEl) statusEl.textContent = '{{ __('Failed to clear jobs.') }}';
+      } finally {
+        clearFailedConfirmButton.disabled = false;
+      }
+    });
+  }
 })();
 </script>
 @endsection

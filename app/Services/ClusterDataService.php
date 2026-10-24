@@ -384,7 +384,19 @@ class ClusterDataService
     {
         $messages   = $this->getRecentMessagesPerDuck(50);
         $lastCoords = $this->lastKnownCoordsPerDuck();
-        $allDucks   = $messages->keys()->merge($lastCoords->keys())->unique();
+        // 'BROADCAST' is the pseudo duck_id used to log outbound emergency
+        // broadcasts (see StatusController::broadcast()) -- it has 'outbound'
+        // topic rows so it shows up in $messages, but it's never a real duck
+        // and never appears in getLatestPerDuck() (status page cards only
+        // come from 'status'/'alert' topics), so it would never have a
+        // matching [data-history-duck] element. The status page's JS polling
+        // treats any such mismatch as a brand-new duck and reloads the page,
+        // which caused a permanent reload loop once a broadcast had ever been
+        // sent. Exclude it here, same as getGpsTrackingRecords() already does.
+        $allDucks = $messages->keys()
+            ->merge($lastCoords->keys())
+            ->reject(fn ($duckId) => $duckId === 'BROADCAST')
+            ->unique();
 
         return $allDucks->mapWithKeys(function ($duckId) use ($messages, $lastCoords) {
             $duckMessages  = $messages->get($duckId, collect());

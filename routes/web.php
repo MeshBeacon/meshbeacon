@@ -23,7 +23,6 @@ Route::post('/telegram/webhook/{secret}', [TelegramWebhookController::class, 'ha
 // Available to guests too, so the login page can be switched before authenticating.
 Route::post('/locale/{locale}', [LocaleController::class, 'update'])->name('locale.update');
 
-
 // Machine-facing health routes do not need a session. Keeping them outside
 // session startup lets liveness remain useful while the database is down.
 $healthMiddleware = [
@@ -94,12 +93,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/messages', [MessageLogController::class, 'index']);
     Route::get('/messages/json', [MessageLogController::class, 'json']);
-    
+
     Route::get('/tak/logs', \App\Livewire\TakLogViewer::class)->name('tak.logs');
     Route::get('/telegram/logs', \App\Livewire\TelegramLogViewer::class)->name('telegram.logs');
 
     Route::get('/system-health', [HealthController::class, 'operations'])->name('system-health');
     Route::get('/system-health/status', [HealthController::class, 'operationsStatus'])->name('system-health.status');
+    Route::post('/system-health/queue/clear-failed', [HealthController::class, 'clearFailedJobs'])
+        ->middleware('can:admin')
+        ->name('system-health.clear-failed');
 });
 
 require __DIR__.'/settings.php';
