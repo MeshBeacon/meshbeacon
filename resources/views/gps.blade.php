@@ -25,12 +25,12 @@
     $gpsReportingCount = $gpsRecords->filter(fn ($r) => ! $r->gps_never_reported)->count();
     $gpsTotalCount     = $gpsRecords->count();
   @endphp
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-y-2">
     <div class="flex items-center gap-3">
       <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Duck GPS Locations') }}</h1>
       <span id="gps-count-summary" class="text-xs text-gray-500 dark:text-gray-400">{{ __(':reporting of :total ducks reporting GPS', ['reporting' => $gpsReportingCount, 'total' => $gpsTotalCount]) }}</span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <el-select id="source-filter" name="source-filter" value="" class="block w-36">
         <button type="button" class="grid w-full cursor-default grid-cols-1 rounded-md bg-gray-100 dark:bg-white/5 py-1.5 pl-3 pr-2 text-left text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-500 sm:text-sm/6">
           <el-selectedcontent class="col-start-1 row-start-1 truncate pr-6">{{ __('All Sources') }}</el-selectedcontent>

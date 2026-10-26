@@ -328,9 +328,12 @@
               <div id="area-chart"></div>
             </div>
 
-            <div class="flow-root w-full lg:w-140 bg-transparent border border-gray-200 dark:border-white/10 m-4 rounded-base shadow-xs p-6 overflow-hidden">
-              <ul role="list" class="-mb-8">
-              </ul>
+            <div class="flex flex-col w-full lg:w-140 bg-transparent border border-gray-200 dark:border-white/10 m-4 rounded-base shadow-xs p-6 overflow-hidden">
+              <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white mb-3 shrink-0">{{ __('Live Feed') }}</h2>
+              <div class="live-feed-wrap flex flex-col flex-1">
+                <ul role="list" class="live-feed-list -mb-8">
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -473,11 +476,23 @@
 
           const commonOptions = buildCommonOptions();
 
+          // Charts start with no series data (only a "Loading…" noData
+          // message), but ApexCharts still draws a datetime x-axis with
+          // placeholder tick labels even when there's nothing to plot.
+          // Start both axes hidden; loadTrendsData() reveals them once real
+          // data comes back, or keeps them hidden if a range genuinely has
+          // no data.
+          const hiddenAxis = {
+            xaxis: { labels: { show: false }, axisTicks: { show: false } },
+            yaxis: { labels: { show: false } },
+          };
+
           const batteryChart = new ApexCharts(batteryEl, {
             ...commonOptions,
             chart: { ...commonOptions.chart, id: 'trends-battery-chart' },
             colors: [successColor, '#F59E0B', '#3B82F6', '#EC4899', '#8B5CF6'],
-            yaxis: { ...commonOptions.yaxis, min: 0, max: 100, tickAmount: 5 }
+            xaxis: { ...commonOptions.xaxis, ...hiddenAxis.xaxis },
+            yaxis: { ...commonOptions.yaxis, min: 0, max: 100, tickAmount: 5, ...hiddenAxis.yaxis }
           });
           batteryChart.render();
 
@@ -485,7 +500,8 @@
             ...commonOptions,
             chart: { ...commonOptions.chart, id: 'trends-rssi-chart' },
             colors: [brandColor, '#10B981', '#F59E0B', '#EC4899', '#8B5CF6'],
-            yaxis: { ...commonOptions.yaxis, min: -130, max: 0, tickAmount: 5, reversed: false }
+            xaxis: { ...commonOptions.xaxis, ...hiddenAxis.xaxis },
+            yaxis: { ...commonOptions.yaxis, min: -130, max: 0, tickAmount: 5, reversed: false, ...hiddenAxis.yaxis }
           });
           rssiChart.render();
 
@@ -525,8 +541,14 @@
             })
               .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
               .then((json) => {
+                const shownAxis = {
+                  xaxis: { labels: { show: true }, axisTicks: { show: true } },
+                  yaxis: { labels: { show: true } },
+                };
+
                 if (json.batterySeries && json.batterySeries.length) {
                   batteryChart.updateSeries(json.batterySeries);
+                  batteryChart.updateOptions(shownAxis, false, true, false);
                 } else {
                   batteryChart.updateSeries([]);
                   // updateSyncedCharts (4th arg) must be false here, otherwise
@@ -534,14 +556,15 @@
                   // share `group: 'trends-sync'` for zoom/pan syncing —
                   // without it, whichever chart's noData text is set last
                   // ends up showing on BOTH charts.
-                  batteryChart.updateOptions({ noData: { text: '{{ __('No battery data available') }}' } }, false, true, false);
+                  batteryChart.updateOptions({ ...hiddenAxis, noData: { text: '{{ __('No battery data available') }}' } }, false, true, false);
                 }
 
                 if (json.rssiSeries && json.rssiSeries.length) {
                   rssiChart.updateSeries(json.rssiSeries);
+                  rssiChart.updateOptions(shownAxis, false, true, false);
                 } else {
                   rssiChart.updateSeries([]);
-                  rssiChart.updateOptions({ noData: { text: '{{ __('No RSSI data available') }}' } }, false, true, false);
+                  rssiChart.updateOptions({ ...hiddenAxis, noData: { text: '{{ __('No RSSI data available') }}' } }, false, true, false);
                 }
               })
               .catch((e) => console.error('Failed to load trends data:', e));

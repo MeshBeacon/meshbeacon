@@ -970,8 +970,20 @@ whenJQueryReady(function () {
                     template.push(templateData);
                 });
 
-                $("div.flow-root ul li").remove();
-                $("div.flow-root ul").html(template.join(""));
+                let $feedLists = $("ul.live-feed-list");
+                let $feedWraps = $(".live-feed-wrap");
+                $feedLists.find("li").remove();
+                if (template.length) {
+                    $feedWraps.removeClass("items-center justify-center");
+                    $feedLists.html(template.join(""));
+                } else {
+                    $feedWraps.addClass("items-center justify-center");
+                    $feedLists.html(
+                        '<li class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">' +
+                            escapeHtml(t('noLiveActivityYet', 'No live activity yet.')) +
+                            '</li>'
+                    );
+                }
 
                 let feed = JSON.stringify(data.data);
                 localStorage.setItem("feed", feed);
@@ -1673,7 +1685,7 @@ whenJQueryReady(function () {
         var $grid = $('#duck-health-grid');
         if (!$grid.length) return;
         if (!ducks.length) {
-            $grid.html('<p class="text-xs italic text-gray-500 dark:text-gray-400">No ducks seen yet.</p>');
+            $grid.html('<p class="text-xs italic text-gray-500 dark:text-gray-400">' + escapeHtml(t('noDucksSeenYet', 'No ducks seen yet.')) + '</p>');
             return;
         }
         var html = '';

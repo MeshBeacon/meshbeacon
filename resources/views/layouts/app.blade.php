@@ -116,6 +116,8 @@
       gpsSatellitesWord: @json(__('satellites')),
       gpsReportingSummary: @json(__(':reporting of :total ducks reporting GPS')),
       noRelayPaths: @json(__('No relay paths recorded yet.')),
+      noDucksSeenYet: @json(__('No ducks seen yet.')),
+      noLiveActivityYet: @json(__('No live activity yet.')),
       // GPS source/badge labels ("Satellite" = the device's own onboard GPS
       // chip, as opposed to a connected phone's GPS) — raw canonical values
       // ('Satellite', 'Phone', 'No Fix', 'No Phone', 'No Data') come straight
@@ -143,6 +145,15 @@
       duckEmptyNoUrgencySub: @json(__('There are currently no active ducks at this urgency level.')),
       noDucksFound: @json(__('No ducks found')),
       tryAdjustingFilter: @json(__('Try adjusting the search or urgency filter.')),
+      reportsNoMessagesInPeriod: @json(__('No messages in this period')),
+      reportsNoRelayDataInPeriod: @json(__('No relay data in this period')),
+      reportsNoData: @json(__('No data')),
+      reportsIncidentCount: @json(__(':count incident(s)')),
+      reportsNoIncidentsMatch: @json(__('No incidents match your search.')),
+      reportsNoIncidentsInPeriod: @json(__('No incidents in this period.')),
+      reportsFailedToLoadIncidents: @json(__('Failed to load incidents.')),
+      reportsCsv: @json(__('CSV')),
+      reportsPrint: @json(__('Print')),
       openInOsm: @json(__('Open in OpenStreetMap')),
       close: @json(__('Close')),
       incidentLocation: @json(__('Incident Location')),

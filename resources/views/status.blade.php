@@ -1,15 +1,15 @@
 <x-layouts::app :title="__('status')">
 @section('page-actions')
-  <div class="flex items-center gap-2">
+  <div class="flex flex-wrap items-center gap-2">
     <button command="show-modal" commandfor="send-duck-dialog"
-      class="inline-flex items-center gap-1.5 rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+      class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path fill-rule="evenodd" d="M1 8.74C1 9.99 2.01 11 3.26 11h1.04l.56 2.8a.75.75 0 0 0 1.46-.2L6.998 11H9.5C10.881 11 12 9.881 12 8.5v-5C12 2.119 10.881 1 9.5 1h-6C2.119 1 1 2.119 1 3.5v5.24ZM13 5.36c.44.17.75.6.75 1.11V8.5a3 3 0 0 1-3 3H9.499l-.044.222A2.75 2.75 0 0 0 12 9.5V4.25c.57.22 1 .77 1 1.11Z" clip-rule="evenodd" />
       </svg>
       {{ __('Send Message to Duck') }}
     </button>
     <button type="button" id="open-broadcast-btn"
-      class="inline-flex items-center gap-1.5 rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+      class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white ring-1 ring-inset ring-red-500 hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892L5.18 9.817a.75.75 0 0 0 .985.985l2.15-.975a2.75 2.75 0 0 0 .892-.596l4.262-4.262a1.75 1.75 0 0 0 0-2.475ZM3.5 6.75A3.25 3.25 0 0 1 6.75 3.5h.75a.75.75 0 0 1 0 1.5h-.75A1.75 1.75 0 0 0 5 6.75v5.5c0 .966.784 1.75 1.75 1.75h5.5A1.75 1.75 0 0 0 14 12.25v-.75a.75.75 0 0 1 1.5 0v.75A3.25 3.25 0 0 1 12.25 15.5h-5.5A3.25 3.25 0 0 1 3.5 12.25v-5.5Z" />
       </svg>
@@ -63,9 +63,9 @@
     <span id="broadcast-toast-msg"></span>
   </div>
 
-  <div class="mb-4 flex items-center justify-between">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-y-2">
     <h1 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Duck Status') }}</h1>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <label class="inline-flex cursor-pointer items-center gap-2 select-none" title="{{ __('Show online ducks only') }}">
         <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ __('Online only') }}</span>
         <div class="relative">

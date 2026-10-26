@@ -2,10 +2,10 @@
 @section('page-actions')
   <div class="flex flex-wrap items-center gap-2">
     <input id="report-from" type="date" value="{{ $from }}"
-      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
+      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white dark:[color-scheme:dark] outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
     <span class="text-sm text-gray-500 dark:text-gray-400">to</span>
     <input id="report-to" type="date" value="{{ $to }}"
-      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
+      class="rounded-md bg-gray-100 dark:bg-white/5 px-3 py-1.5 text-sm text-gray-900 dark:text-white dark:[color-scheme:dark] outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500">
     <button id="report-apply-btn" type="button"
       class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-white/10 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       {{ __('Apply') }}
@@ -18,7 +18,7 @@
       {{ __('CSV') }}
     </a>
     <a id="report-export-print" href="{{ route('reports.print', ['from' => $from, 'to' => $to]) }}" target="_blank"
-      class="inline-flex items-center gap-1.5 rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-gray-900 hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+      class="inline-flex items-center gap-1.5 rounded-md bg-orange-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-orange-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
         <path d="M5 2.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2.5H5V2.5ZM4 6a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h1v1.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V12h1a1 1 0 0 0 1-1V8a2 2 0 0 0-2-2H4Zm2 6v-1h4v1H6Z" />
       </svg>
@@ -146,6 +146,21 @@
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  function t(key, fallback) {
+    const i18n = window.MESHBEACON_I18N;
+    return (i18n && i18n[key]) || fallback;
+  }
+
+  function statusLabel(raw) {
+    switch (raw) {
+      case 'open':         return t('incStatusOpen', 'Open');
+      case 'acknowledged':  return t('incStatusAcknowledged', 'Acknowledged');
+      case 'responding':    return t('incStatusResponding', 'Responding');
+      case 'resolved':      return t('incResolvedFull', 'Resolved');
+      default:              return raw;
+    }
+  }
+
   function formatDuration(seconds) {
     if (seconds === null || seconds === undefined) return '&mdash;';
     if (seconds < 60) return seconds + 's';
@@ -153,48 +168,74 @@
     return (seconds / 3600).toFixed(1) + 'h';
   }
 
+  const isDarkMode = () => document.documentElement.classList.contains('dark');
+
+  function themePalette() {
+    const dark = isDarkMode();
+    return {
+      grid: dark ? '#374151' : '#e5e7eb',
+      label: dark ? '#9ca3af' : '#4b5563',
+      mode: dark ? 'dark' : 'light',
+    };
+  }
+
   let volumeChart = null;
   let hopChart = null;
+  let lastSummary = null;
 
   function renderCharts(summary) {
+    lastSummary = summary;
     const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--color-fg-brand').trim() || '#1447E6';
     // "Inter" is never actually loaded as a webfont anywhere in the app, so
     // requesting it here silently fell back to the browser's generic
     // sans-serif — not the theme's real font. Read the theme's actual
     // computed font-family instead so chart text matches the rest of the UI.
     const themeFontFamily = getComputedStyle(document.body).fontFamily;
+    const palette = themePalette();
 
-    const topDucks   = summary.message_volume.by_duck.slice(0, 10);
+    // Bar charts draw a default numeric y-axis scale and tick marks even
+    // with zero categories/series, which looks like a stray empty axis
+    // behind the "no data" message. Hide both axes' labels/ticks when a
+    // period genuinely has no data, matching the dashboard trend charts.
+    const topDucks     = summary.message_volume.by_duck.slice(0, 10);
+    const hasVolumeData = topDucks.length > 0;
     const volumeOpts = {
-      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily },
+      // ApexCharts' built-in dark theme (triggered by theme.mode below)
+      // paints its own default background, which doesn't match this card's
+      // dark:bg-gray-800/75 — force transparent so the chart blends in.
+      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily, background: 'transparent' },
       series: [{ name: 'Messages', data: topDucks.map(d => d.total) }],
       xaxis: {
         categories: topDucks.map(d => d.duck_id),
-        labels: { style: { colors: '#9ca3af', fontSize: '11px' } },
+        labels: { show: hasVolumeData, style: { colors: palette.label, fontSize: '11px' } },
         axisBorder: { show: false },
-        axisTicks: { show: false },
+        axisTicks: { show: hasVolumeData },
       },
-      yaxis: { labels: { style: { colors: '#9ca3af' } } },
+      yaxis: { labels: { show: hasVolumeData, style: { colors: palette.label } } },
       colors: [brandColor],
-      grid: { borderColor: 'rgba(255,255,255,0.05)' },
+      grid: { borderColor: palette.grid },
+      theme: { mode: palette.mode },
       dataLabels: { enabled: false },
-      noData: { text: 'No messages in this period', style: { color: '#9ca3af' } },
+      noData: { text: t('reportsNoMessagesInPeriod', 'No messages in this period'), style: { color: palette.label } },
     };
 
+    const hopData    = summary.hop_distribution.data || [];
+    const hasHopData = hopData.length > 0;
     const hopOpts = {
-      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily },
-      series: [{ name: 'Messages', data: summary.hop_distribution.data }],
+      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily, background: 'transparent' },
+      series: [{ name: 'Messages', data: hopData }],
       xaxis: {
         categories: summary.hop_distribution.labels,
-        labels: { style: { colors: '#9ca3af', fontSize: '11px' } },
+        labels: { show: hasHopData, style: { colors: palette.label, fontSize: '11px' } },
         axisBorder: { show: false },
-        axisTicks: { show: false },
+        axisTicks: { show: hasHopData },
       },
-      yaxis: { labels: { style: { colors: '#9ca3af' } } },
+      yaxis: { labels: { show: hasHopData, style: { colors: palette.label } } },
       colors: ['#f59e0b'],
-      grid: { borderColor: 'rgba(255,255,255,0.05)' },
+      grid: { borderColor: palette.grid },
+      theme: { mode: palette.mode },
       dataLabels: { enabled: false },
-      noData: { text: 'No relay data in this period', style: { color: '#9ca3af' } },
+      noData: { text: t('reportsNoRelayDataInPeriod', 'No relay data in this period'), style: { color: palette.label } },
     };
 
     if (typeof ApexCharts === 'undefined') return;
@@ -214,11 +255,18 @@
     }
   }
 
+  // ApexCharts renders its grid/axis/legend colors into inline SVG at
+  // creation time, so they don't react to the dark/light theme toggle on
+  // their own. Watch for the `dark` class flipping on <html> and re-render
+  // with the last-loaded data so colors follow the new theme.
+  new MutationObserver(() => { if (lastSummary) renderCharts(lastSummary); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
   function renderDeviceTypeStats(byDuckType) {
     const container = document.getElementById('report-device-type-stats');
     const entries = Object.entries(byDuckType || {});
     if (!entries.length) {
-      container.innerHTML = '<div class="flex items-center justify-between rounded-md bg-gray-100 dark:bg-white/5 px-4 py-3"><dt>No data</dt></div>';
+      container.innerHTML = `<div class="flex items-center justify-between rounded-md bg-gray-100 dark:bg-white/5 px-4 py-3"><dt>${escapeHtml(t('reportsNoData', 'No data'))}</dt></div>`;
       return;
     }
     container.innerHTML = entries.map(([label, count]) => `
@@ -261,32 +309,36 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
 
-      document.getElementById('report-incidents-count').textContent = json.total + ' incident(s)';
+      document.getElementById('report-incidents-count').textContent =
+        t('reportsIncidentCount', ':count incident(s)').replace(':count', json.total);
 
       if (!json.data.length) {
-        body.innerHTML = `<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">${q ? 'No incidents match your search.' : 'No incidents in this period.'}</td></tr>`;
+        const emptyMsg = q
+          ? t('reportsNoIncidentsMatch', 'No incidents match your search.')
+          : t('reportsNoIncidentsInPeriod', 'No incidents in this period.');
+        body.innerHTML = `<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">${escapeHtml(emptyMsg)}</td></tr>`;
         return;
       }
 
       body.innerHTML = json.data.map(inc => `
         <tr>
           <td class="px-3 py-2 text-sm text-gray-900 dark:text-white">${inc.duck_id}</td>
-          <td class="px-3 py-2 text-sm capitalize text-gray-600 dark:text-gray-300">${inc.status}</td>
+          <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">${escapeHtml(statusLabel(inc.status))}</td>
           <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-300">${inc.assigned_to_name ?? '&mdash;'}</td>
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title="${escapeHtml(inc.notes)}">${inc.notes ? escapeHtml(inc.notes) : '&mdash;'}</td>
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${inc.created_at}</td>
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${formatDuration(inc.ack_seconds)}</td>
           <td class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">${formatDuration(inc.resolve_seconds)}</td>
           <td class="px-3 py-2 text-right text-sm">
-            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/export" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">CSV</a>
+            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/export" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">${escapeHtml(t('reportsCsv', 'CSV'))}</a>
             <span class="text-gray-600">&middot;</span>
-            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/print" target="_blank" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">Print</a>
+            <a href="/reports/incidents/${encodeURIComponent(inc.message_id)}/print" target="_blank" class="text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">${escapeHtml(t('reportsPrint', 'Print'))}</a>
           </td>
         </tr>
       `).join('');
     } catch (e) {
       console.error('Failed to load incidents:', e);
-      body.innerHTML = '<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-red-600 dark:text-red-400">Failed to load incidents.</td></tr>';
+      body.innerHTML = `<tr><td colspan="8" class="px-3 py-4 text-center text-sm text-red-600 dark:text-red-400">${escapeHtml(t('reportsFailedToLoadIncidents', 'Failed to load incidents.'))}</td></tr>`;
     }
   }
 

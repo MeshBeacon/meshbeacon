@@ -106,6 +106,8 @@
       gpsSourceLabel: @json(__('Source:')),
       gpsSatellitesWord: @json(__('satellites')),
       noRelayPaths: @json(__('No relay paths recorded yet.')),
+      noDucksSeenYet: @json(__('No ducks seen yet.')),
+      noLiveActivityYet: @json(__('No live activity yet.')),
       openInOsm: @json(__('Open in OpenStreetMap')),
       close: @json(__('Close')),
       historyButton: @json(__('History')),
@@ -406,8 +408,10 @@
       <div class="flex items-center gap-3 mb-3 shrink-0">
         <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">{{ __('Live Feed') }}</h2>
       </div>
-      <div class="flow-root overflow-y-auto min-h-0">
-        <ul role="list" class="-mb-8"></ul>
+      <div class="flex flex-col flex-1 overflow-y-auto min-h-0">
+        <div class="live-feed-wrap flex flex-col flex-1">
+          <ul role="list" class="live-feed-list -mb-8"></ul>
+        </div>
       </div>
     </div>
   </div>
