@@ -158,10 +158,15 @@
 
   function renderCharts(summary) {
     const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--color-fg-brand').trim() || '#1447E6';
+    // "Inter" is never actually loaded as a webfont anywhere in the app, so
+    // requesting it here silently fell back to the browser's generic
+    // sans-serif — not the theme's real font. Read the theme's actual
+    // computed font-family instead so chart text matches the rest of the UI.
+    const themeFontFamily = getComputedStyle(document.body).fontFamily;
 
     const topDucks   = summary.message_volume.by_duck.slice(0, 10);
     const volumeOpts = {
-      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily },
       series: [{ name: 'Messages', data: topDucks.map(d => d.total) }],
       xaxis: {
         categories: topDucks.map(d => d.duck_id),
@@ -177,7 +182,7 @@
     };
 
     const hopOpts = {
-      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+      chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: themeFontFamily },
       series: [{ name: 'Messages', data: summary.hop_distribution.data }],
       xaxis: {
         categories: summary.hop_distribution.labels,

@@ -69,8 +69,12 @@ class StatusController extends Controller
             'id'                  => $r->id,
             'duck_id'             => $r->duck_id,
             'gps_never_reported'  => (bool) $r->gps_never_reported,
-            'gps_source_label'    => $r->gps_never_reported ? __('No Data') : $r->gps_source_label,
-            'gps_badge_label'     => $r->gps_never_reported ? __('No Data') : $r->gps_badge_label,
+            // Kept as raw canonical English values here ('Satellite', 'Phone',
+            // 'No Fix', 'No Phone', 'No Data') — the frontend uses these for
+            // CSS-class selection and source-filter matching, and translates
+            // them for display itself (see gpsLabel() in gps.blade.php).
+            'gps_source_label'    => $r->gps_never_reported ? 'No Data' : $r->gps_source_label,
+            'gps_badge_label'     => $r->gps_never_reported ? 'No Data' : $r->gps_badge_label,
             'gps_fix_zero'     => $r->gps_fix_zero,
             'gps_from_phone'   => $r->gps_from_phone,
             'gps_no_phone'     => $r->gps_no_phone,
@@ -89,7 +93,7 @@ class StatusController extends Controller
             'last_known_hdg'   => ($lastKnownCoords[$r->duck_id] ?? null)?->gps_hdg,
             'last_known_at'    => ($lastKnownCoords[$r->duck_id] ?? null)?->created_at?->diffForHumans(),
             'created_at_for_humans' => $r->created_at->diffForHumans(),
-            'created_at_formatted' => $r->created_at->format('j M Y, H:i'),
+            'created_at_formatted' => $r->created_at->translatedFormat('j M Y, H:i'),
             'poll_enabled'     => ($polls[$r->duck_id] ?? null)?->enabled ?? false,
             'poll_next_at'     => ($polls[$r->duck_id] ?? null)?->next_run_at?->toJSON() ?? null,
             'poll_interval_minutes' => ($polls[$r->duck_id] ?? null)?->interval_minutes ?? 1,

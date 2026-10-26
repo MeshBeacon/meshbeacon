@@ -70,8 +70,12 @@
 @forelse ($gpsRecords as $record)
 @php
   $neverReported = (bool) $record->gps_never_reported;
-  $srcLabel   = $neverReported ? __('No Data') : $record->gps_source_label;
-  $badgeLabel = $neverReported ? __('No Data') : $record->gps_badge_label;
+  // Kept as the raw canonical English values ('Satellite', 'Phone', 'No Fix',
+  // 'No Phone', 'No Data') here — used below for CSS-class matching and as
+  // the source-filter's data-gps-src attribute (which must match the filter
+  // dropdown's raw option values). Translate only at the actual display points.
+  $srcLabel   = $neverReported ? 'No Data' : $record->gps_source_label;
+  $badgeLabel = $neverReported ? 'No Data' : $record->gps_badge_label;
   $badgeClass = match($badgeLabel) {
     'Satellite' => 'rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-semibold text-green-400 ring-1 ring-inset ring-green-500/30',
     'Phone'     => 'rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400 ring-1 ring-inset ring-blue-500/30',
@@ -89,7 +93,7 @@
   <div class="px-4 py-4 sm:px-6 flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record->duck_id }}</span>
-      <span class="{{ $badgeClass }}" data-gps-badge="{{ $record->duck_id }}">{{ $badgeLabel }}</span>
+      <span class="{{ $badgeClass }}" data-gps-badge="{{ $record->duck_id }}">{{ __($badgeLabel) }}</span>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <button type="button"
@@ -132,12 +136,12 @@
   <div class="px-4 py-3 sm:px-6 flex flex-col gap-1.5 grow" data-gps-body="{{ $record->duck_id }}">
     @if ($record->gps_fix_zero)
         @php
-          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix - device active, no phone connected')
-                    : ($record->gps_from_phone ? __('No GPS fix - phone GPS unavailable')
-                    : __('No GPS fix - no satellite signal'));
+          $noFixMsg = $record->gps_no_phone   ? __('No GPS fix — device active, no phone connected')
+                    : ($record->gps_from_phone ? __('No GPS fix — phone GPS unavailable')
+                    : __('No GPS fix — no satellite signal'));
           $lastCoord = $lastKnownCoords[$record->duck_id] ?? null;
         @endphp
-        <div class="grow flex flex-col gap-1.5">
+        <div class="flex flex-col gap-1.5">
           <p class="inline-flex items-center gap-1.5 rounded bg-orange-400/10 px-2 py-1.5 text-xs text-orange-600 dark:text-orange-400">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-3.5 shrink-0">
               <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06L3.28 2.22ZM7 3.064V3a1 1 0 0 1 2 0v.064A5.002 5.002 0 0 1 12.9 7.5h.35a.75.75 0 0 1 0 1.5h-.55a5.003 5.003 0 0 1-1.196 2.547l.543.543a.75.75 0 1 1-1.06 1.06l-.543-.543A5.003 5.003 0 0 1 8.75 13.9V14a.75.75 0 0 1-1.5 0v-.1a5.003 5.003 0 0 1-2.694-1.293l-.543.543a.75.75 0 0 1-1.06-1.06l.543-.543A5.003 5.003 0 0 1 2.3 9H1.75a.75.75 0 0 1 0-1.5H2.1A5.002 5.002 0 0 1 7 3.064Z" clip-rule="evenodd" />
@@ -164,20 +168,20 @@
               <p class="text-xs text-gray-600 mt-0.5">{{ $lastCoord->created_at->diffForHumans() }}</p>
             </div>
           @endif
-        </div>
-        @if ($record->gps_batt !== null)
-          <div class="flex items-start gap-1.5">
-            <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
-            <div class="flex flex-wrap gap-1.5 flex-1">
-              <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
-                {{ $record->gps_batt }}%
-              </span>
+          @if ($record->gps_batt !== null)
+            <div class="mt-0.5 flex items-start gap-1.5">
+              <span class="text-xs text-gray-500 w-10 shrink-0 pt-0.5">{{ __('Device') }}</span>
+              <div class="flex flex-wrap gap-1.5 flex-1">
+                <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium {{ $record->gps_batt < 20 ? 'bg-red-800/60 text-red-300' : ($record->gps_batt < 50 ? 'bg-orange-800/60 text-orange-500 dark:text-orange-300' : 'bg-green-800/60 text-green-300') }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-2.5 shrink-0"><path d="M2 6a2 2 0 0 1 2-2h7.5a.5.5 0 0 1 .5.5v1h.5a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H12v1a.5.5 0 0 1-.5.5H4a2 2 0 0 1-2-2V6Z"/></svg>
+                  {{ $record->gps_batt }}%
+                </span>
+              </div>
             </div>
-          </div>
-        @endif
+          @endif
+        </div>
     @elseif ($record->map_url)
-      <div class="grow flex flex-col gap-1.5">
+      <div class="flex flex-col gap-1.5">
         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Coordinates') }}</p>
         <p class="font-mono text-sm text-gray-900 dark:text-white">{{ $record->gps_lat }}, {{ $record->gps_lng }}</p>
         @if ($record->gps_sats !== null)
@@ -245,7 +249,7 @@
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {{ __('Source:') }} <span class="{{ $record->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ $srcLabel }}</span>
+                    {{ __('Source:') }} <span class="{{ $record->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ __($srcLabel) }}</span>
                     @if ($record->gps_sats !== null)
                       &bull; {{ $record->gps_sats }} {{ __('satellites') }}
                     @endif
@@ -290,7 +294,7 @@
         @endif
         <span class="text-sm text-gray-900 dark:text-white" data-gps-ts="{{ $record->duck_id }}">{{ $record->created_at->diffForHumans() }}</span>
       </div>
-      <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->format('j M Y, H:i') }}</span>
+      <span class="text-xs text-gray-500" data-gps-ts-abs="{{ $record->duck_id }}">{{ $record->created_at->translatedFormat('j M Y, H:i') }}</span>
     </div>
     <div class="flex items-center gap-1.5" data-gps-actions="{{ $record->duck_id }}">
       @unless ($neverReported)
@@ -416,6 +420,21 @@
     if (label === 'Phone')     return 'rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-400 ring-1 ring-inset ring-blue-500/30';
     if (label === 'No Phone')  return 'rounded-full bg-slate-500/20 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-inset ring-slate-500/30';
     return 'rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:text-orange-400 ring-1 ring-inset ring-orange-500/30';
+  }
+
+  // Translates a raw canonical GPS source/badge label ('Satellite', 'Phone',
+  // 'No Fix', 'No Phone', 'No Data') for display. Keep the raw value itself
+  // wherever it's used for CSS-class matching or the data-gps-src filter
+  // attribute — only pass it through here at the point of display.
+  function gpsLabel(raw) {
+    switch (raw) {
+      case 'Satellite': return t('gpsBadgeSatellite', 'Satellite');
+      case 'Phone':      return t('gpsBadgePhone', 'Phone');
+      case 'No Fix':     return t('gpsBadgeNoFix', 'No Fix');
+      case 'No Phone':   return t('gpsBadgeNoPhone', 'No Phone');
+      case 'No Data':    return t('gpsBadgeNoData', 'No Data');
+      default:           return raw;
+    }
   }
 
   // SVG icon paths (Heroicons mini 16-solid)
@@ -558,7 +577,7 @@
             '<el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">' +
               '<div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">' +
                 '<div><h3 class="text-sm font-semibold text-gray-900 dark:text-white">' + escHtml(rec.duck_id) + ' \u2014 ' + escHtml(t('gpsLocationModalTitle', 'GPS Location')) + '</h3>' +
-                '<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + escHtml(t('gpsSourceLabel', 'Source:')) + ' <span class="' + srcCls + '">' + escHtml(rec.gps_source_label) + '</span>' +
+                '<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">' + escHtml(t('gpsSourceLabel', 'Source:')) + ' <span class="' + srcCls + '">' + escHtml(gpsLabel(rec.gps_source_label)) + '</span>' +
                   (rec.gps_sats !== null ? ' &bull; ' + escHtml(rec.gps_sats) + ' ' + escHtml(t('gpsSatellitesWord', 'satellites')) : '') +
                   (rec.gps_alt  !== null && rec.gps_alt !== undefined ? ' &bull; ' + Number(rec.gps_alt).toFixed(1) + ' m &bull; ' + Number(rec.gps_spd || 0).toFixed(1) + ' km/h &bull; ' + Number(rec.gps_hdg || 0).toFixed(1) + '&deg;' : '') +
                 '</p></div>' +
@@ -953,7 +972,7 @@
       '<div class="px-4 py-4 sm:px-6 flex flex-col gap-2">' +
         '<div class="flex items-center justify-between">' +
           '<span class="text-sm font-semibold text-gray-900 dark:text-white">' + escHtml(duckId) + '</span>' +
-          '<span class="' + badgeClass(badgeLbl) + '" data-gps-badge="' + escHtml(duckId) + '">' + escHtml(badgeLbl) + '</span>' +
+          '<span class="' + badgeClass(badgeLbl) + '" data-gps-badge="' + escHtml(duckId) + '">' + escHtml(gpsLabel(badgeLbl)) + '</span>' +
         '</div>' +
         pollToggleBtnHtml(duckId, false, null, rec.poll_interval_minutes || 1) +
       '</div>' +
@@ -1032,7 +1051,7 @@
             if (badgeEl) {
               var lbl = rec.gps_badge_label || rec.gps_source_label;
               badgeEl.className   = badgeClass(lbl);
-              badgeEl.textContent = lbl;
+              badgeEl.textContent = gpsLabel(lbl);
             }
 
             if (card.getAttribute('data-gps-record-id') !== String(rec.id)) {
@@ -1084,7 +1103,8 @@
         if (summaryEl) {
           var total     = Object.keys(data).length;
           var reporting = Object.values(data).filter(function (r) { return !r.gps_never_reported; }).length;
-          summaryEl.textContent = reporting + ' of ' + total + ' ducks reporting GPS';
+          summaryEl.textContent = t('gpsReportingSummary', ':reporting of :total ducks reporting GPS')
+            .replace(':reporting', reporting).replace(':total', total);
         }
       })
       .catch(function () {});

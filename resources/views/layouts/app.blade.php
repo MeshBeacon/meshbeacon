@@ -50,6 +50,11 @@
       hasOfflineMap: {{ $hasOfflineMap ? 'true' : 'false' }},
       maxNativeZoom: {{ $maxNativeZoom }},
     };
+    // The app's chosen UI language (not the visitor's browser language) —
+    // used by Date#toLocaleString() calls in app.js so month/day names in
+    // on-page timestamps match the rest of the translated UI, instead of
+    // silently following whatever locale the browser happens to be set to.
+    window.MESHBEACON_LOCALE = @json(app()->getLocale() === 'ms' ? 'ms-MY' : 'en-US');
   </script>
   {{-- Translation strings needed by app.js's client-side live polling (duck
        card body, GPS warnings, Online/Offline badge, incident badges, and
@@ -109,6 +114,34 @@
       gpsLocationModalTitle: @json(__('GPS Location')),
       gpsSourceLabel: @json(__('Source:')),
       gpsSatellitesWord: @json(__('satellites')),
+      gpsReportingSummary: @json(__(':reporting of :total ducks reporting GPS')),
+      // GPS source/badge labels ("Satellite" = the device's own onboard GPS
+      // chip, as opposed to a connected phone's GPS) — raw canonical values
+      // ('Satellite', 'Phone', 'No Fix', 'No Phone', 'No Data') come straight
+      // from the ClusterData model/API and are used as-is for CSS-class
+      // selection and source-filter matching, so they must stay untranslated
+      // there; these keys translate them only at display time.
+      gpsBadgeSatellite: @json(__('Satellite')),
+      gpsBadgePhone: @json(__('Phone')),
+      gpsBadgeNoFix: @json(__('No Fix')),
+      gpsBadgeNoPhone: @json(__('No Phone')),
+      gpsBadgeNoData: @json(__('No Data')),
+      incWithIncident: @json(__('With Incident')),
+      incStatusOpen: @json(__('Open')),
+      incStatusAcknowledged: @json(__('Acknowledged')),
+      incStatusResponding: @json(__('Responding')),
+      duckEmptyNoneDetected: @json(__('No ducks detected')),
+      duckEmptyNoneDetectedSub: @json(__('No MamaDuck or PapaDuck has checked in yet.')),
+      duckEmptyNoIncident: @json(__('No ducks with :label incident')),
+      duckEmptyNoIncidentSub: @json(__('There are no active incidents at this status.')),
+      duckEmptyNoOnline: @json(__('No online ducks')),
+      duckEmptyNoOnlineSub: @json(__('All ducks are currently offline.')),
+      duckEmptyNoMatch: @json(__('No ducks matching ":query"')),
+      duckEmptyNoMatchSub: @json(__('Try a different duck ID.')),
+      duckEmptyNoUrgency: @json(__('No ducks with :label urgency')),
+      duckEmptyNoUrgencySub: @json(__('There are currently no active ducks at this urgency level.')),
+      noDucksFound: @json(__('No ducks found')),
+      tryAdjustingFilter: @json(__('Try adjusting the search or urgency filter.')),
       openInOsm: @json(__('Open in OpenStreetMap')),
       close: @json(__('Close')),
       incidentLocation: @json(__('Incident Location')),
@@ -409,13 +442,18 @@ const chartEl = document.getElementById("area-chart");
 if (chartEl && typeof ApexCharts !== 'undefined') {
   const computedStyle = getComputedStyle(document.documentElement);
   const brandColor = computedStyle.getPropertyValue('--color-fg-brand').trim() || "#1447E6";
+  // "Inter" is never actually loaded as a webfont anywhere in the app, so
+  // requesting it here silently fell back to the browser's generic
+  // sans-serif — not the theme's real font. Read the theme's actual
+  // computed font-family instead so the chart text matches the rest of the UI.
+  const themeFontFamily = getComputedStyle(document.body).fontFamily;
 
   const options = {
     chart: {
       height: "100%",
       maxWidth: "100%",
       type: "area",
-      fontFamily: "Inter, sans-serif",
+      fontFamily: themeFontFamily,
       dropShadow: { enabled: false },
       toolbar: { show: false },
       animations: { enabled: true },

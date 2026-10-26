@@ -386,6 +386,11 @@
           const computedStyle = getComputedStyle(document.documentElement);
           const brandColor = computedStyle.getPropertyValue('--color-fg-brand').trim() || "#1447E6";
           const successColor = computedStyle.getPropertyValue('--color-fg-success').trim() || "#10B981";
+          // "Inter" is never actually loaded as a webfont anywhere in the app,
+          // so requesting it here silently fell back to the browser's generic
+          // sans-serif — not the theme's real font. Read the theme's actual
+          // computed font-family instead so chart text matches the rest of the UI.
+          const themeFontFamily = getComputedStyle(document.body).fontFamily;
 
           const isDarkMode = () => document.documentElement.classList.contains('dark');
 
@@ -405,7 +410,7 @@
               chart: {
                 height: 280,
                 type: "line",
-                fontFamily: "Inter, sans-serif",
+                fontFamily: themeFontFamily,
                 dropShadow: { enabled: false },
                 toolbar: { show: false },
                 animations: { enabled: true },
@@ -414,6 +419,12 @@
                 // the time axis on one applies the same range to the other.
                 group: 'trends-sync'
               },
+              // Without an explicit `series` key here, `w.config.series` stays
+              // `undefined` until the first `updateSeries()` call, which
+              // crashes ApexCharts' internal `create()` ("Cannot read
+              // properties of undefined (reading 'forEach')") as soon as
+              // `.render()` or `.updateOptions()` runs beforehand.
+              series: [],
               stroke: { width: 3, curve: 'smooth' },
               grid: {
                 show: true,
@@ -491,7 +502,11 @@
               legend: opts.legend,
               theme: opts.theme,
               tooltip: opts.tooltip,
-              noData: opts.noData,
+              // Deliberately omit `text` here (only carry over the style) so
+              // refreshing the theme doesn't stomp on whichever no-data
+              // message ( "No battery/RSSI data available" vs the initial
+              // "Loading…" ) is currently showing on each chart.
+              noData: { style: opts.noData.style },
             };
             batteryChart.updateOptions(themedOptions, false, false);
             rssiChart.updateOptions(themedOptions, false, false);
@@ -514,14 +529,19 @@
                   batteryChart.updateSeries(json.batterySeries);
                 } else {
                   batteryChart.updateSeries([]);
-                  batteryChart.updateOptions({ noData: { text: '{{ __('No battery data available') }}' } });
+                  // updateSyncedCharts (4th arg) must be false here, otherwise
+                  // this propagates to the RSSI chart too since both charts
+                  // share `group: 'trends-sync'` for zoom/pan syncing —
+                  // without it, whichever chart's noData text is set last
+                  // ends up showing on BOTH charts.
+                  batteryChart.updateOptions({ noData: { text: '{{ __('No battery data available') }}' } }, false, true, false);
                 }
 
                 if (json.rssiSeries && json.rssiSeries.length) {
                   rssiChart.updateSeries(json.rssiSeries);
                 } else {
                   rssiChart.updateSeries([]);
-                  rssiChart.updateOptions({ noData: { text: '{{ __('No RSSI data available') }}' } });
+                  rssiChart.updateOptions({ noData: { text: '{{ __('No RSSI data available') }}' } }, false, true, false);
                 }
               })
               .catch((e) => console.error('Failed to load trends data:', e));

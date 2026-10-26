@@ -459,7 +459,7 @@ class ClusterDataService
                 'spd'        => $r->gps_spd,
                 'source'     => $r->gps_from_phone ? 'Phone' : 'Satellite',
                 'created_at' => $r->created_at->toJSON(),
-                'label'      => $r->created_at->format('j M, H:i'),
+                'label'      => $r->created_at->translatedFormat('j M, H:i'),
             ])
             ->values()
             ->toArray();

@@ -31,6 +31,9 @@
     $maxNativeZoom = $mbtilesService->getMaxNativeZoom($mbtilesPath);
   @endphp
   <script>
+    // See layouts/app.blade.php for why this is needed (kiosk doesn't extend
+    // that layout, so it must expose the same global itself).
+    window.MESHBEACON_LOCALE = @json(app()->getLocale() === 'ms' ? 'ms-MY' : 'en-US');
     window.MESHBEACON_MAP_CONFIG = {
       localUrl: '/tiles/{z}/{x}/{y}.pbf',
       osmUrls: [

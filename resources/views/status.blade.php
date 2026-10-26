@@ -349,7 +349,7 @@
                 <div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $mamaduck->duck_id }} &mdash; {{ __('GPS Location') }}</h3>
                   <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" data-map-subtitle>
-                    {{ __('Source:') }} <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ $mamaduck->gps_source_label }}</span>
+                    {{ __('Source:') }} <span class="{{ $mamaduck->gps_from_phone ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400' }}">{{ __($mamaduck->gps_source_label) }}</span>
                     @if ($mamaduck->gps_sats !== null)
                       &bull; {{ $mamaduck->gps_sats }} {{ __('satellites') }}
                     @endif
@@ -529,7 +529,16 @@
 </div>
 
 <script>
-  var urgencyLabels = { '0': 'Low', '1': 'Medium', '2': 'Critical' };
+  function t(key, fallback) {
+    var i18n = window.MESHBEACON_I18N;
+    return (i18n && i18n[key]) || fallback;
+  }
+
+  var urgencyLabels = {
+    '0': t('urgencyLow', 'Low'),
+    '1': t('urgencyMedium', 'Medium'),
+    '2': t('urgencyCritical', 'Critical'),
+  };
 
   function applyFilters() {
     var q          = document.getElementById('duck-search').value.trim().toLowerCase();
@@ -571,7 +580,12 @@
     var title = document.getElementById('duck-empty-title');
     var sub   = document.getElementById('duck-empty-sub');
 
-    var incLabels = { any: 'With Incident', open: 'Open', acknowledged: 'Acknowledged', responding: 'Responding' };
+    var incLabels = {
+      any: t('incWithIncident', 'With Incident'),
+      open: t('incStatusOpen', 'Open'),
+      acknowledged: t('incStatusAcknowledged', 'Acknowledged'),
+      responding: t('incStatusResponding', 'Responding'),
+    };
 
     if (visible === 0) {
       empty.classList.remove('hidden');
@@ -579,23 +593,23 @@
         // No ducks exist at all (not a filter side-effect) - same style of
         // message as the "Online only" empty state, since there's nothing
         // for the user to adjust here.
-        title.textContent = 'No ducks detected';
-        sub.textContent   = 'No MamaDuck or PapaDuck has checked in yet.';
+        title.textContent = t('duckEmptyNoneDetected', 'No ducks detected');
+        sub.textContent   = t('duckEmptyNoneDetectedSub', 'No MamaDuck or PapaDuck has checked in yet.');
       } else if (inc !== '') {
-        title.textContent = 'No ducks with ' + (incLabels[inc] || inc) + ' incident';
-        sub.textContent   = 'There are no active incidents at this status.';
+        title.textContent = t('duckEmptyNoIncident', 'No ducks with :label incident').replace(':label', incLabels[inc] || inc);
+        sub.textContent   = t('duckEmptyNoIncidentSub', 'There are no active incidents at this status.');
       } else if (onlineOnly && q === '' && u === '') {
-        title.textContent = 'No online ducks';
-        sub.textContent   = 'All ducks are currently offline.';
+        title.textContent = t('duckEmptyNoOnline', 'No online ducks');
+        sub.textContent   = t('duckEmptyNoOnlineSub', 'All ducks are currently offline.');
       } else if (q !== '' && u === '') {
-        title.textContent = 'No ducks matching "' + q + '"';
-        sub.textContent   = 'Try a different duck ID.';
+        title.textContent = t('duckEmptyNoMatch', 'No ducks matching ":query"').replace(':query', q);
+        sub.textContent   = t('duckEmptyNoMatchSub', 'Try a different duck ID.');
       } else if (q === '' && u !== '') {
-        title.textContent = 'No ducks with ' + (urgencyLabels[u] || u) + ' urgency';
-        sub.textContent   = 'There are currently no active ducks at this urgency level.';
+        title.textContent = t('duckEmptyNoUrgency', 'No ducks with :label urgency').replace(':label', urgencyLabels[u] || u);
+        sub.textContent   = t('duckEmptyNoUrgencySub', 'There are currently no active ducks at this urgency level.');
       } else {
-        title.textContent = 'No ducks found';
-        sub.textContent   = 'Try adjusting the search or urgency filter.';
+        title.textContent = t('noDucksFound', 'No ducks found');
+        sub.textContent   = t('tryAdjustingFilter', 'Try adjusting the search or urgency filter.');
       }
     } else {
       empty.classList.add('hidden');
@@ -704,8 +718,8 @@
   // on load would apply that leftover state and hide ducks that should be
   // shown by default. Ducks should always load unfiltered on first view.
   if (document.querySelectorAll('#duck-cards-container [data-duck-id]').length === 0) {
-    document.getElementById('duck-empty-title').textContent = 'No ducks detected';
-    document.getElementById('duck-empty-sub').textContent   = 'No MamaDuck or PapaDuck has checked in yet.';
+    document.getElementById('duck-empty-title').textContent = t('duckEmptyNoneDetected', 'No ducks detected');
+    document.getElementById('duck-empty-sub').textContent   = t('duckEmptyNoneDetectedSub', 'No MamaDuck or PapaDuck has checked in yet.');
     document.getElementById('duck-empty-state').classList.remove('hidden');
   }
 
