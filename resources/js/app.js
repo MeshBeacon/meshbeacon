@@ -1252,14 +1252,24 @@ whenJQueryReady(function () {
                     var msgText = inc.display_text
                         ? '<span style="word-break:break-word;overflow-wrap:break-word;">' + escapeHtml(inc.display_text) + '</span>'
                         : '<span class="text-gray-500 dark:text-gray-400" style="font-style:italic;">' + t('noMessage', 'No message') + '</span>';
+                    // In-app map modal rather than an external link: this panel
+                    // is used for disaster/offline-first operations, where a
+                    // "View on Map" link that navigates to openstreetmap.org
+                    // would just fail/spin when there's no connectivity. The
+                    // modal reuses window.createMeshBeaconMap, which already
+                    // falls back to installed offline vector tiles when offline
+                    // (see meshBeaconMapStyle()). The external OSM link is kept
+                    // inside the modal only as a secondary, online-only option.
                     var mapBtn = "";
                     if (inc.map_url) {
                         mapBtn =
-                            '<a href="' + escapeHtml(inc.map_url) + '" target="_blank" rel="noopener noreferrer" ' +
-                            'class="bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-indigo-600 dark:text-indigo-300 transition-colors" ' +
-                            'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;font-size:0.75rem;font-weight:500;text-decoration:none;">' +
+                            '<button type="button" class="inc-map-btn bg-gray-900/5 hover:bg-gray-900/10 dark:bg-white/10 dark:hover:bg-white/15 text-indigo-600 dark:text-indigo-300 transition-colors" ' +
+                            'command="show-modal" commandfor="incident-map-dialog" ' +
+                            'data-lat="' + escapeHtml(inc.gps_lat || '') + '" data-lng="' + escapeHtml(inc.gps_lng || '') + '" ' +
+                            'data-map-url="' + escapeHtml(inc.map_url) + '" data-duck="' + escapeHtml(inc.duck_id) + '" ' +
+                            'style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.5rem;padding:0.25rem 0.625rem;border-radius:0.375rem;font-size:0.75rem;font-weight:500;border:none;cursor:pointer;">' +
                             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0;"><path fill-rule="evenodd" d="M8 1a5 5 0 0 1 5 5c0 2.813-2.45 5.714-4.168 7.603a1.145 1.145 0 0 1-1.664 0C5.45 11.714 3 8.813 3 6a5 5 0 0 1 5-5Zm0 6.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clip-rule="evenodd"/></svg>' +
-                            t('viewOnMap', 'View on Map') + '</a>';
+                            t('viewOnMap', 'View on Map') + '</button>';
                     }
 
                     // Assignment + notes row (available regardless of status
@@ -1412,6 +1422,59 @@ whenJQueryReady(function () {
                 }, 3000);
             }
         });
+    });
+
+    // "View on Map" — shows the incident location in the shared offline-
+    // capable map modal (#incident-map-dialog, markup lives on whichever
+    // page renders #incidents-list: dashboard.blade.php / kiosk.blade.php).
+    // Opening the <dialog> itself is handled declaratively by the button's
+    // command="show-modal" attribute; this handler only has to populate it.
+    var incidentMapInstance = null;
+    var incidentMapMarker   = null;
+    var incidentMapCenter   = null;
+    $(document).on('click', '.inc-map-btn', function () {
+        var $btn    = $(this);
+        var lat     = parseFloat($btn.data('lat'));
+        var lng     = parseFloat($btn.data('lng'));
+        var duckId  = $btn.data('duck') || '';
+        var mapUrl  = $btn.data('map-url') || '';
+        var $title  = $('#incident-map-dialog-title');
+        var $sub    = $('#incident-map-dialog-subtitle');
+        var $osm    = $('#incident-map-dialog-osm-link');
+        var mapEl   = document.getElementById('incident-map-dialog-map');
+
+        $title.text(duckId ? duckId + ' \u2014 ' + t('incidentLocation', 'Incident Location') : t('incidentLocation', 'Incident Location'));
+        $sub.text((!isNaN(lat) && !isNaN(lng)) ? lat.toFixed(5) + ', ' + lng.toFixed(5) : '');
+        if (mapUrl) {
+            $osm.attr('href', mapUrl).removeClass('hidden');
+        } else {
+            $osm.addClass('hidden');
+        }
+
+        if (!mapEl || isNaN(lat) || isNaN(lng) || !window.createMeshBeaconMap) return;
+        incidentMapCenter = [lng, lat];
+
+        // The dialog is hidden (display:none) at the moment this handler
+        // runs, so MapLibre can't measure the container yet — defer init
+        // until just after the <dialog> has actually opened, mirroring the
+        // lazy-init pattern used by gps.blade.php's per-record map dialogs.
+        setTimeout(function () {
+            if (!incidentMapInstance) {
+                // Zoom +/- and a recenter-on-marker button, same as the
+                // other embedded maps in the app — a single-point modal
+                // still benefits from these when operators pan/zoom around
+                // to check nearby terrain/roads.
+                incidentMapInstance = window.createMeshBeaconMap(mapEl, { center: incidentMapCenter, zoom: 15 });
+                incidentMapInstance.addControl(new window.MeshBeaconRecenterControl(function () {
+                    incidentMapInstance.flyTo({ center: incidentMapCenter, zoom: 15 });
+                }), 'top-left');
+                incidentMapMarker = new maplibregl.Marker({ color: '#dc2626' }).setLngLat(incidentMapCenter).addTo(incidentMapInstance);
+            } else {
+                incidentMapInstance.jumpTo({ center: incidentMapCenter, zoom: 15 });
+                incidentMapMarker.setLngLat(incidentMapCenter);
+            }
+            incidentMapInstance.resize();
+        }, 50);
     });
 
     // Assign an incident to a responder

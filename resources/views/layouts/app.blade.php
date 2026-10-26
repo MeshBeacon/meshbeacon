@@ -110,6 +110,7 @@
       gpsSatellitesWord: @json(__('satellites')),
       openInOsm: @json(__('Open in OpenStreetMap')),
       close: @json(__('Close')),
+      incidentLocation: @json(__('Incident Location')),
       historyButton: @json(__('History')),
       requestButton: @json(__('Request')),
       requesting: @json(__('Requesting…')),

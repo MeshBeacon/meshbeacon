@@ -53,6 +53,39 @@
   </div>
 </div>
 
+{{-- Incident location modal — shown in-app via an embedded MapLibre map
+     (offline vector tiles when installed/offline, see createMeshBeaconMap)
+     rather than navigating out to openstreetmap.org. This matters for
+     disaster/offline-first operation: an external link is useless with no
+     connectivity. "Open in OpenStreetMap" is kept only as a secondary,
+     online-only convenience link. Markup lives here; the delegated click
+     handler that populates it (.inc-map-btn) is in app.js. --}}
+<el-dialog>
+  <dialog id="incident-map-dialog" class="fixed inset-0 m-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent">
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-50 dark:bg-gray-900/75 transition-opacity data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in"></el-dialog-backdrop>
+    <div tabindex="0" class="flex min-h-full items-center justify-center p-4 focus:outline focus:outline-0">
+      <el-dialog-panel class="relative w-full max-w-2xl overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl outline outline-1 -outline-offset-1 outline-gray-200 dark:outline-white/10 transition-all data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-200 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:scale-95">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-white/10">
+          <div>
+            <h3 id="incident-map-dialog-title" class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Incident Location') }}</h3>
+            <p id="incident-map-dialog-subtitle" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-mono"></p>
+          </div>
+          <button command="close" commandfor="incident-map-dialog" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-white text-lg leading-none">&times;</button>
+        </div>
+        <div class="w-full h-96">
+          <div id="incident-map-dialog-map" class="w-full h-full"></div>
+        </div>
+        <div class="flex justify-end gap-3 px-4 py-3 border-t border-gray-200 dark:border-white/10">
+          <a id="incident-map-dialog-osm-link" href="#" target="_blank" rel="noopener noreferrer"
+             class="hidden text-xs text-orange-600 dark:text-orange-400 hover:text-orange-500 dark:text-orange-300">{{ __('Open in OpenStreetMap') }} &rarr;</a>
+          <button command="close" commandfor="incident-map-dialog"
+             class="rounded-md bg-gray-200 dark:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-900 dark:text-white hover:bg-white/20">{{ __('Close') }}</button>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+
 {{-- Overview - combined device counts + incident SLA into a single KPI
      strip instead of two separate stat grids, to reduce visual duplication.
      2 columns on mobile, up to 6 across on large screens. --}}

@@ -184,6 +184,8 @@ class ClusterDataService
                     'sos_from_device' => $cluster->sos_from_device,
                     'sos_from_mobile' => $cluster->sos_from_mobile,
                     'map_url'         => $cluster->map_url,
+                    'gps_lat'         => $cluster->gps_lat,
+                    'gps_lng'         => $cluster->gps_lng,
                     'created_at'      => $cluster->created_at,
                 ];
             });
