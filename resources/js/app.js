@@ -1727,7 +1727,7 @@ whenJQueryReady(function () {
         var $list = $('#topology-list');
         if (!$list.length) return;
         if (!items.length) {
-            $list.html('<p class="text-xs italic text-gray-500 dark:text-gray-400">No relay paths recorded yet.</p>');
+            $list.html('<p class="text-xs italic text-gray-500 dark:text-gray-400">' + escapeHtml(t('noRelayPaths', 'No relay paths recorded yet.')) + '</p>');
             return;
         }
         var html = '<div style="display:flex;flex-direction:column;gap:6px;">';

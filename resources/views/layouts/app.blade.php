@@ -115,6 +115,7 @@
       gpsSourceLabel: @json(__('Source:')),
       gpsSatellitesWord: @json(__('satellites')),
       gpsReportingSummary: @json(__(':reporting of :total ducks reporting GPS')),
+      noRelayPaths: @json(__('No relay paths recorded yet.')),
       // GPS source/badge labels ("Satellite" = the device's own onboard GPS
       // chip, as opposed to a connected phone's GPS) — raw canonical values
       // ('Satellite', 'Phone', 'No Fix', 'No Phone', 'No Data') come straight

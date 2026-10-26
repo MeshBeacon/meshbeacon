@@ -105,6 +105,7 @@
       gpsLocationModalTitle: @json(__('GPS Location')),
       gpsSourceLabel: @json(__('Source:')),
       gpsSatellitesWord: @json(__('satellites')),
+      noRelayPaths: @json(__('No relay paths recorded yet.')),
       openInOsm: @json(__('Open in OpenStreetMap')),
       close: @json(__('Close')),
       historyButton: @json(__('History')),
