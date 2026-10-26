@@ -78,12 +78,59 @@ function meshBeaconOfflineVectorStyle(cfg) {
                 type: "fill",
                 source: SRC,
                 "source-layer": "landcover",
+                // OpenMapTiles `landcover.class`: farmland, ice, wood, rock, grass,
+                // wetland, sand (https://openmaptiles.org/docs/schema/#landcover).
                 paint: {
-                    "fill-color": ["match", ["get", "class"], "wood", "#d4e4c8", "grass", "#d7ecc6", "#e3efd3"],
+                    "fill-color": [
+                        "match",
+                        ["get", "class"],
+                        "wood", "#d4e4c8",
+                        "grass", "#d7ecc6",
+                        "farmland", "#eef0d7",
+                        "wetland", "#c8e4dc",
+                        "sand", "#f2ecd2",
+                        "rock", "#d8d4cc",
+                        "ice", "#eef2f5",
+                        "#e3efd3",
+                    ],
                     "fill-opacity": 0.6,
                 },
             },
-            { id: "landuse", type: "fill", source: SRC, "source-layer": "landuse", paint: { "fill-color": "#e8e4dd", "fill-opacity": 0.5 } },
+            {
+                id: "landuse",
+                type: "fill",
+                source: SRC,
+                "source-layer": "landuse",
+                // OpenMapTiles `landuse.class` carries a lot more than generic
+                // "land" — residential/commercial/industrial zoning, cemeteries,
+                // hospitals/schools, sports grounds, parking — all useful context
+                // for disaster ops (e.g. spotting a hospital or school near an
+                // incident). See https://openmaptiles.org/docs/schema/#landuse.
+                paint: {
+                    "fill-color": [
+                        "match",
+                        ["get", "class"],
+                        "residential", "#e3dfd6",
+                        "commercial", "#f6dfdc",
+                        "retail", "#f6e4d8",
+                        "industrial", "#e8dfe6",
+                        "garages", "#e0e0e0",
+                        "cemetery", "#cddcc8",
+                        "military", "#f1c9c9",
+                        "hospital", "#fbe3e3",
+                        "school", "#fdf1c8",
+                        "university", "#fdf1c8",
+                        "college", "#fdf1c8",
+                        "kindergarten", "#fdf1c8",
+                        "stadium", "#d8f0d0",
+                        "pitch", "#d8f0d0",
+                        "playground", "#d8f0d0",
+                        "track", "#d8f0d0",
+                        "#e8e4dd",
+                    ],
+                    "fill-opacity": 0.5,
+                },
+            },
             { id: "park", type: "fill", source: SRC, "source-layer": "park", paint: { "fill-color": "#cdebc6", "fill-opacity": 0.6 } },
             { id: "water", type: "fill", source: SRC, "source-layer": "water", paint: { "fill-color": "#a6cbe3" } },
             {
@@ -116,7 +163,9 @@ function meshBeaconOfflineVectorStyle(cfg) {
                 source: SRC,
                 "source-layer": "building",
                 minzoom: 13,
-                paint: { "fill-color": "#dcd3c7", "fill-outline-color": "#c9bdaf" },
+                // Use the OSM building:colour tag (`colour` property) when the
+                // tileset includes it, falling back to the neutral default.
+                paint: { "fill-color": ["coalesce", ["get", "colour"], "#dcd3c7"], "fill-outline-color": "#c9bdaf" },
             },
             {
                 id: "boundary",
@@ -143,6 +192,10 @@ function meshBeaconOfflineVectorStyle(cfg) {
                 type: "line",
                 source: SRC,
                 "source-layer": "transportation",
+                // Service/track/path-family roads get their own dashed layer
+                // below (with a higher minzoom, to avoid clutter) so exclude
+                // them here to prevent drawing the same geometry twice.
+                filter: ["!", ["in", ["get", "class"], ["literal", ["path", "track", "service", "raceway", "busway"]]]],
                 layout: { "line-join": "round", "line-cap": "round" },
                 paint: {
                     "line-color": [
@@ -156,11 +209,38 @@ function meshBeaconOfflineVectorStyle(cfg) {
                         "#f9d27a",
                         "secondary",
                         "#fcebaf",
+                        "tertiary",
+                        "#fcebaf",
                         "rail",
                         "#9a9a9a",
                         "#ffffff",
                     ],
                     "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.3, 14, 4],
+                },
+            },
+            {
+                id: "transportation-path",
+                type: "line",
+                source: SRC,
+                "source-layer": "transportation",
+                // Minor/unpaved/foot roads (OpenMapTiles `transportation.class`
+                // path/track/service, `.subclass` footway/cycleway/steps) — kept
+                // off until a closer zoom since they add a lot of visual noise
+                // at city-wide scale.
+                filter: ["in", ["get", "class"], ["literal", ["path", "track", "service"]]],
+                minzoom: 14,
+                layout: { "line-join": "round", "line-cap": "round" },
+                paint: {
+                    "line-color": [
+                        "match",
+                        ["get", "subclass"],
+                        "footway", "#c88a5a",
+                        "cycleway", "#5a9bc8",
+                        "steps", "#c88a5a",
+                        "#b5b0a8",
+                    ],
+                    "line-width": ["interpolate", ["linear"], ["zoom"], 14, 0.75, 18, 2.5],
+                    "line-dasharray": [2, 1.5],
                 },
             },
             {
@@ -244,6 +324,22 @@ function meshBeaconOfflineVectorStyle(cfg) {
                     "text-max-width": 8,
                 },
                 paint: { "text-color": "#2d2d2d", "text-halo-color": "#ffffff", "text-halo-width": 1.2 },
+            },
+            {
+                // Airport names/IATA codes — useful for evacuation/logistics
+                // planning. https://openmaptiles.org/docs/schema/#aerodrome_label
+                id: "aerodrome-label",
+                type: "symbol",
+                source: SRC,
+                "source-layer": "aerodrome_label",
+                minzoom: 10,
+                layout: {
+                    "text-field": ["coalesce", ["get", "name"], ["get", "iata"]],
+                    "text-size": 11,
+                    "text-offset": [0, 0.8],
+                    "text-anchor": "top",
+                },
+                paint: { "text-color": "#4a5a8a", "text-halo-color": "#ffffff", "text-halo-width": 1 },
             },
         ],
     };
@@ -1199,7 +1295,7 @@ whenJQueryReady(function () {
                     // (may mean the ACK isn't reaching the device).
                     var retransCount = inc.retransmission_count || 1;
                     var retransBadge = retransCount > 1
-                        ? '<span title="' + retransCount + ' SOS transmissions received for this incident" ' +
+                        ? '<span title="' + escapeHtml(t('incRetransTitle', ':count SOS transmissions received for this incident').replace(':count', retransCount)) + '" ' +
                           'class="text-[0.65rem] px-1.5 py-px rounded-sm font-semibold bg-black/5 dark:bg-white/10 text-gray-700 dark:text-gray-200">\u00d7' + retransCount + '</span>'
                         : '';
 

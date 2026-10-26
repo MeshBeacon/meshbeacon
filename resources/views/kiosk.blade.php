@@ -92,6 +92,7 @@
       viewOnMap: @json(__('View on Map')),
       gpsCoordinates: @json(__('Coordinates')),
       gpsSatellitesInView: @json(__(':count satellites in view')),
+      incRetransTitle: @json(__(':count SOS transmissions received for this incident')),
       gpsLastKnownCoordinates: @json(__('Last known coordinates')),
       gpsNoFixDeviceActive: @json(__('No GPS fix — device active, no phone connected')),
       gpsNoFixPhoneUnavailable: @json(__('No GPS fix — phone GPS unavailable')),
