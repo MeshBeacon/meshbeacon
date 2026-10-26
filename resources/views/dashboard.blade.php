@@ -395,6 +395,22 @@
           // computed font-family instead so chart text matches the rest of the UI.
           const themeFontFamily = getComputedStyle(document.body).fontFamily;
 
+          // ApexCharts formats datetime axis/tooltip labels ('MMM' etc.) using
+          // its own internal locale data (default: English month names), which
+          // doesn't follow the app's chosen language on its own. Register a
+          // Malay locale (values match ApexCharts' own bundled ms.json) and
+          // select it when the app's locale is Malay, so e.g. "Oct" becomes "Okt".
+          const msChartLocale = {
+            name: 'ms',
+            options: {
+              months: ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'],
+              shortMonths: ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogos', 'Sep', 'Okt', 'Nov', 'Dis'],
+              days: ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'],
+              shortDays: ['Ahd', 'Isn', 'Sel', 'Rab', 'Kha', 'Jum', 'Sab'],
+            },
+          };
+          const chartLocaleName = window.MESHBEACON_LOCALE === 'ms-MY' ? 'ms' : 'en';
+
           const isDarkMode = () => document.documentElement.classList.contains('dark');
 
           function themePalette() {
@@ -414,6 +430,8 @@
                 height: 280,
                 type: "line",
                 fontFamily: themeFontFamily,
+                locales: [msChartLocale],
+                defaultLocale: chartLocaleName,
                 dropShadow: { enabled: false },
                 toolbar: { show: false },
                 animations: { enabled: true },
