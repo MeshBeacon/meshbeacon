@@ -266,6 +266,7 @@
         }
 
         var initialFitDone = false;
+        var knownDuckIds = new Set();
 
         function addDuckLayers(geojson) {
           map.addSource('duck-pins', {
@@ -348,6 +349,8 @@
           .then(function (pins) {
             var features = [];
             var bounds = null;
+            var newUnseenOutsideView = false;
+            var mapBounds = (initialFitDone && map.isStyleLoaded()) ? map.getBounds() : null;
 
             pins.forEach(function (duck) {
               var lat = duck.lat;
@@ -371,6 +374,18 @@
 
               bounds = bounds || new maplibregl.LngLatBounds();
               bounds.extend([lng, lat]);
+
+              // Only auto-recenter for ducks we've genuinely never seen before
+              // (not every position update of an already-known duck), and
+              // only if the map isn't already showing them — a brand new
+              // duck reporting from outside the current view would otherwise
+              // go unnoticed until someone manually pans/zooms to find it.
+              if (!knownDuckIds.has(duck.duck_id)) {
+                knownDuckIds.add(duck.duck_id);
+                if (mapBounds && !mapBounds.contains([lng, lat])) {
+                  newUnseenOutsideView = true;
+                }
+              }
             });
 
             var geojson = { type: 'FeatureCollection', features: features };
@@ -386,6 +401,12 @@
               if (bounds) {
                 map.fitBounds(bounds, { maxZoom: 14, padding: 40 });
               }
+            } else if (newUnseenOutsideView && bounds) {
+              // Re-fit (animated, not a hard jump) only when a new duck
+              // appeared off-screen. Routine position updates from already-
+              // known ducks never move the camera, so operators watching the
+              // kiosk aren't disoriented by a wandering viewport.
+              map.fitBounds(bounds, { maxZoom: 14, padding: 40, duration: 1000 });
             }
           })
           .catch(function (e) { console.error('Map refresh error', e); });
